@@ -15,7 +15,23 @@ A tibble with country information around the world.
 \description{
 This function returns a tibble comprising geo coordinates of each country
 with the iso2c and iso3c code, income and GDP per capita information, along
-with which continent each country is classified with.
+with which continent each country is classified with. Sometimes, country
+names do not align well when joining various data together. For example,
+some data shows country as "USA", others have "The U.S." or "US", making
+the data join experience a pain. And this is where the iso2c and the iso3c
+codes come into play a key role in country name join, as they are the
+standard codes and can be unified. \code{map_data("world")} is useful when
+users want to make a world map, as it comprises geo coordinates of each
+country. This dataframe, however, is not a tibble, and it does not contain
+the iso2c or iso3c code, causing it a bit difficult to work with when joining
+it with other world data. The function \code{world_data} changes this
+situation by outputting a tibble that goes beyond \code{map_data("world")}
+by binding extra columns including the aforementioned ISO codes and others.
+The only argument users need to input is which year of country information
+they want to use, such as GDP per capita and the income category, etc. One
+thing that is worth noting is that some countries or entities do not have the
+ISO code, for example, "Kosovo" does not have one. When making a map, these
+entities may not show any information.
 }
 \examples{
 \dontrun{

@@ -1,0 +1,23 @@
+Package: worlddatajoin
+Type: Package
+Title: Join 'WDI', 'countrycode', and the World Map Together
+Version: 0.1.0
+Authors@R: 
+    c(person(given = "Youzhi",
+             family = "Yu",
+             role = c("aut", "cre"),
+             email = "yuyouzhi666@icloud.com"))
+Description: Both 'WDI' and 'countrycode' are great and they are handy
+    tools to deal with country names around the world. This tool combines
+    them together, and this is especially useful when making a world map.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    countrycode,
+    dplyr,
+    ggplot2,
+    tibble,
+    utils,
+    WDI
+RoxygenNote: 7.1.2

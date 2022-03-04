@@ -1,0 +1,86 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# worlddatajoin
+
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/PursuitOfDataScience/worlddatajoin/workflows/R-CMD-check/badge.svg)](https://github.com/PursuitOfDataScience/worlddatajoin/actions)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+<!-- badges: end -->
+
+The goal of worlddatajoin is to combine `map_data("world")` from ggplot2 with the WDI and countrycode packages together. So far, this package is on the experimental phase, more functionality will be added in the future. 
+
+## Installation
+
+You can install the development version of worlddatajoin from GitHub with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("PursuitOfDataScience/worlddatajoin")
+```
+
+```{r}
+library(worlddatajoin)
+library(ggplot2)
+library(dplyr)
+```
+
+`map_data("world")` is offered by ggplot2. The tibble is useful, especially when making a world map, as it offers the geo-coordinates.
+
+```{r}
+map_data("world") %>%
+  head(5)
+```
+
+As I myself have made so many world maps, one issue I found out is that it is difficult to join the country names together as the `region` column above does not align well with the data frames users want to join. For example, "US" can be "United States", "America", "U.S." or some other variations. When this happens, the join experience is not successful. 
+
+That is why I have made this worlddatajoin package. To successfully match countries from various data frames/tibbles, the iso2c and iso3c codes are used. More than that, GDP per capita and continent information are also offered in the function `world_data()`. Users only need to input which year they want to use. 
+
+Here is the tibble returned by `world_data()` in the year of 2020:
+
+```{r}
+data_2020 <- world_data(year = 2020)
+
+data_2020
+```
+Now we can use `data_2020` to make a few world maps.
+
+```{r}
+data_2020 %>%
+  ggplot(aes(long, lat, group = group, fill = continent)) +
+  geom_polygon() +
+  theme_minimal()
+```
+
+```{r}
+data_2020 %>%
+  ggplot(aes(long, lat, group = group, fill = income)) +
+  geom_polygon() +
+  theme_minimal() 
+```
+
+One thing worth noting is that `income` is ordered from "Low income" to "High income".
+
+We can also put the GDP per capita information on the map:
+
+```{r}
+data_2020 %>%
+  ggplot(aes(long, lat, group = group, fill = gdp_per_capita_2015)) +
+  geom_polygon() +
+  theme_minimal() 
+```
+

@@ -1,11 +1,11 @@
 # One call: your data, on a map
 
 Auto-detects the country column, standardises it to ISO codes (via
-[`standardize_country()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/standardize_country.md)),
+[`standardize_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/standardize_country.md)),
 attaches geometry and returns a plot-ready frame – the function that
 fulfils the package's promise for *your* own data. Pipe the result
 straight into
-[`world_map()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_map.md).
+[`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md).
 
 ## Usage
 
@@ -48,7 +48,7 @@ join_world(
 - region:
 
   Optional region subset (see
-  [`world_geometry()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_geometry.md)).
+  [`world_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_geometry.md)).
 
 - projection, recenter:
 
@@ -58,7 +58,7 @@ join_world(
 
   Whether to report unmatched countries (default `TRUE`); also surfaces
   a
-  [`check_country_match()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/check_country_match.md)
+  [`check_country_match()`](https://pursuitofdatascience.github.io/countryatlas/reference/check_country_match.md)
   summary.
 
 ## Value

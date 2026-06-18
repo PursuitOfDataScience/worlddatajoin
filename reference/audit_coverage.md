@@ -34,7 +34,7 @@ A list with elements `unmatched`, `na_rates` and `by_group`.
 ## Examples
 
 ``` r
-audit_coverage(worlddatajoin::world_snapshot$countries)
+audit_coverage(countryatlas::world_snapshot$countries)
 #> 
 #> ── Coverage audit ──────────────────────────────────────────────────────────────
 #> ✔ All countries matched to an ISO code.

@@ -4,7 +4,7 @@ Answers the constant question "is this country in the EU / OECD / G7 /
 G20 / BRICS / ...?" from a curated, dated membership table
 (point-in-time membership is genuinely fiddly, so it is shipped and
 maintained, not guessed). See
-[country_groups_tbl](https://pursuitofdatascience.github.io/worlddatajoin/reference/country_groups_tbl.md).
+[country_groups_tbl](https://pursuitofdatascience.github.io/countryatlas/reference/country_groups_tbl.md).
 
 ## Usage
 

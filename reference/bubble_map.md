@@ -56,7 +56,7 @@ A `ggplot` object.
 
 ``` r
 # \donttest{
-snap <- worlddatajoin::world_snapshot$countries
+snap <- countryatlas::world_snapshot$countries
 if (requireNamespace("maps", quietly = TRUE)) {
   bubble_map(snap, population)
 }

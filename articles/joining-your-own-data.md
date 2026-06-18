@@ -6,7 +6,7 @@ uses internally.
 
 ## Standardise any frame
 
-[`standardize_country()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/standardize_country.md)
+[`standardize_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/standardize_country.md)
 attaches ISO codes and classifications, reconciling spellings
 automatically:
 
@@ -30,7 +30,7 @@ standardize_country(my_data, nation, warn = FALSE)
 
 ## One call to a map
 
-[`join_world()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/join_world.md)
+[`join_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/join_world.md)
 auto-detects the country column, standardises it and attaches geometry:
 
 ``` r
@@ -44,7 +44,7 @@ my_data |>
 
 ## Reconcile two messy tables
 
-[`country_join()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/country_join.md)
+[`country_join()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join.md)
 joins two frames that each key on country names, by reconciling both
 sides to `iso3c` first:
 
@@ -92,7 +92,7 @@ wdj_overrides(c(Somaliland = "SOM"))[c("Kosovo", "Somaliland")]
 ## Custom origins
 
 If your key is already an ISO-2 or World Bank code, tell
-[`standardize_country()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/standardize_country.md)
+[`standardize_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/standardize_country.md)
 via `origin`:
 
 ``` r

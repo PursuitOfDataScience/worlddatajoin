@@ -2,7 +2,7 @@
 
 Encapsulates the choropleth boilerplate and goes beyond a single style.
 Auto-detects the polygon vs `sf` backend, applies
-[`theme_world_map()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/theme_world_map.md),
+[`theme_world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/theme_world_map.md),
 and – for `sf` – a real projection via
 [`ggplot2::coord_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html).
 Binned / quantile / jenks styles are offered because a continuous fill
@@ -32,9 +32,9 @@ world_map(
 - data:
 
   A map-ready frame from
-  [`world_data()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_data.md)
+  [`world_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_data.md)
   /
-  [`join_world()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/join_world.md)
+  [`join_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/join_world.md)
   (polygon tibble or `sf`).
 
 - fill:
@@ -83,7 +83,7 @@ A `ggplot` object.
 
 ``` r
 # \donttest{
-snap <- worlddatajoin::world_snapshot$countries
+snap <- countryatlas::world_snapshot$countries
 if (requireNamespace("maps", quietly = TRUE)) {
   mapdf <- attach_geometry(snap, geometry = "polygon")
   world_map(mapdf, gdp_per_capita, style = "quantile")

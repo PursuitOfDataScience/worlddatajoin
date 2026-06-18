@@ -2,7 +2,7 @@
 
 A statebins-style equal-area tile grid of the world (one square per
 country) so tiny states are actually visible. Uses the bundled
-[world_tiles](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_tiles.md)
+[world_tiles](https://pursuitofdatascience.github.io/countryatlas/reference/world_tiles.md)
 layout (and `geofacet` when available for small multiples).
 
 ## Usage
@@ -33,7 +33,7 @@ A `ggplot` object.
 
 ``` r
 # \donttest{
-tile_map(worlddatajoin::world_snapshot$countries, gdp_per_capita)
+tile_map(countryatlas::world_snapshot$countries, gdp_per_capita)
 
 # }
 ```

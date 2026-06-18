@@ -31,7 +31,7 @@ animate_world(data, fill, time = year, projection = "equal_earth", ...)
 - ...:
 
   Passed to
-  [`world_map()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_map.md).
+  [`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md).
 
 ## Value
 

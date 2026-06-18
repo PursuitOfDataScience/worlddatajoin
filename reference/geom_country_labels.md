@@ -3,9 +3,9 @@
 A `ggplot2` layer that places labels (names, ISO codes or flag emoji) at
 country centroids, with optional `ggrepel` collision avoidance. Designed
 for the polygon backend produced by
-[`world_data()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_data.md)
+[`world_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_data.md)
 /
-[`join_world()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/join_world.md).
+[`join_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/join_world.md).
 
 ## Usage
 
@@ -44,7 +44,7 @@ A `ggplot2` layer.
 ``` r
 # \donttest{
 library(ggplot2)
-snap <- worlddatajoin::world_snapshot$countries
+snap <- countryatlas::world_snapshot$countries
 if (requireNamespace("maps", quietly = TRUE)) {
   mapdf <- attach_geometry(snap, geometry = "polygon")
   world_map(mapdf, gdp_per_capita) + geom_country_labels()

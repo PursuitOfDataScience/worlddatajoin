@@ -1,6 +1,6 @@
 # Getting started
 
-The goal of **worlddatajoin** is to get country data onto a map with as
+The goal of **countryatlas** is to get country data onto a map with as
 little friction as possible, using ISO codes as the universal join key.
 The happy path is a single call.
 
@@ -26,7 +26,7 @@ data_2020 <- attach_geometry(world_snapshot$countries, geometry = "polygon")
 No
 [`geom_polygon()`](https://ggplot2.tidyverse.org/reference/geom_polygon.html)
 boilerplate —
-[`world_map()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_map.md)
+[`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md)
 does it:
 
 ``` r

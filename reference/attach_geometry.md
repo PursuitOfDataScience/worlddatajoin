@@ -1,7 +1,7 @@
 # Attach geometry to a country-level table
 
 The bridge between a one-row-per-country table (e.g. from
-[`country_data()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/country_data.md))
+[`country_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_data.md))
 and plotting: bolts polygon or `sf` geometry onto your data, keyed on
 `iso3c`.
 
@@ -40,7 +40,7 @@ attach_geometry(
 - region:
 
   Optional region subset (see
-  [`world_geometry()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_geometry.md)).
+  [`world_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_geometry.md)).
 
 - projection, recenter:
 

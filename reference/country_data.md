@@ -1,7 +1,7 @@
 # Lightweight one-row-per-country table
 
 The analysis counterpart to
-[`world_data()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_data.md):
+[`world_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_data.md):
 no polygons, one tidy row per country (`iso3c`, `iso2c`, `country`,
 classifications and the requested indicators). This is what you actually
 `join()` /
@@ -9,7 +9,7 @@ classifications and the requested indicators). This is what you actually
 [`summarise()`](https://dplyr.tidyverse.org/reference/summarise.html) /
 [`rank()`](https://rdrr.io/r/base/rank.html) on; attach geometry only at
 draw time with
-[`attach_geometry()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/attach_geometry.md).
+[`attach_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/attach_geometry.md).
 
 ## Usage
 

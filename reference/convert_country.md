@@ -38,7 +38,7 @@ convert_country(
 - custom_match:
 
   Optional overrides (default
-  [`wdj_overrides()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/wdj_overrides.md)).
+  [`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)).
 
 - warn:
 

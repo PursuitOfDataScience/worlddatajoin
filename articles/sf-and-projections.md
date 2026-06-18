@@ -20,7 +20,7 @@ world_data(2020, c(gdp = "NY.GDP.PCAP.KD"), geometry = "sf") |>
             title = "GDP per capita (Equal Earth projection)")
 ```
 
-[`world_map()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_map.md)
+[`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md)
 auto-detects the `sf` backend and applies the projection through
 [`ggplot2::coord_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html).
 Available projections include `"equal_earth"` (the default — equal-area
@@ -29,7 +29,7 @@ and good-looking), `"robinson"`, `"mollweide"`, `"natural_earth"` and
 
 ## Just the canvas
 
-[`world_geometry()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_geometry.md)
+[`world_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_geometry.md)
 returns projected, region-subset, antimeridian-safe geometry without any
 data — country polygons, label-ready centroids, coastlines, a graticule
 or an ocean rectangle:
@@ -65,7 +65,7 @@ and picks a sensible projection for it.
 ## Simplifying for the web
 
 High-resolution geometry can be thinned for fast plotting with
-[`simplify_geometry()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/simplify_geometry.md)
+[`simplify_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/simplify_geometry.md)
 (which uses `rmapshaper` when available).
 
 ``` r

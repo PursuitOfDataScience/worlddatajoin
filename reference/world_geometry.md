@@ -43,7 +43,7 @@ world_geometry(
 - projection:
 
   Projection for the `sf` backend (see
-  [`world_map()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_map.md)).
+  [`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md)).
 
 - recenter:
 

@@ -4,7 +4,7 @@ The package's headline function, generalised but backward-compatible.
 Returns a tibble that already stitches together map geometry, World Bank
 indicators and the countrycode crosswalk, keyed on the ISO spine – ready
 to pipe into
-[`world_map()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_map.md)
+[`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md)
 or `ggplot2`.
 
 ## Usage
@@ -85,7 +85,7 @@ world_data(
 - overrides:
 
   Name -\> iso3c overrides for geometry matching (default
-  [`wdj_overrides()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/wdj_overrides.md)).
+  [`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)).
 
 ## Value
 

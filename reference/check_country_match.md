@@ -4,7 +4,7 @@ A report on what will and will not match before you trust the map: the
 input, its `iso3c`, whether it `matched`, and a `suggestion` (the
 closest known country name by string distance) for misses. Surfaced
 automatically by
-[`join_world()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/join_world.md).
+[`join_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/join_world.md).
 
 ## Usage
 
@@ -30,7 +30,7 @@ check_country_match(
 - custom_match:
 
   Overrides applied before matching (default
-  [`wdj_overrides()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/wdj_overrides.md)).
+  [`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)).
 
 - suggest:
 

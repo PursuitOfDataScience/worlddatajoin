@@ -30,8 +30,8 @@ A named character vector suitable for `countrycode(custom_match=)`.
 The table maps a country/region name (as spelled by the geometry
 backends) to an ISO 3166-1 alpha-3 code. Pass the result as the
 `custom_match` argument to
-[`standardize_country()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/standardize_country.md),
-[`world_data()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_data.md)
+[`standardize_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/standardize_country.md),
+[`world_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_data.md)
 and friends. Every downstream code (`iso2c`, continent, region, flag,
 ...) is derived from this `iso3c`, so a single override is enough.
 

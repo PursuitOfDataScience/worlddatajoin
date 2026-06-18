@@ -88,5 +88,5 @@ world_data(2020) |>
 
 Each degrades gracefully: if the optional package is missing you get a
 clear, actionable message (and
-[`animate_world()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/animate_world.md)
+[`animate_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/animate_world.md)
 falls back to a faceted small-multiple).

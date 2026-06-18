@@ -1,10 +1,10 @@
-# worlddatajoin
+# countryatlas
 
 Country names never line up across data sources. `"US"`, `"U.S."`,
 `"United States"`, `"United States of America"` and `"America"` are the
 same country, but a naïve
 [`left_join()`](https://dplyr.tidyverse.org/reference/mutate-joins.html)
-treats them as five. **worlddatajoin** kills that pain by making **ISO
+treats them as five. **countryatlas** kills that pain by making **ISO
 codes the universal join key** and handing you a single, ready-to-map
 tibble that already stitches together three otherwise disjoint worlds:
 
@@ -24,7 +24,7 @@ opt-in.
 ``` r
 
 # install.packages("devtools")
-devtools::install_github("PursuitOfDataScience/worlddatajoin")
+devtools::install_github("PursuitOfDataScience/countryatlas")
 ```
 
 The base install is light. Heavy spatial extras (`sf`, `rnaturalearth`,
@@ -33,7 +33,7 @@ The base install is light. Heavy spatial extras (`sf`, `rnaturalearth`,
 
 ``` r
 
-library(worlddatajoin)
+library(countryatlas)
 library(ggplot2)
 library(dplyr)
 ```
@@ -61,11 +61,11 @@ data_2020
 #> # ℹ 2 more variables: gdp_per_capita <dbl>, gdp_per_capita_2015 <dbl>
 ```
 
-[`world_data()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_data.md)
+[`world_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_data.md)
 returns the map geometry, the requested World Bank indicator(s), income
 and continent — already keyed on `iso3c`/`iso2c`. Draw a choropleth with
 the built-in
-[`world_map()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/world_map.md)
+[`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md)
 helper (no more hand-rolled
 [`geom_polygon()`](https://ggplot2.tidyverse.org/reference/geom_polygon.html)
 boilerplate):
@@ -126,7 +126,7 @@ head(common_indicators)
 
 This is the headline use case. You have a frame keyed on messy country
 names —
-[`join_world()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/join_world.md)
+[`join_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/join_world.md)
 standardises it and attaches geometry in one call:
 
 ``` r
@@ -187,19 +187,19 @@ in_group(c("France", "United States", "Japan"), "EU")
 ## A whole vocabulary of honest maps
 
 Beyond the choropleth: proportional-symbol
-([`bubble_map()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/bubble_map.md)),
+([`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md)),
 bivariate
-([`bivariate_map()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/bivariate_map.md)),
+([`bivariate_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bivariate_map.md)),
 area-honest cartograms
-([`cartogram_map()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/cartogram_map.md)),
+([`cartogram_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/cartogram_map.md)),
 equal-area tile grids
-([`tile_map()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/tile_map.md)),
+([`tile_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/tile_map.md)),
 great-circle flows
-([`flow_map()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/flow_map.md)),
+([`flow_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/flow_map.md)),
 animation
-([`animate_world()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/animate_world.md))
+([`animate_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/animate_world.md))
 and interactivity
-([`interactive_map()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/interactive_map.md)).
+([`interactive_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/interactive_map.md)).
 
 ``` r
 
@@ -218,4 +218,4 @@ the World Bank API.
 
 See the vignettes — *Getting started*, *Joining your own data*, *Modern
 maps with sf & projections*, and *Beyond the choropleth* — and the
-[reference site](https://pursuitofdatascience.github.io/worlddatajoin/).
+[reference site](https://pursuitofdatascience.github.io/countryatlas/).

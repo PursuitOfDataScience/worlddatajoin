@@ -2,7 +2,7 @@
 
 A statebins-style equal-area tile layout: one square per country,
 positioned on a `row`/`col` grid derived from country centroids. Used by
-[`tile_map()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/tile_map.md).
+[`tile_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/tile_map.md).
 
 ## Usage
 

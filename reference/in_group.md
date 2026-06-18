@@ -1,7 +1,7 @@
 # Is a country in a group?
 
 A vectorised membership predicate built on
-[`country_groups()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/country_groups.md).
+[`country_groups()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_groups.md).
 
 ## Usage
 
@@ -18,7 +18,7 @@ in_group(x, group, origin = "country.name")
 - group:
 
   A single group name (see
-  [`country_groups()`](https://pursuitofdatascience.github.io/worlddatajoin/reference/country_groups.md)).
+  [`country_groups()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_groups.md)).
 
 - origin:
 

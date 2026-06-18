@@ -1,0 +1,13 @@
+pandoc: 3.8.3
+pkgdown: 2.2.0
+pkgdown_sha: ~
+articles:
+  beyond-the-choropleth: beyond-the-choropleth.html
+  getting-started: getting-started.html
+  joining-your-own-data: joining-your-own-data.html
+  sf-and-projections: sf-and-projections.html
+  worlddatajoin: worlddatajoin.html
+last_built: 2026-06-18T11:01Z
+urls:
+  reference: https://pursuitofdatascience.github.io/worlddatajoin/reference
+  article: https://pursuitofdatascience.github.io/worlddatajoin/articles

@@ -1,0 +1,64 @@
+# Coverage / missingness audit
+
+What is missing, before you trust the map: which countries are
+unmatched, the `NA` rate per indicator, and which World Bank regions /
+income groups are under-covered – so a half-empty map is caught before
+it is published.
+
+## Usage
+
+``` r
+audit_coverage(data, indicator = NULL, by = c("region", "income", "continent"))
+```
+
+## Arguments
+
+- data:
+
+  A country-level (or map-ready) data frame.
+
+- indicator:
+
+  Optional character vector of value columns to report `NA` rates for.
+  If `NULL`, all numeric columns are used.
+
+- by:
+
+  Grouping for the coverage breakdown: `"region"` (default), `"income"`
+  or `"continent"`.
+
+## Value
+
+A list with elements `unmatched`, `na_rates` and `by_group`.
+
+## Examples
+
+``` r
+audit_coverage(worlddatajoin::world_snapshot$countries)
+#> 
+#> ── Coverage audit ──────────────────────────────────────────────────────────────
+#> ✔ All countries matched to an ISO code.
+#> 
+#> ── Missingness by indicator ──
+#> 
+#> # A tibble: 4 × 4
+#>   indicator           n n_missing na_rate
+#>   <chr>           <int>     <int>   <dbl>
+#> 1 gdp_per_capita    215         9  0.0419
+#> 2 population        215         0  0     
+#> 3 life_expectancy   215         0  0     
+#> 4 co2_per_capita    215        12  0.0558
+#> ── Coverage by group ──
+#> 
+#> # A tibble: 8 × 3
+#>   region                     n_countries na_rate
+#>   <chr>                            <int>   <dbl>
+#> 1 East Asia & Pacific                 37  0.0541
+#> 2 Latin America & Caribbean           41  0.0488
+#> 3 Middle East & North Africa          21  0.0476
+#> 4 Sub-Saharan Africa                  48  0.0417
+#> 5 Europe & Central Asia               56  0.0357
+#> 6 North America                        3  0     
+#> 7 South Asia                           8  0     
+#> 8 NA                                   1  0     
+```

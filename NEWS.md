@@ -1,4 +1,4 @@
-# worlddatajoin 1.0.0
+# countryatlas 1.0.0
 
 A single, comprehensive release that takes the package from a one-function proof
 of concept to a complete toolkit for joining world data to maps. The spirit is
@@ -11,7 +11,7 @@ table* — but pushed to its full potential.
   still returns the classic polygon-backed, GDP-per-capita tibble. The only
   visible change is the column name `gdp_per_capita_2015` → `gdp_per_capita`.
   A one-cycle deprecation shim keeps `gdp_per_capita_2015` available as an alias
-  (toggle with `options(worlddatajoin.gdp_compat = FALSE)`).
+  (toggle with `options(countryatlas.gdp_compat = FALSE)`).
 * The 16 regions the previous version silently dropped (Kosovo, Micronesia, the
   Virgin Islands, Saint Martin, Bonaire/Saba/Sint Eustatius, the Canary Islands,
   Madeira/Azores, …) are now **matched** via [`wdj_overrides()`] instead of
@@ -75,6 +75,6 @@ table* — but pushed to its full potential.
 
 Group memberships in `country_groups_tbl` are point-in-time as of 2024-01-01.
 
-# worlddatajoin 0.1.0
+# countryatlas 0.1.0
 
 * Initial experimental release with a single `world_data(year)` function.

@@ -1,4 +1,4 @@
-url: https://pursuitofdatascience.github.io/worlddatajoin/
+url: https://pursuitofdatascience.github.io/countryatlas/
 
 template:
   bootstrap: 5
@@ -7,7 +7,7 @@ template:
     primary: "#2166AC"
 
 home:
-  title: worlddatajoin • Join world data to maps on the ISO spine
+  title: countryatlas • Join world data to maps on the ISO spine
   description: >
     A complete toolkit for getting country data onto honest maps, using ISO
     codes as the universal join key.
@@ -29,7 +29,7 @@ navbar:
       - text: Beyond the choropleth
         href: articles/beyond-the-choropleth.html
       - text: "Full introduction (formal)"
-        href: articles/worlddatajoin.html
+        href: articles/countryatlas.html
 
 reference:
 - title: Core data assembly
@@ -98,4 +98,4 @@ reference:
 
 - title: Package
   contents:
-  - worlddatajoin-package
+  - countryatlas-package

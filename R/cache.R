@@ -2,8 +2,8 @@
 
 # The persistent on-disk cache directory for WDI fetches.
 wdj_cache_dir <- function() {
-  getOption("worlddatajoin.cache_dir",
-            tools::R_user_dir("worlddatajoin", "cache"))
+  getOption("countryatlas.cache_dir",
+            tools::R_user_dir("countryatlas", "cache"))
 }
 
 # A single, uncached WDI fetch for one indicator. Returns a tidy tibble with

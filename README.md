@@ -1,13 +1,13 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# worlddatajoin <img src="man/figures/logo.png" align="right" height="120" alt="" />
+# countryatlas <img src="man/figures/logo.png" align="right" height="120" alt="" />
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/PursuitOfDataScience/worlddatajoin/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/PursuitOfDataScience/worlddatajoin/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/PursuitOfDataScience/countryatlas/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/PursuitOfDataScience/countryatlas/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
-coverage](https://codecov.io/gh/PursuitOfDataScience/worlddatajoin/branch/main/graph/badge.svg)](https://app.codecov.io/gh/PursuitOfDataScience/worlddatajoin)
+coverage](https://codecov.io/gh/PursuitOfDataScience/countryatlas/branch/main/graph/badge.svg)](https://app.codecov.io/gh/PursuitOfDataScience/countryatlas)
 [![Lifecycle:
 stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->
@@ -15,7 +15,7 @@ stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://
 Country names never line up across data sources. `"US"`, `"U.S."`,
 `"United States"`, `"United States of America"` and `"America"` are the
 same country, but a naïve `left_join()` treats them as five.
-**worlddatajoin** kills that pain by making **ISO codes the universal
+**countryatlas** kills that pain by making **ISO codes the universal
 join key** and handing you a single, ready-to-map tibble that already
 stitches together three otherwise disjoint worlds:
 
@@ -34,7 +34,7 @@ opt-in.
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("PursuitOfDataScience/worlddatajoin")
+devtools::install_github("PursuitOfDataScience/countryatlas")
 ```
 
 The base install is light. Heavy spatial extras (`sf`, `rnaturalearth`,
@@ -42,7 +42,7 @@ The base install is light. Heavy spatial extras (`sf`, `rnaturalearth`,
 `Suggests` and are only needed for the features that use them.
 
 ``` r
-library(worlddatajoin)
+library(countryatlas)
 library(ggplot2)
 library(dplyr)
 ```
@@ -202,4 +202,4 @@ the World Bank API.
 
 See the vignettes — *Getting started*, *Joining your own data*, *Modern
 maps with sf & projections*, and *Beyond the choropleth* — and the
-[reference site](https://pursuitofdatascience.github.io/worlddatajoin/).
+[reference site](https://pursuitofdatascience.github.io/countryatlas/).

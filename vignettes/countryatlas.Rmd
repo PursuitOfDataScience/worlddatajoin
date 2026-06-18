@@ -1,5 +1,5 @@
 ---
-title: "worlddatajoin: Joining World Data to Maps on the ISO Spine"
+title: "countryatlas: Joining World Data to Maps on the ISO Spine"
 author: |
   Youzhi Yu
   <span style="font-size: 0.8em;">University of Chicago</span>
@@ -10,7 +10,7 @@ output:
     toc_depth: 3
     number_sections: true
 vignette: >
-  %\VignetteIndexEntry{worlddatajoin: Joining World Data to Maps on the ISO Spine}
+  %\VignetteIndexEntry{countryatlas: Joining World Data to Maps on the ISO Spine}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -26,7 +26,7 @@ knitr::opts_chunk$set(
   fig.align = "center",
   dpi = 96
 )
-library(worlddatajoin)
+library(countryatlas)
 library(ggplot2)
 library(dplyr)
 ```
@@ -36,7 +36,7 @@ library(dplyr)
 Joining country-level data across independent sources is deceptively hard: the
 same country is spelled `"US"`, `"U.S."`, `"United States"` and
 `"United States of America"`, and a naïve join treats them as different
-entities. **worlddatajoin** resolves this friction by adopting ISO 3166 codes as
+entities. **countryatlas** resolves this friction by adopting ISO 3166 codes as
 a universal join key and by stitching together three otherwise disjoint
 resources — map geometry, World Bank development indicators, and a comprehensive
 country-code crosswalk — into a single, map-ready table. This vignette presents
@@ -252,7 +252,7 @@ cache can be cleared with `clear_wdi_cache()`.
 
 # Conclusion
 
-`worlddatajoin` keeps its original soul — ISO codes as the universal join key,
+`countryatlas` keeps its original soul — ISO codes as the universal join key,
 one call to a map-ready table — and extends it into a complete toolkit: any
 indicator and any year span, a modern `sf` backend, an exposed join engine for
 the user's own data, honest diagnostics, curated reference data, analysis

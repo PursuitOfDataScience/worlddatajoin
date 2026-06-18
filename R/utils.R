@@ -6,12 +6,12 @@
 wdj_abort <- function(message, ..., call = rlang::caller_env(), class = NULL,
                       .envir = rlang::caller_env()) {
   cli::cli_abort(message, ..., call = call, .envir = .envir,
-                 class = c(class, "worlddatajoin_error"))
+                 class = c(class, "countryatlas_error"))
 }
 
 wdj_warn <- function(message, ..., class = NULL, .envir = rlang::caller_env()) {
   cli::cli_warn(message, ..., .envir = .envir,
-                class = c(class, "worlddatajoin_warning"))
+                class = c(class, "countryatlas_warning"))
 }
 
 wdj_inform <- function(message, ..., .envir = rlang::caller_env()) {
@@ -29,10 +29,10 @@ has_pkg <- function(pkg) {
   isTRUE(requireNamespace(pkg, quietly = TRUE))
 }
 
-# Decide how many workers to use. Honours options(worlddatajoin.workers=) and
+# Decide how many workers to use. Honours options(countryatlas.workers=) and
 # falls back to all-but-one available core, capped at the work size.
 wdj_workers <- function(n_tasks = Inf) {
-  opt <- getOption("worlddatajoin.workers", NULL)
+  opt <- getOption("countryatlas.workers", NULL)
   if (!is.null(opt)) {
     workers <- max(1L, as.integer(opt))
   } else {

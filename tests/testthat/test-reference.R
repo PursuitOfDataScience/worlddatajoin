@@ -23,7 +23,7 @@ test_that("country_groups and in_group work", {
 
   expect_equal(in_group(c("France", "United States", "Japan"), "EU"),
                c(TRUE, FALSE, FALSE))
-  expect_error(country_groups("NOPE"), class = "worlddatajoin_error")
+  expect_error(country_groups("NOPE"), class = "countryatlas_error")
 })
 
 test_that("bundled datasets have expected shape", {

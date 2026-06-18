@@ -1,4 +1,4 @@
-snap <- worlddatajoin::world_snapshot$countries
+snap <- countryatlas::world_snapshot$countries
 
 test_that("world_map builds a ggplot for several styles", {
   skip_if_not_installed("maps")
@@ -37,7 +37,7 @@ test_that("sf-only plots error cleanly without sf", {
 })
 
 test_that("great_circle returns the requested number of points", {
-  gc <- worlddatajoin:::great_circle(0, 0, 90, 0, n = 25)
+  gc <- countryatlas:::great_circle(0, 0, 90, 0, n = 25)
   expect_equal(nrow(gc), 25)
   expect_named(gc, c("lon", "lat"))
 })

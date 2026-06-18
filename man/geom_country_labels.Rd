@@ -28,7 +28,7 @@ the polygon backend produced by \code{\link[=world_data]{world_data()}} / \code{
 \examples{
 \donttest{
 library(ggplot2)
-snap <- worlddatajoin::world_snapshot$countries
+snap <- countryatlas::world_snapshot$countries
 if (requireNamespace("maps", quietly = TRUE)) {
   mapdf <- attach_geometry(snap, geometry = "polygon")
   world_map(mapdf, gdp_per_capita) + geom_country_labels()

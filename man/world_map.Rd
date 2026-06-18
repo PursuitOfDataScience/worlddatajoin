@@ -55,7 +55,7 @@ choropleths.
 }
 \examples{
 \donttest{
-snap <- worlddatajoin::world_snapshot$countries
+snap <- countryatlas::world_snapshot$countries
 if (requireNamespace("maps", quietly = TRUE)) {
   mapdf <- attach_geometry(snap, geometry = "polygon")
   world_map(mapdf, gdp_per_capita, style = "quantile")

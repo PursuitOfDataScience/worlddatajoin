@@ -7,7 +7,7 @@ test_that("world_data(year) keeps the classic backward-compatible output", {
   # The deprecation shim keeps the old column name available for one cycle.
   expect_true("gdp_per_capita_2015" %in% names(w))
   expect_true(is.factor(w$income))
-  expect_identical(levels(w$income), worlddatajoin:::income_levels())
+  expect_identical(levels(w$income), countryatlas:::income_levels())
 })
 
 test_that("multi-indicator named vectors drive clean column names", {
@@ -28,8 +28,8 @@ test_that("a year range yields a panel keyed on iso3c + year", {
 })
 
 test_that("year validation rejects bad input", {
-  expect_error(world_data("2020"), class = "worlddatajoin_error")
-  expect_error(world_data(1800), class = "worlddatajoin_error")
+  expect_error(world_data("2020"), class = "countryatlas_error")
+  expect_error(world_data(1800), class = "countryatlas_error")
 })
 
 test_that("country_data with no indicator returns the country spine", {

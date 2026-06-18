@@ -71,7 +71,7 @@ compute_breaks <- function(x, style, n_bins) {
 #' @export
 #' @examples
 #' \donttest{
-#' snap <- worlddatajoin::world_snapshot$countries
+#' snap <- countryatlas::world_snapshot$countries
 #' if (requireNamespace("maps", quietly = TRUE)) {
 #'   mapdf <- attach_geometry(snap, geometry = "polygon")
 #'   world_map(mapdf, gdp_per_capita, style = "quantile")
@@ -169,7 +169,7 @@ scales_format <- function() {
 #' @export
 #' @examples
 #' \donttest{
-#' snap <- worlddatajoin::world_snapshot$countries
+#' snap <- countryatlas::world_snapshot$countries
 #' if (requireNamespace("maps", quietly = TRUE)) {
 #'   bubble_map(snap, population)
 #' }
@@ -309,7 +309,7 @@ cartogram_map <- function(data, weight, type = c("contiguous", "dorling",
 #' @export
 #' @examples
 #' \donttest{
-#' tile_map(worlddatajoin::world_snapshot$countries, gdp_per_capita)
+#' tile_map(countryatlas::world_snapshot$countries, gdp_per_capita)
 #' }
 tile_map <- function(data, fill, label = TRUE) {
   fill_q <- rlang::enquo(fill)
@@ -540,7 +540,7 @@ interactive_map <- function(data, fill, tooltip = NULL,
 #' @examples
 #' \donttest{
 #' library(ggplot2)
-#' snap <- worlddatajoin::world_snapshot$countries
+#' snap <- countryatlas::world_snapshot$countries
 #' if (requireNamespace("maps", quietly = TRUE)) {
 #'   mapdf <- attach_geometry(snap, geometry = "polygon")
 #'   world_map(mapdf, gdp_per_capita) + geom_country_labels()

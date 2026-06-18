@@ -15,17 +15,17 @@ knitr::opts_chunk$set(
 )
 ```
 
-# worlddatajoin <img src="man/figures/logo.png" align="right" height="120" alt="" />
+# countryatlas <img src="man/figures/logo.png" align="right" height="120" alt="" />
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/PursuitOfDataScience/worlddatajoin/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/PursuitOfDataScience/worlddatajoin/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/PursuitOfDataScience/worlddatajoin/branch/main/graph/badge.svg)](https://app.codecov.io/gh/PursuitOfDataScience/worlddatajoin)
+[![R-CMD-check](https://github.com/PursuitOfDataScience/countryatlas/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/PursuitOfDataScience/countryatlas/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/PursuitOfDataScience/countryatlas/branch/main/graph/badge.svg)](https://app.codecov.io/gh/PursuitOfDataScience/countryatlas)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->
 
 Country names never line up across data sources. `"US"`, `"U.S."`,
 `"United States"`, `"United States of America"` and `"America"` are the same
-country, but a naïve `left_join()` treats them as five. **worlddatajoin** kills
+country, but a naïve `left_join()` treats them as five. **countryatlas** kills
 that pain by making **ISO codes the universal join key** and handing you a
 single, ready-to-map tibble that already stitches together three otherwise
 disjoint worlds:
@@ -40,7 +40,7 @@ The happy path is one call: `world_data(2020)`. Everything else is opt-in.
 
 ```r
 # install.packages("devtools")
-devtools::install_github("PursuitOfDataScience/worlddatajoin")
+devtools::install_github("PursuitOfDataScience/countryatlas")
 ```
 
 The base install is light. Heavy spatial extras (`sf`, `rnaturalearth`,
@@ -48,7 +48,7 @@ The base install is light. Heavy spatial extras (`sf`, `rnaturalearth`,
 `Suggests` and are only needed for the features that use them.
 
 ```{r}
-library(worlddatajoin)
+library(countryatlas)
 library(ggplot2)
 library(dplyr)
 ```
@@ -149,4 +149,4 @@ API.
 
 See the vignettes — *Getting started*, *Joining your own data*, *Modern maps
 with sf & projections*, and *Beyond the choropleth* — and the
-[reference site](https://pursuitofdatascience.github.io/worlddatajoin/).
+[reference site](https://pursuitofdatascience.github.io/countryatlas/).

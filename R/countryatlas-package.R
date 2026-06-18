@@ -1,6 +1,6 @@
-#' worlddatajoin: join World Bank data, country codes and maps on the ISO spine
+#' countryatlas: join World Bank data, country codes and maps on the ISO spine
 #'
-#' `worlddatajoin` exists to kill one recurring source of pain: country names
+#' `countryatlas` exists to kill one recurring source of pain: country names
 #' never line up across data sources. The package makes ISO codes the universal
 #' join key and hands you a ready-to-map tibble that stitches together map
 #' geometry ([ggplot2::map_data()] or Natural Earth `sf`), World Bank indicators

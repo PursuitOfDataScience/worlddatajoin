@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(worlddatajoin)
+library(countryatlas)
 
-test_check("worlddatajoin")
+test_check("countryatlas")

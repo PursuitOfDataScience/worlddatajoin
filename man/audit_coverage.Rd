@@ -24,5 +24,5 @@ the \code{NA} rate per indicator, and which World Bank regions / income groups a
 under-covered -- so a half-empty map is caught before it is published.
 }
 \examples{
-audit_coverage(worlddatajoin::world_snapshot$countries)
+audit_coverage(countryatlas::world_snapshot$countries)
 }

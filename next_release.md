@@ -1,4 +1,4 @@
-# worlddatajoin — Next Release Plan
+# countryatlas — Next Release Plan
 
 > **Status:** design document for the next release
 > **Current version:** 0.1.0 (experimental)
@@ -8,7 +8,7 @@
 
 ## 1. The spirit we are expanding
 
-`worlddatajoin` exists to kill one specific, recurring source of pain: **country names never line up across data sources.** `"US"`, `"U.S."`, `"United States"`, `"United States of America"`, and `"America"` are the same country, but a naïve `left_join()` treats them as five. The package's answer is to make **ISO codes the universal join key** and to hand the user a single, ready-to-map tibble that already stitches together three otherwise-disjoint worlds:
+`countryatlas` exists to kill one specific, recurring source of pain: **country names never line up across data sources.** `"US"`, `"U.S."`, `"United States"`, `"United States of America"`, and `"America"` are the same country, but a naïve `left_join()` treats them as five. The package's answer is to make **ISO codes the universal join key** and to hand the user a single, ready-to-map tibble that already stitches together three otherwise-disjoint worlds:
 
 - **`ggplot2::map_data("world")`** — the geometry (where countries are),
 - **`WDI`** — World Bank indicators (what is true about them),
@@ -416,7 +416,7 @@ Shared plumbing under the plotting layer, exposed so power users can compose the
 
 ### Area H — Performance & offline
 
-- **Memoised + on-disk WDI cache.** Wrap WDI fetches in `memoise` keyed on indicator/year/args, with an optional persistent cache under `tools::R_user_dir("worlddatajoin", "cache")`, so re-runs and re-knits hit the network once (or never). `cache = FALSE` opts out.
+- **Memoised + on-disk WDI cache.** Wrap WDI fetches in `memoise` keyed on indicator/year/args, with an optional persistent cache under `tools::R_user_dir("countryatlas", "cache")`, so re-runs and re-knits hit the network once (or never). `cache = FALSE` opts out.
 - **Bundled `world_snapshot`.** A small lazy-loaded dataset — a curated indicator set for one recent year, as both a country-level tibble and low-res `sf` — so examples **actually run** (drop the blanket `\dontrun{}`), and tests/vignettes work **offline** and deterministically. Also fixes the dangling `LazyData: true`.
 
 ---
@@ -532,4 +532,4 @@ Everything heavy/modern is **Suggested and gated** — the base install stays as
 
 ### One-paragraph summary
 
-The 1.0.0 release keeps `worlddatajoin`'s soul — *ISO codes as the universal join key, one call to a map-ready table* — and pushes it to its full potential in a single release. It generalizes the core to **any indicator, any year span, and a modern `sf` backend**; it finally **exposes the join machinery for the user's own data** (`join_world()`, `standardize_country()`, `country_join()`) with **honest diagnostics** (`check_country_match()`, `audit_coverage()`) instead of silent drops; it ships the **reference data** people repeatedly hand-assemble (metadata, group memberships, an indicator catalog, flags & currencies); it adds **analysis helpers** (per-capita, regional roll-ups, ranking) so the pipeline never has to leave the package; and it turns one hand-drawn choropleth into a **full map vocabulary** — binned/quantile choropleths, proportional-symbol, bivariate, cartogram, tile-grid, flow, animated, and interactive — all projected and area-honest by default. Same spirit, an order of magnitude more useful.
+The 1.0.0 release keeps `countryatlas`'s soul — *ISO codes as the universal join key, one call to a map-ready table* — and pushes it to its full potential in a single release. It generalizes the core to **any indicator, any year span, and a modern `sf` backend**; it finally **exposes the join machinery for the user's own data** (`join_world()`, `standardize_country()`, `country_join()`) with **honest diagnostics** (`check_country_match()`, `audit_coverage()`) instead of silent drops; it ships the **reference data** people repeatedly hand-assemble (metadata, group memberships, an indicator catalog, flags & currencies); it adds **analysis helpers** (per-capita, regional roll-ups, ranking) so the pipeline never has to leave the package; and it turns one hand-drawn choropleth into a **full map vocabulary** — binned/quantile choropleths, proportional-symbol, bivariate, cartogram, tile-grid, flow, animated, and interactive — all projected and area-honest by default. Same spirit, an order of magnitude more useful.

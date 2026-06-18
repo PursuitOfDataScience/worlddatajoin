@@ -23,6 +23,6 @@ so tiny states are actually visible. Uses the bundled \link{world_tiles} layout
 }
 \examples{
 \donttest{
-tile_map(worlddatajoin::world_snapshot$countries, gdp_per_capita)
+tile_map(countryatlas::world_snapshot$countries, gdp_per_capita)
 }
 }

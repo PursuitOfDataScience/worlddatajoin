@@ -26,10 +26,10 @@ test_that("wdj_overrides is extensible", {
 
 test_that("standardize_country errors on missing column", {
   expect_error(standardize_country(data.frame(a = 1), nope, warn = FALSE),
-               class = "worlddatajoin_error")
+               class = "countryatlas_error")
 })
 
 test_that("standardize_country warns on unmatched", {
   df <- data.frame(x = c("United States", "Wakanda"))
-  expect_warning(standardize_country(df, x), class = "worlddatajoin_warning")
+  expect_warning(standardize_country(df, x), class = "countryatlas_warning")
 })

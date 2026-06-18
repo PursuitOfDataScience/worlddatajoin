@@ -104,7 +104,7 @@ world_data <- function(year,
   # Legacy alias: keep gdp_per_capita_2015 readable for one cycle.
   if ("gdp_per_capita" %in% names(countries) &&
       !"gdp_per_capita_2015" %in% names(countries) &&
-      isTRUE(getOption("worlddatajoin.gdp_compat", TRUE))) {
+      isTRUE(getOption("countryatlas.gdp_compat", TRUE))) {
     countries$gdp_per_capita_2015 <- countries$gdp_per_capita
   }
 

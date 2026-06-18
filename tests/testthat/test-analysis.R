@@ -22,7 +22,7 @@ test_that("aggregate_regions rolls up with sum and weighted mean", {
     stats::weighted.mean(c(21, 1.7), c(331, 38))
   )
   expect_error(aggregate_regions(df, gdp, fun = "weighted_mean"),
-               class = "worlddatajoin_error")
+               class = "countryatlas_error")
 })
 
 test_that("rank_countries adds rank, percentile, z-score", {

@@ -39,7 +39,7 @@ because big values hide in small countries and vice versa.
 }
 \examples{
 \donttest{
-snap <- worlddatajoin::world_snapshot$countries
+snap <- countryatlas::world_snapshot$countries
 if (requireNamespace("maps", quietly = TRUE)) {
   bubble_map(snap, population)
 }

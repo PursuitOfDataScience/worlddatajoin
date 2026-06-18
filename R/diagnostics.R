@@ -70,7 +70,7 @@ check_country_match <- function(x,
 #' @return A list with elements `unmatched`, `na_rates` and `by_group`.
 #' @export
 #' @examples
-#' audit_coverage(worlddatajoin::world_snapshot$countries)
+#' audit_coverage(countryatlas::world_snapshot$countries)
 audit_coverage <- function(data,
                            indicator = NULL,
                            by = c("region", "income", "continent")) {

@@ -12,12 +12,12 @@ knitr::opts_chunk$set(
   collapse = TRUE, comment = "#>", message = FALSE, warning = FALSE,
   fig.width = 7, fig.height = 4, fig.align = "center", dpi = 96
 )
-library(worlddatajoin)
+library(countryatlas)
 library(ggplot2)
 library(dplyr)
 ```
 
-The goal of **worlddatajoin** is to get country data onto a map with as little
+The goal of **countryatlas** is to get country data onto a map with as little
 friction as possible, using ISO codes as the universal join key. The happy path
 is a single call.
 

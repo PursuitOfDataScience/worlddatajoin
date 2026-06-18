@@ -1,4 +1,4 @@
-# Build the bundled datasets for worlddatajoin.
+# Build the bundled datasets for countryatlas.
 # Run from the package root with the package dependencies available:
 #   Rscript data-raw/build_datasets.R
 # Re-run whenever the curated data or the snapshot year changes.

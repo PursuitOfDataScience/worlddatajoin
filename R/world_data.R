@@ -1,72 +1,218 @@
-#' Obtaining countries' information
+# Core data assembly ------------------------------------------------------------
+
+# Per-country classification (income / region / continent) assembled offline
+# from WDI's bundled country metadata plus countrycode.
+country_classification <- function(iso3c, classify) {
+  out <- tibble::tibble(iso3c = iso3c)
+  meta <- tryCatch(tibble::as_tibble(WDI::WDI_data$country),
+                   error = function(e) NULL)
+  if ("income" %in% classify) {
+    if (!is.null(meta)) {
+      lk <- meta[, c("iso3c", "income")]
+      out <- dplyr::left_join(out, lk, by = "iso3c")
+      out$income <- clean_income(out$income)
+    } else {
+      out$income <- factor(NA, levels = income_levels())
+    }
+  }
+  if ("region" %in% classify) {
+    if (!is.null(meta) && "region" %in% names(meta)) {
+      lk <- meta[, c("iso3c", "region")]
+      names(lk)[2] <- "region"
+      out <- dplyr::left_join(out, lk, by = "iso3c")
+    } else {
+      out$region <- suppressWarnings(
+        countrycode::countrycode(iso3c, "iso3c", "region", warn = FALSE)
+      )
+    }
+  }
+  if ("continent" %in% classify) {
+    out$continent <- suppressWarnings(
+      countrycode::countrycode(iso3c, "iso3c", "continent", warn = FALSE)
+    )
+  }
+  out <- apply_code_fallback(out)
+  # Drop the helper iso3c if caller binds separately.
+  out
+}
+
+#' Map-ready, enriched country tibble
 #'
-#' This function returns a tibble comprising geo coordinates of each country
-#' with the iso2c and iso3c code, income and GDP per capita information, along
-#' with which continent each country is classified with. Sometimes, country
-#' names do not align well when joining various data together. For example,
-#' some data shows country as "USA", others have "The U.S." or "US", making
-#' the data join experience a pain. And this is where the iso2c and the iso3c
-#' codes come into play a key role in country name join, as they are the
-#' standard codes and can be unified. \code{map_data("world")} is useful when
-#' users want to make a world map, as it comprises geo coordinates of each
-#' country. This dataframe, however, is not a tibble, and it does not contain
-#' the iso2c or iso3c code, causing it a bit difficult to work with when joining
-#' it with other world data. The function \code{world_data} changes this
-#' situation by outputting a tibble that goes beyond \code{map_data("world")}
-#' by binding extra columns including the aforementioned ISO codes and others.
-#' The only argument users need to input is which year of country information
-#' they want to use, such as GDP per capita and the income category, etc. One
-#' thing that is worth noting is that some countries or entities do not have the
-#' ISO code, for example, "Kosovo" does not have one. When making a map, these
-#' entities may not show any information.
+#' The package's headline function, generalised but backward-compatible. Returns
+#' a tibble that already stitches together map geometry, World Bank indicators
+#' and the countrycode crosswalk, keyed on the ISO spine -- ready to pipe into
+#' [world_map()] or `ggplot2`.
 #'
+#' `world_data(2020)` keeps its original behaviour (polygon backend, GDP per
+#' capita). Everything else is opt-in: any indicator(s), a span of years (a
+#' panel), an `sf` backend with real projections, and region subsetting.
 #'
-#' @param year Year. The minimum input year is 1960.
-#' @import ggplot2
-#' @import tibble
-#' @import dplyr
-#' @import countrycode
-#' @import WDI
-#' @return A tibble with country information around the world.
+#' @param year A single year or a range (e.g. `2000:2020`, yielding a panel
+#'   keyed on `iso3c` + `year`). Minimum 1960.
+#' @param indicator A named character vector of WDI codes. Names drive column
+#'   names, e.g. `c(gdp = "NY.GDP.PCAP.KD", pop = "SP.POP.TOTL")`. Defaults to
+#'   `c(gdp_per_capita = "NY.GDP.PCAP.KD")`.
+#' @param geometry `"polygon"` (default; reproduces the classic output), `"sf"`
+#'   (Natural Earth, for `geom_sf()` and real projections) or `"none"`.
+#' @param scale Natural Earth resolution for the `sf` backend.
+#' @param region Optional subset: a continent, group name, `iso3c` vector or
+#'   bounding box.
+#' @param classify Which classifications to add (any of `"income"`,
+#'   `"continent"`, `"region"`).
+#' @param projection,recenter Projection options for the `sf` backend.
+#' @param latest If `TRUE`, use the most recent non-`NA` value per country for a
+#'   single-year request.
+#' @param cache Whether to use the memoised / on-disk WDI cache.
+#' @param language WDI language code (default `"en"`).
+#' @param parallel Whether to fetch multiple indicators in parallel.
+#' @param overrides Name -> iso3c overrides for geometry matching (default
+#'   [wdj_overrides()]).
+#'
+#' @return A tibble (polygon backend), `sf` object (sf backend) or country-level
+#'   tibble (`geometry = "none"`).
 #' @export
-#'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' world_data(2020)
-#'}
-world_data <- function(year){
+#' world_data(2020, indicator = c(life_exp = "SP.DYN.LE00.IN"),
+#'            geometry = "none")
+#' }
+world_data <- function(year,
+                       indicator = c(gdp_per_capita = "NY.GDP.PCAP.KD"),
+                       geometry = c("polygon", "sf", "none"),
+                       scale = c("small", "medium", "large"),
+                       region = NULL,
+                       classify = c("income", "continent", "region"),
+                       projection = "equal_earth",
+                       recenter = NULL,
+                       latest = FALSE,
+                       cache = TRUE,
+                       language = "en",
+                       parallel = TRUE,
+                       overrides = wdj_overrides()) {
+  geometry <- match.arg(geometry)
+  scale <- match.arg(scale)
+  year <- validate_years(year)
+  classify <- intersect(classify, c("income", "continent", "region"))
 
-  ggplot2::map_data("world") %>%
-    tibble::tibble() %>%
-    dplyr::filter(!region %in% c("Ascension Island",
-                                 "Azores",
-                                 "Barbuda",
-                                 "Bonaire",
-                                 "Canary Islands",
-                                 "Chagos Archipelago",
-                                 "Grenadines",
-                                 "Heard Island",
-                                 "Kosovo",
-                                 "Madeira Islands",
-                                 "Micronesia",
-                                 "Saba",
-                                 "Saint Martin",
-                                 "Siachen Glacier",
-                                 "Sint Eustatius",
-                                 "Virgin Islands")) %>%
-    dplyr::mutate(iso3c = countrycode::countrycode(region, origin = "country.name", destination = "iso3c"),
-                  iso2c = countrycode::countrycode(region, origin = "country.name", destination = "iso2c")) %>%
-    dplyr::left_join(WDI::WDI(start = year, end = year, extra = T) %>%
-                       tibble::tibble() %>%
-                       dplyr::rename(gdp_per_capita_2015 = NY.GDP.PCAP.KD) %>%
-                       dplyr::select(country, gdp_per_capita_2015, iso2c, iso3c, income, year) %>%
-                       dplyr::filter(income != "Aggregates") %>%
-                       dplyr::mutate(income = factor(income, levels = c("Not Classified",
-                                                                        "Low income",
-                                                                        "Lower middle income",
-                                                                        "Upper middle income",
-                                                                        "High income"))),
-                     by = c("iso2c", "iso3c")) %>%
-    dplyr::mutate(continent = countrycode(iso3c, origin = "iso3c", destination = "continent"))
+  countries <- country_data(
+    year = year, indicator = indicator, latest = latest,
+    panel = length(year) > 1L, classify = classify, cache = cache,
+    language = language, parallel = parallel
+  )
 
+  # Legacy alias: keep gdp_per_capita_2015 readable for one cycle.
+  if ("gdp_per_capita" %in% names(countries) &&
+      !"gdp_per_capita_2015" %in% names(countries) &&
+      isTRUE(getOption("worlddatajoin.gdp_compat", TRUE))) {
+    countries$gdp_per_capita_2015 <- countries$gdp_per_capita
+  }
+
+  if (geometry == "none") {
+    return(countries)
+  }
+
+  attach_geometry(countries, by = "iso3c", geometry = geometry, scale = scale,
+                  region = region, projection = projection, recenter = recenter)
+}
+
+#' Lightweight one-row-per-country table
+#'
+#' The analysis counterpart to [world_data()]: no polygons, one tidy row per
+#' country (`iso3c`, `iso2c`, `country`, classifications and the requested
+#' indicators). This is what you actually `join()` / `mutate()` / `summarise()`
+#' / `rank()` on; attach geometry only at draw time with [attach_geometry()].
+#'
+#' @param year A single year or a range (with `panel = TRUE`).
+#' @param indicator A named character vector of WDI codes (or `NULL` for none).
+#' @param latest Use the most recent non-`NA` value per country (single year).
+#' @param panel Return a panel keyed on `iso3c` + `year` (implied when `year`
+#'   spans multiple years).
+#' @param classify Which classifications to add.
+#' @param cache Whether to use the WDI cache.
+#' @param language WDI language code.
+#' @param parallel Whether to fetch indicators in parallel.
+#'
+#' @return A tibble, one row per country (or per country-year for a panel).
+#' @export
+#' @examples
+#' \donttest{
+#' country_data(2020, c(co2 = "EN.ATM.CO2E.KT"))
+#' }
+country_data <- function(year,
+                         indicator = NULL,
+                         latest = FALSE,
+                         panel = FALSE,
+                         classify = c("income", "continent", "region"),
+                         cache = TRUE,
+                         language = "en",
+                         parallel = TRUE) {
+  year <- validate_years(year)
+  panel <- isTRUE(panel) || length(year) > 1L
+  classify <- intersect(classify, c("income", "continent", "region"))
+
+  start <- min(year)
+  end <- max(year)
+
+  wdi <- fetch_wdi(indicator, start = start, end = end, cache = cache,
+                   language = language, parallel = parallel)
+
+  # Restrict to requested years and drop World Bank aggregates / non-countries.
+  if (nrow(wdi)) {
+    wdi <- dplyr::filter(wdi, .data$year %in% !!year)
+    wdi <- dplyr::filter(wdi, !is.na(.data$iso3c))
+    # Keep only true countries (valid iso3c in the codelist) -> removes
+    # "World", "Euro area", regional aggregates.
+    valid <- unique(stats::na.omit(countrycode::codelist$iso3c))
+    wdi <- dplyr::filter(wdi, .data$iso3c %in% c(valid, "XKX"))
+  }
+
+  if (isTRUE(latest) && length(year) == 1L && nrow(wdi)) {
+    val_cols <- setdiff(names(wdi), c("iso2c", "iso3c", "country", "year"))
+    wdi <- wdi %>%
+      dplyr::group_by(.data$iso3c) %>%
+      dplyr::arrange(.data$year, .by_group = TRUE) %>%
+      dplyr::summarise(
+        dplyr::across(dplyr::all_of(c("iso2c", "country")), dplyr::last),
+        dplyr::across(dplyr::all_of(val_cols),
+                      ~ dplyr::last(stats::na.omit(.x)) %||% NA),
+        .groups = "drop"
+      )
+    panel <- FALSE
+  }
+
+  # Build the country spine. If no indicators were requested, start from the
+  # full codelist so the table is still useful.
+  if (nrow(wdi) == 0L) {
+    cl <- country_codes(c("iso2c"))
+    spine <- tibble::tibble(iso3c = cl$iso3c, iso2c = cl$iso2c,
+                            country = cl$country)
+    if (panel) {
+      spine <- tidyr::crossing(spine, year = year)
+    }
+    base <- spine
+  } else {
+    if (!panel) {
+      # Collapse to one row per country (single requested year).
+      wdi <- dplyr::distinct(wdi, .data$iso3c, .keep_all = TRUE)
+      wdi$year <- NULL
+    } else {
+      # One row per country-year (two iso2c codes can map to one iso3c).
+      wdi <- dplyr::distinct(wdi, .data$iso3c, .data$year, .keep_all = TRUE)
+    }
+    base <- wdi
+  }
+
+  # Attach classifications (drop pre-existing same-named cols, but keep the key).
+  # Use unique codes so a panel's repeated iso3c values don't fan out the join.
+  cls <- country_classification(unique(base$iso3c), classify)
+  drop <- setdiff(intersect(names(cls), names(base)), "iso3c")
+  base[drop] <- NULL
+  base <- dplyr::left_join(base, cls, by = "iso3c")
+
+  # Order columns sensibly.
+  lead <- intersect(c("iso3c", "iso2c", "country", "year",
+                      "continent", "region", "income"), names(base))
+  base <- base[, c(lead, setdiff(names(base), lead)), drop = FALSE]
+  tibble::as_tibble(base)
 }

@@ -1,0 +1,81 @@
+---
+title: "Joining your own data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Joining your own data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE, comment = "#>", message = FALSE, warning = FALSE,
+  fig.width = 7, fig.height = 4, fig.align = "center", dpi = 96
+)
+library(worlddatajoin)
+library(ggplot2)
+library(dplyr)
+```
+
+The headline use case: *I have a frame keyed on messy country names — get it on
+a map.* The package exposes the same matching machinery it uses internally.
+
+## Standardise any frame
+
+`standardize_country()` attaches ISO codes and classifications, reconciling
+spellings automatically:
+
+```{r}
+my_data <- data.frame(
+  nation = c("U.S.", "S. Korea", "Czechia", "Kosovo", "Cote d'Ivoire", "UK"),
+  score  = c(10, 8, 6, 4, 7, 9)
+)
+standardize_country(my_data, nation, warn = FALSE)
+```
+
+## One call to a map
+
+`join_world()` auto-detects the country column, standardises it and attaches
+geometry:
+
+```{r}
+my_data |>
+  join_world(nation, warn = FALSE) |>
+  world_map(score, title = "My data on the ISO spine")
+```
+
+## Reconcile two messy tables
+
+`country_join()` joins two frames that each key on country names, by reconciling
+both sides to `iso3c` first:
+
+```{r}
+a <- data.frame(country = c("Czechia", "South Korea", "Russia"), gdp = 1:3)
+b <- data.frame(nation  = c("Czech Republic", "Korea, Rep.", "Russian Federation"),
+                pop = c(10, 51, 144))
+country_join(a, b, country, nation)
+```
+
+## Check before you trust
+
+Always inspect what failed to match:
+
+```{r}
+check_country_match(my_data$nation)
+```
+
+If something legitimately cannot be matched, extend the override table:
+
+```{r}
+wdj_overrides(c(Somaliland = "SOM"))[c("Kosovo", "Somaliland")]
+```
+
+## Custom origins
+
+If your key is already an ISO-2 or World Bank code, tell `standardize_country()`
+via `origin`:
+
+```{r}
+df <- data.frame(code = c("US", "KR", "BR"))
+standardize_country(df, code, origin = "iso2c", warn = FALSE)
+```

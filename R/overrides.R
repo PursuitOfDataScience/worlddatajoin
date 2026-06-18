@@ -1,0 +1,93 @@
+# Curated overrides -------------------------------------------------------------
+
+#' Curated country-name overrides (replaces the silent drop-list)
+#'
+#' A documented `custom_match` table for entities that map backends
+#' ([ggplot2::map_data()] and Natural Earth) get wrong or leave without an ISO
+#' code. Earlier versions of the package *deleted* these regions; now they are
+#' *matched* instead, so they stop silently disappearing from maps.
+#'
+#' The table maps a country/region name (as spelled by the geometry backends) to
+#' an ISO 3166-1 alpha-3 code. Pass the result as the `custom_match` argument to
+#' [standardize_country()], [world_data()] and friends. Every downstream code
+#' (`iso2c`, continent, region, flag, ...) is derived from this `iso3c`, so a
+#' single override is enough.
+#'
+#' @param extra An optional named character vector of additional overrides
+#'   (names are country/region names, values are `iso3c` codes). Merged on top
+#'   of the built-in table, so you can extend or override it, e.g.
+#'   `wdj_overrides(c(Somaliland = "SOM"))`.
+#'
+#' @return A named character vector suitable for `countrycode(custom_match=)`.
+#' @export
+#' @examples
+#' wdj_overrides()
+#' wdj_overrides(c(Somaliland = "SOM"))
+wdj_overrides <- function(extra = NULL) {
+  base <- c(
+    # map_data("world") spellings the legacy code used to drop.
+    "Ascension Island" = "SHN",
+    "Azores"           = "PRT",
+    "Barbuda"          = "ATG",
+    "Bonaire"          = "BES",
+    "Canary Islands"   = "ESP",
+    "Chagos Archipelago" = "IOT",
+    "Grenadines"       = "VCT",
+    "Heard Island"     = "HMD",
+    "Kosovo"           = "XKX",
+    "Madeira Islands"  = "PRT",
+    "Micronesia"       = "FSM",
+    "Saba"             = "BES",
+    "Saint Martin"     = "MAF",
+    "Siachen Glacier"  = "IND",
+    "Sint Eustatius"   = "BES",
+    "Virgin Islands"   = "VIR",
+    # Common Natural Earth / WDI variants and other frequent offenders.
+    # (Accented spellings such as "Curacao"/"Saint Barthelemy" are matched
+    # natively by countrycode, so only the de-accented forms need overriding.)
+    "Saint Barthelemy" = "BLM",
+    "Curacao"          = "CUW",
+    "Madeira"          = "PRT",
+    "Federated States of Micronesia" = "FSM",
+    "Micronesia, Fed. Sts." = "FSM",
+    "Virgin Islands, U.S." = "VIR",
+    "British Virgin Islands" = "VGB",
+    "Channel Islands"  = "GBR",
+    "Kosovo, Republic of" = "XKX"
+  )
+  if (!is.null(extra)) {
+    nms <- names(extra)                    # capture before as.character()
+    extra <- as.character(extra)
+    if (is.null(nms) || any(!nzchar(nms))) {
+      wdj_abort("{.arg extra} must be a fully named character vector.")
+    }
+    base[nms] <- extra
+  }
+  base
+}
+
+# Small fallback table for ISO3c codes that `countrycode` does not classify
+# into a continent / region (notably Kosovo's user-assigned XKX).
+wdj_code_fallback <- function() {
+  tibble::tribble(
+    ~iso3c,  ~iso2c, ~continent, ~region,
+    "XKX",   "XK",   "Europe",   "Europe & Central Asia"
+  )
+}
+
+# Fill continent / region / iso2c for codes countrycode leaves NA.
+apply_code_fallback <- function(df) {
+  fb <- wdj_code_fallback()
+  if (!"iso3c" %in% names(df)) return(df)
+  for (i in seq_len(nrow(fb))) {
+    hit <- !is.na(df$iso3c) & df$iso3c == fb$iso3c[i]
+    if (!any(hit)) next
+    for (col in c("iso2c", "continent", "region")) {
+      if (col %in% names(df)) {
+        miss <- hit & is.na(df[[col]])
+        df[[col]][miss] <- fb[[col]][i]
+      }
+    }
+  }
+  df
+}

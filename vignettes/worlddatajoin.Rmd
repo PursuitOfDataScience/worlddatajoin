@@ -1,0 +1,265 @@
+---
+title: "worlddatajoin: Joining World Data to Maps on the ISO Spine"
+author: |
+  Youzhi Yu
+  <span style="font-size: 0.8em;">University of Chicago</span>
+date: "`r format(Sys.Date(), '%B %e, %Y')`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{worlddatajoin: Joining World Data to Maps on the ISO Spine}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 7,
+  fig.height = 4,
+  fig.align = "center",
+  dpi = 96
+)
+library(worlddatajoin)
+library(ggplot2)
+library(dplyr)
+```
+
+# Abstract {-}
+
+Joining country-level data across independent sources is deceptively hard: the
+same country is spelled `"US"`, `"U.S."`, `"United States"` and
+`"United States of America"`, and a naïve join treats them as different
+entities. **worlddatajoin** resolves this friction by adopting ISO 3166 codes as
+a universal join key and by stitching together three otherwise disjoint
+resources — map geometry, World Bank development indicators, and a comprehensive
+country-code crosswalk — into a single, map-ready table. This vignette presents
+the package's design philosophy, its complete functional vocabulary, and worked
+examples spanning data assembly, the join engine, diagnostics, reference data,
+analysis helpers and a full grammar of honest cartographic displays. All
+examples run offline against a bundled data snapshot.
+
+# Introduction
+
+The package rests on a single conviction: *if a task does not make it easier to
+get country data onto a map — or to make that map honest — it does not belong
+here*. Concretely, three packages are combined:
+
+* **`ggplot2::map_data("world")`** (or Natural Earth via `sf`) supplies polygon
+  geometry, i.e. *where* countries are;
+* **`WDI`** supplies World Bank indicators, i.e. *what is true* about them;
+* **`countrycode`** supplies the crosswalk of ISO codes, continents and regions
+  that makes a reliable join possible.
+
+Three design commitments follow. First, **the happy path is one call**:
+`world_data(2020)` returns a tibble ready to map. Second, **the ISO code is the
+spine**: every function speaks `iso3c`/`iso2c` internally and exposes it, so
+anything the package produces joins to anything else — and to the user's own
+data. Third, **no country is lost silently**: entities that map backends spell
+idiosyncratically are *matched* through a curated override table rather than
+dropped, and unmatched values are reported explicitly.
+
+To keep every example reproducible without a network connection, this vignette
+uses the bundled `world_snapshot` dataset, a curated set of indicators for one
+recent year.
+
+```{r}
+snapshot <- world_snapshot$countries
+dplyr::glimpse(snapshot)
+```
+
+# Core data assembly
+
+## `world_data()`
+
+The headline function is generalised but backward-compatible. The classic call
+returns the polygon-backed, enriched tibble exactly as before:
+
+```{r eval = FALSE}
+# Live World Bank API call (not evaluated here to keep the vignette offline):
+world_data(2020)
+world_data(
+  2020,
+  indicator = c(life_exp = "SP.DYN.LE00.IN", co2 = "EN.GHG.CO2.PC.CE.AR5"),
+  geometry  = "sf",
+  region    = "Africa"
+)
+```
+
+The `indicator` argument accepts one or many WDI codes; a **named** vector
+drives clean column names. A range of years (`2000:2020`) yields a panel keyed
+on `iso3c` and `year`. The `geometry` argument switches between the classic
+`"polygon"` backend, a modern `"sf"` backend with real projections, and
+`"none"` for pure analysis.
+
+## `country_data()` and `attach_geometry()`
+
+For analysis you usually want one tidy row per country, not ~99,000 polygon
+vertices. `country_data()` provides exactly that, and geometry is attached only
+at draw time:
+
+```{r}
+mapdf <- attach_geometry(snapshot, geometry = "polygon")
+dim(mapdf)
+```
+
+# Visualising: the choropleth and beyond
+
+## One-line choropleths
+
+`world_map()` encapsulates the plotting boilerplate and offers several honest
+styles. A continuous fill on a skewed indicator hides most of the variation, so
+binned and quantile styles are first-class:
+
+```{r}
+world_map(mapdf, gdp_per_capita, style = "quantile",
+          title = "GDP per capita (quantile bins)")
+```
+
+```{r}
+world_map(mapdf, continent, style = "categorical")
+```
+
+## Proportional-symbol maps
+
+Totals (population, total emissions) are misrepresented by a choropleth because
+large values hide in small countries. A bubble map at country centroids is the
+right idiom:
+
+```{r}
+bubble_map(snapshot, population)
+```
+
+## Equal-area tile grids
+
+Tiny states vanish on a geographic map. An equal-area tile grid gives every
+country the same visual weight:
+
+```{r fig.height = 5}
+tile_map(snapshot, life_expectancy)
+```
+
+## Flow maps
+
+Origin–destination data (trade, migration, flights) is drawn as great-circle
+arcs, with both endpoints resolved to centroids automatically:
+
+```{r}
+flows <- data.frame(
+  from   = c("China", "Germany", "Brazil", "India"),
+  to     = c("United States", "France", "Japan", "United Kingdom"),
+  weight = c(500, 200, 150, 120)
+)
+flow_map(flows, from, to, weight)
+```
+
+# The join engine
+
+The package's mission, exposed for the reader's own data. Given a frame keyed on
+messy names, `standardize_country()` attaches ISO codes and classifications:
+
+```{r}
+messy <- data.frame(
+  nation = c("U.S.", "S. Korea", "Czechia", "Kosovo", "Cote d'Ivoire"),
+  value  = c(10, 8, 6, 4, 7)
+)
+standardize_country(messy, nation, warn = FALSE)
+```
+
+`join_world()` goes one step further — auto-detecting the country column,
+standardising it and attaching geometry — while `country_join()` reconciles two
+independent tables that each key on country names:
+
+```{r}
+left  <- data.frame(country = c("Czechia", "South Korea"), gdp = c(1, 2))
+right <- data.frame(nation  = c("Czech Republic", "Korea, Rep."), pop = c(10, 51))
+country_join(left, right, country, nation)
+```
+
+# Diagnostics: never lose a country silently
+
+`check_country_match()` is a pre-flight report; `wdj_overrides()` is the curated
+match table that replaces the old drop-list; and `audit_coverage()` reports
+missingness before a half-empty map is published.
+
+```{r}
+check_country_match(c("USA", "Cote d'Ivoire", "Yugoslavia", "Wakanda"))
+```
+
+```{r}
+audit_coverage(snapshot)$na_rates
+```
+
+The entities the previous version dropped — Kosovo, Micronesia, the Virgin
+Islands and a dozen others — are now matched:
+
+```{r}
+dropped <- c("Kosovo", "Micronesia", "Virgin Islands", "Canary Islands",
+             "Saint Martin")
+standardize_country(data.frame(region = dropped), region, warn = FALSE)
+```
+
+# Reference data and code translation
+
+`convert_country()` exposes the full countrycode vocabulary with first-class
+shortcuts for the high-value schemes:
+
+```{r}
+convert_country(c("Japan", "Brazil", "Germany"), to = "flag")
+convert_country(c("Japan", "Brazil", "Germany"), to = "currency")
+```
+
+Country-group membership is a curated, dated table:
+
+```{r}
+country_groups("G7")
+in_group(c("France", "United States", "Japan", "Brazil"), "EU")
+```
+
+The package also bundles `country_meta` (static per-country attributes),
+`common_indicators` (a friendly indicator catalogue), `country_groups_tbl` and
+`world_tiles`.
+
+# Analysis helpers
+
+Small, in-spirit transforms that keep an analysis from leaving the package
+mid-pipeline:
+
+```{r}
+snapshot |>
+  rank_countries(gdp_per_capita) |>
+  filter(rank <= 5) |>
+  select(country, gdp_per_capita, rank, percentile)
+```
+
+```{r}
+snapshot |>
+  aggregate_regions(population, by = "region", fun = "sum")
+```
+
+# Performance and offline use
+
+World Bank fetches are memoised with an optional on-disk cache, and multiple
+indicators are fetched in parallel where the platform supports forking. The
+bundled `world_snapshot` makes every example here run without the network. The
+cache can be cleared with `clear_wdi_cache()`.
+
+# Conclusion
+
+`worlddatajoin` keeps its original soul — ISO codes as the universal join key,
+one call to a map-ready table — and extends it into a complete toolkit: any
+indicator and any year span, a modern `sf` backend, an exposed join engine for
+the user's own data, honest diagnostics, curated reference data, analysis
+helpers, and a full vocabulary of projected, area-honest maps.
+
+# Session information {-}
+
+```{r}
+sessionInfo()
+```

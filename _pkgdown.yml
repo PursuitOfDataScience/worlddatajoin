@@ -1,0 +1,101 @@
+url: https://pursuitofdatascience.github.io/worlddatajoin/
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+  bslib:
+    primary: "#2166AC"
+
+home:
+  title: worlddatajoin • Join world data to maps on the ISO spine
+  description: >
+    A complete toolkit for getting country data onto honest maps, using ISO
+    codes as the universal join key.
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    articles:
+      text: Articles
+      menu:
+      - text: Getting started
+        href: articles/getting-started.html
+      - text: Joining your own data
+        href: articles/joining-your-own-data.html
+      - text: Modern maps with sf & projections
+        href: articles/sf-and-projections.html
+      - text: Beyond the choropleth
+        href: articles/beyond-the-choropleth.html
+      - text: "Full introduction (formal)"
+        href: articles/worlddatajoin.html
+
+reference:
+- title: Core data assembly
+  desc: One call to a map-ready table, the light analysis table, and bare geometry.
+  contents:
+  - world_data
+  - country_data
+  - world_geometry
+
+- title: The join engine
+  desc: The package's mission, exposed for your own data.
+  contents:
+  - standardize_country
+  - join_world
+  - attach_geometry
+  - country_join
+
+- title: Diagnostics & data quality
+  desc: Never lose a country silently.
+  contents:
+  - check_country_match
+  - wdj_overrides
+  - audit_coverage
+
+- title: Reference data & code translation
+  contents:
+  - convert_country
+  - country_codes
+  - country_groups
+  - in_group
+  - wdi_search
+
+- title: Analysis helpers
+  contents:
+  - per_capita
+  - aggregate_regions
+  - rank_countries
+  - complete_years
+
+- title: Visualization
+  desc: A full vocabulary of projected, area-honest maps.
+  contents:
+  - world_map
+  - bubble_map
+  - bivariate_map
+  - cartogram_map
+  - tile_map
+  - flow_map
+  - animate_world
+  - interactive_map
+  - geom_country_labels
+  - theme_world_map
+  - simplify_geometry
+
+- title: Performance & caching
+  contents:
+  - clear_wdi_cache
+
+- title: Bundled datasets
+  contents:
+  - world_snapshot
+  - country_meta
+  - common_indicators
+  - country_groups_tbl
+  - world_tiles
+
+- title: Package
+  contents:
+  - worlddatajoin-package

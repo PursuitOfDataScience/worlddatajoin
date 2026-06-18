@@ -1,0 +1,58 @@
+test_that("world_data(year) keeps the classic backward-compatible output", {
+  skip_if_offline_wb()
+  skip_if_not_installed("maps")
+  w <- world_data(2020)
+  expect_true(all(c("long", "lat", "group", "iso3c", "iso2c", "income",
+                    "continent", "gdp_per_capita") %in% names(w)))
+  # The deprecation shim keeps the old column name available for one cycle.
+  expect_true("gdp_per_capita_2015" %in% names(w))
+  expect_true(is.factor(w$income))
+  expect_identical(levels(w$income), worlddatajoin:::income_levels())
+})
+
+test_that("multi-indicator named vectors drive clean column names", {
+  skip_if_offline_wb()
+  md <- country_data(2020, c(gdp = "NY.GDP.PCAP.KD", pop = "SP.POP.TOTL"))
+  expect_true(all(c("gdp", "pop") %in% names(md)))
+  expect_false(any(c("NY.GDP.PCAP.KD", "SP.POP.TOTL") %in% names(md)))
+  expect_gt(sum(!is.na(md$gdp)), 150)
+})
+
+test_that("a year range yields a panel keyed on iso3c + year", {
+  skip_if_offline_wb()
+  pan <- country_data(2018:2020, c(gdp = "NY.GDP.PCAP.KD"))
+  expect_true("year" %in% names(pan))
+  expect_setequal(unique(pan$year), 2018:2020)
+  # one row per country-year
+  expect_equal(anyDuplicated(pan[, c("iso3c", "year")]), 0)
+})
+
+test_that("year validation rejects bad input", {
+  expect_error(world_data("2020"), class = "worlddatajoin_error")
+  expect_error(world_data(1800), class = "worlddatajoin_error")
+})
+
+test_that("country_data with no indicator returns the country spine", {
+  cd <- country_data(2020, indicator = NULL)
+  expect_true(all(c("iso3c", "iso2c", "country", "continent") %in% names(cd)))
+  expect_gt(nrow(cd), 150)
+})
+
+test_that("polygon and sf backends agree on country coverage", {
+  skip_if_not_installed("maps")
+  skip_if_not_installed("sf")
+  skip_if_not_installed("rnaturalearth")
+  poly <- world_geometry("countries", geometry = "polygon")
+  sfg <- world_geometry("countries", geometry = "sf")
+  common <- intersect(stats::na.omit(unique(poly$iso3c)), sfg$iso3c)
+  # The two backends should share the vast majority of countries.
+  expect_gt(length(common), 150)
+})
+
+test_that("Natural Earth iso_a3 == -99 countries are recovered (regression)", {
+  skip_if_not_installed("sf")
+  skip_if_not_installed("rnaturalearth")
+  sfg <- world_geometry("countries", geometry = "sf")
+  # France, Norway, Kosovo are notorious -99 cases; they must not vanish.
+  expect_true(all(c("FRA", "NOR") %in% sfg$iso3c))
+})

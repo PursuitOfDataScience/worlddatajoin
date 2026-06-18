@@ -2,39 +2,76 @@
 % Please edit documentation in R/world_data.R
 \name{world_data}
 \alias{world_data}
-\title{Obtaining countries' information}
+\title{Map-ready, enriched country tibble}
 \usage{
-world_data(year)
+world_data(
+  year,
+  indicator = c(gdp_per_capita = "NY.GDP.PCAP.KD"),
+  geometry = c("polygon", "sf", "none"),
+  scale = c("small", "medium", "large"),
+  region = NULL,
+  classify = c("income", "continent", "region"),
+  projection = "equal_earth",
+  recenter = NULL,
+  latest = FALSE,
+  cache = TRUE,
+  language = "en",
+  parallel = TRUE,
+  overrides = wdj_overrides()
+)
 }
 \arguments{
-\item{year}{Year. The minimum input year is 1960.}
+\item{year}{A single year or a range (e.g. \code{2000:2020}, yielding a panel
+keyed on \code{iso3c} + \code{year}). Minimum 1960.}
+
+\item{indicator}{A named character vector of WDI codes. Names drive column
+names, e.g. \code{c(gdp = "NY.GDP.PCAP.KD", pop = "SP.POP.TOTL")}. Defaults to
+\code{c(gdp_per_capita = "NY.GDP.PCAP.KD")}.}
+
+\item{geometry}{\code{"polygon"} (default; reproduces the classic output), \code{"sf"}
+(Natural Earth, for \code{geom_sf()} and real projections) or \code{"none"}.}
+
+\item{scale}{Natural Earth resolution for the \code{sf} backend.}
+
+\item{region}{Optional subset: a continent, group name, \code{iso3c} vector or
+bounding box.}
+
+\item{classify}{Which classifications to add (any of \code{"income"},
+\code{"continent"}, \code{"region"}).}
+
+\item{projection, recenter}{Projection options for the \code{sf} backend.}
+
+\item{latest}{If \code{TRUE}, use the most recent non-\code{NA} value per country for a
+single-year request.}
+
+\item{cache}{Whether to use the memoised / on-disk WDI cache.}
+
+\item{language}{WDI language code (default \code{"en"}).}
+
+\item{parallel}{Whether to fetch multiple indicators in parallel.}
+
+\item{overrides}{Name -> iso3c overrides for geometry matching (default
+\code{\link[=wdj_overrides]{wdj_overrides()}}).}
 }
 \value{
-A tibble with country information around the world.
+A tibble (polygon backend), \code{sf} object (sf backend) or country-level
+tibble (\code{geometry = "none"}).
 }
 \description{
-This function returns a tibble comprising geo coordinates of each country
-with the iso2c and iso3c code, income and GDP per capita information, along
-with which continent each country is classified with. Sometimes, country
-names do not align well when joining various data together. For example,
-some data shows country as "USA", others have "The U.S." or "US", making
-the data join experience a pain. And this is where the iso2c and the iso3c
-codes come into play a key role in country name join, as they are the
-standard codes and can be unified. \code{map_data("world")} is useful when
-users want to make a world map, as it comprises geo coordinates of each
-country. This dataframe, however, is not a tibble, and it does not contain
-the iso2c or iso3c code, causing it a bit difficult to work with when joining
-it with other world data. The function \code{world_data} changes this
-situation by outputting a tibble that goes beyond \code{map_data("world")}
-by binding extra columns including the aforementioned ISO codes and others.
-The only argument users need to input is which year of country information
-they want to use, such as GDP per capita and the income category, etc. One
-thing that is worth noting is that some countries or entities do not have the
-ISO code, for example, "Kosovo" does not have one. When making a map, these
-entities may not show any information.
+The package's headline function, generalised but backward-compatible. Returns
+a tibble that already stitches together map geometry, World Bank indicators
+and the countrycode crosswalk, keyed on the ISO spine -- ready to pipe into
+\code{\link[=world_map]{world_map()}} or \code{ggplot2}.
+}
+\details{
+\code{world_data(2020)} keeps its original behaviour (polygon backend, GDP per
+capita). Everything else is opt-in: any indicator(s), a span of years (a
+panel), an \code{sf} backend with real projections, and region subsetting.
 }
 \examples{
-\dontrun{
+\donttest{
 world_data(2020)
+world_data(2020, indicator = c(life_exp = "SP.DYN.LE00.IN"),
+           geometry = "none")
 }
 }

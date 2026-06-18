@@ -2,3 +2,11 @@
 .Rhistory
 .RData
 .Ruserdata
+docs/
+*.tar.gz
+*.Rcheck/
+inst/doc
+/doc/
+/Meta/
+__pycache__/
+*.pyc

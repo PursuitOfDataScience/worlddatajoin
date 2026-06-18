@@ -2,4 +2,16 @@
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^README\.Rmd$
+^README\.html$
 ^\.github$
+^next_release\.md$
+^data-raw$
+^_pkgdown\.yml$
+^pkgdown$
+^docs$
+^\.lintr$
+^codecov\.yml$
+^CRAN-SUBMISSION$
+^cran-comments\.md$
+^\.git$
+^man/figures/README-.*\.png$

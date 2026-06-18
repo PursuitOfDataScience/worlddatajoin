@@ -1,0 +1,71 @@
+---
+title: "Getting started"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE, comment = "#>", message = FALSE, warning = FALSE,
+  fig.width = 7, fig.height = 4, fig.align = "center", dpi = 96
+)
+library(worlddatajoin)
+library(ggplot2)
+library(dplyr)
+```
+
+The goal of **worlddatajoin** is to get country data onto a map with as little
+friction as possible, using ISO codes as the universal join key. The happy path
+is a single call.
+
+## A map-ready tibble in one call
+
+With a live connection, `world_data(year)` returns everything you need:
+
+```{r eval = FALSE}
+data_2020 <- world_data(2020)
+```
+
+To keep this vignette offline, we use the bundled snapshot and attach geometry
+ourselves:
+
+```{r}
+data_2020 <- attach_geometry(world_snapshot$countries, geometry = "polygon")
+```
+
+## Your first choropleth
+
+No `geom_polygon()` boilerplate — `world_map()` does it:
+
+```{r}
+world_map(data_2020, gdp_per_capita, style = "quantile",
+          title = "GDP per capita")
+```
+
+Income is an ordered factor, so a categorical fill reads naturally:
+
+```{r}
+world_map(data_2020, income, style = "categorical")
+```
+
+## Choosing indicators
+
+You are not limited to GDP. Pass any World Bank indicator code (named, for clean
+columns), or browse the bundled catalogue:
+
+```{r}
+head(common_indicators)
+```
+
+```{r eval = FALSE}
+country_data(2020, c(life_exp = "SP.DYN.LE00.IN", pop = "SP.POP.TOTL"))
+```
+
+## Next steps
+
+* *Joining your own data* — get a frame keyed on messy names onto a map.
+* *Modern maps with sf & projections* — equal-area, projected maps.
+* *Beyond the choropleth* — bubbles, cartograms, tiles, flows and more.

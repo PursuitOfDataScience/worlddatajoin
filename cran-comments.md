@@ -1,9 +1,18 @@
 ## R CMD check results
 
-0 errors | 0 warnings | 0 notes
+0 errors | 0 warnings | 1 note
 
-* This is a major release (1.0.0) that generalises the package from a single
-  function to a complete toolkit. See NEWS.md.
+* This is a new submission.
+
+## Resubmission
+
+This is a resubmission. In response to the automated incoming pre-tests:
+
+* Fixed: declared the minimum R version as `R (>= 4.1.0)` in DESCRIPTION,
+  since the package uses the native pipe `|>` (introduced in R 4.1.0).
+* The words flagged as "possibly misspelled" in DESCRIPTION — "choropleth",
+  "choropleths" and "cartogram" — are correctly spelled cartography and
+  data-visualization terms, not misspellings.
 
 ## Test environments
 

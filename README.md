@@ -206,6 +206,16 @@ equal-area tile grids (`tile_map()`), great-circle flows (`flow_map()`),
 an orthographic globe (`globe_map()`), small multiples (`facet_map()`),
 animation (`animate_world()`) and interactivity (`interactive_map()`).
 
+The world as a globe, not a rectangle — and the `"polygon"` backend needs
+only `maps` + `mapproj`, no `sf`:
+
+``` r
+globe_map(world_snapshot$countries, continent, backend = "polygon",
+          style = "categorical", lon = 10, lat = 20)
+```
+
+<img src="man/figures/README-globe-1.png" width="70%" />
+
 ``` r
 bubble_map(world_snapshot$countries, population)
 ```

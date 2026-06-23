@@ -55,6 +55,7 @@ Suggests:
     ggsql,
     knitr,
     leaflet,
+    mapproj,
     maps,
     nanoarrow,
     plotly,

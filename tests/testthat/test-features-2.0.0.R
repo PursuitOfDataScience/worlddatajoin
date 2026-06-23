@@ -69,6 +69,15 @@ test_that("plate_carree is equirectangular and new projections build", {
   expect_match(countryatlas:::wdj_crs("orthographic", lat0 = 30), "lat_0=30")
 })
 
+test_that("globe_map polygon backend constructs without sf", {
+  skip_if_not_installed("maps")
+  skip_if_not_installed("mapproj")
+  p <- globe_map(world_snapshot$countries, continent, backend = "polygon",
+                 style = "categorical")
+  expect_s3_class(p, "ggplot")
+  expect_s3_class(p$coordinates, "CoordMap")
+})
+
 test_that("polygon centroids are one antimeridian-safe row per iso3c", {
   skip_if_not_installed("maps")
   cent <- world_geometry("centroids", geometry = "polygon")

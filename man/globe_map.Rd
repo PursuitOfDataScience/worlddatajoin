@@ -9,6 +9,7 @@ globe_map(
   fill,
   lon = 0,
   lat = 20,
+  backend = c("sf", "polygon"),
   style = c("continuous", "binned", "quantile", "jenks", "categorical"),
   palette = NULL,
   n_bins = 5,
@@ -19,12 +20,17 @@ globe_map(
 )
 }
 \arguments{
-\item{data}{An \code{sf} map-ready frame (use \code{geometry = "sf"}).}
+\item{data}{A map-ready frame: an \code{sf} frame for \code{backend = "sf"}, or a
+country-level frame with \code{iso3c} (or a polygon frame) for
+\code{backend = "polygon"}.}
 
 \item{fill}{The fill column (unquoted).}
 
 \item{lon, lat}{The longitude / latitude the globe is centred on (the face
 pointing at the viewer).}
+
+\item{backend}{\code{"sf"} (default, via \code{\link[ggplot2:coord_sf]{ggplot2::coord_sf()}}) or \code{"polygon"}
+(via \code{\link[ggplot2:coord_map]{ggplot2::coord_map()}}, no \code{sf} required).}
 
 \item{style, palette, n_bins, borders, title, legend, na_label}{As in \code{\link[=world_map]{world_map()}}.}
 }
@@ -34,11 +40,16 @@ A \code{ggplot} object.
 \description{
 The world as a globe (orthographic projection) centred on \code{lon}/\code{lat} -- the
 honest answer to "the whole world on a rectangle exaggerates the poles". Takes
-the same \code{sf} frame and \code{style} options as \code{\link[=world_map]{world_map()}}.
+the same \code{fill} / \code{style} options as \code{\link[=world_map]{world_map()}}. The default \code{"sf"} backend
+gives the cleanest limb; the \code{"polygon"} backend draws the globe with
+\code{\link[ggplot2:coord_map]{ggplot2::coord_map()}} and needs only \code{maps} + \code{mapproj} (no \code{sf}).
 }
 \examples{
 \dontrun{
 world_data(2020, geometry = "sf") |>
   globe_map(gdp_per_capita, lon = 10, lat = 30)
+# No sf required:
+globe_map(world_snapshot$countries, continent, backend = "polygon",
+          style = "categorical")
 }
 }

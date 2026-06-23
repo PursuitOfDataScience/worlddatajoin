@@ -16,6 +16,8 @@ library(countryatlas)
 library(ggplot2)
 has_sf <- requireNamespace("sf", quietly = TRUE) &&
   requireNamespace("rnaturalearth", quietly = TRUE)
+has_globe <- requireNamespace("maps", quietly = TRUE) &&
+  requireNamespace("mapproj", quietly = TRUE)
 ```
 
 The legacy `maps` polygons are an unprojected plate carrée: they badly distort
@@ -37,9 +39,27 @@ world_data(2020, c(gdp = "NY.GDP.PCAP.KD"), geometry = "sf") |>
 ```
 
 `world_map()` auto-detects the `sf` backend and applies the projection through
-`ggplot2::coord_sf()`. Available projections include `"equal_earth"` (the
-default — equal-area and good-looking), `"robinson"`, `"mollweide"`,
-`"natural_earth"` and `"plate_carree"`.
+`ggplot2::coord_sf()`. Available projections are `"equal_earth"` (the default —
+equal-area and good-looking), `"robinson"`, `"mollweide"`, `"natural_earth"`,
+`"plate_carree"`, `"mercator"`, `"winkel_tripel"`, `"eckert4"`, `"gall_peters"`,
+`"orthographic"`, `"azimuthal_equal_area"`, `"north_polar"` and `"south_polar"`.
+
+## The world as a globe
+
+`globe_map()` draws an orthographic globe centred on `lon`/`lat`. The default
+`"sf"` backend gives the cleanest limb; the `"polygon"` backend below needs only
+`maps` + `mapproj` (no `sf`):
+
+```{r globe, eval = has_globe, fig.width = 5.5, fig.height = 5}
+globe_map(world_snapshot$countries, continent, backend = "polygon",
+          style = "categorical", lon = 10, lat = 20)
+```
+
+```{r eval = FALSE}
+# With the sf backend (smoother limb, real great circles):
+world_data(2020, geometry = "sf") |>
+  globe_map(gdp_per_capita, lon = 10, lat = 30)
+```
 
 ## Just the canvas
 

@@ -664,12 +664,18 @@ simplify_geometry <- function(x, keep = 0.05, ...) {
 #'
 #' The world as a globe (orthographic projection) centred on `lon`/`lat` -- the
 #' honest answer to "the whole world on a rectangle exaggerates the poles". Takes
-#' the same `sf` frame and `style` options as [world_map()].
+#' the same `fill` / `style` options as [world_map()]. The default `"sf"` backend
+#' gives the cleanest limb; the `"polygon"` backend draws the globe with
+#' [ggplot2::coord_map()] and needs only `maps` + `mapproj` (no `sf`).
 #'
-#' @param data An `sf` map-ready frame (use `geometry = "sf"`).
+#' @param data A map-ready frame: an `sf` frame for `backend = "sf"`, or a
+#'   country-level frame with `iso3c` (or a polygon frame) for
+#'   `backend = "polygon"`.
 #' @param fill The fill column (unquoted).
 #' @param lon,lat The longitude / latitude the globe is centred on (the face
 #'   pointing at the viewer).
+#' @param backend `"sf"` (default, via [ggplot2::coord_sf()]) or `"polygon"`
+#'   (via [ggplot2::coord_map()], no `sf` required).
 #' @param style,palette,n_bins,borders,title,legend,na_label As in [world_map()].
 #'
 #' @return A `ggplot` object.
@@ -678,21 +684,63 @@ simplify_geometry <- function(x, keep = 0.05, ...) {
 #' \dontrun{
 #' world_data(2020, geometry = "sf") |>
 #'   globe_map(gdp_per_capita, lon = 10, lat = 30)
+#' # No sf required:
+#' globe_map(world_snapshot$countries, continent, backend = "polygon",
+#'           style = "categorical")
 #' }
 globe_map <- function(data, fill, lon = 0, lat = 20,
+                      backend = c("sf", "polygon"),
                       style = c("continuous", "binned", "quantile", "jenks",
                                 "categorical"),
                       palette = NULL, n_bins = 5, borders = TRUE,
                       title = NULL, legend = NULL, na_label = "No data") {
-  need_pkg("sf", "for globe_map()")
-  if (!is_sf(data)) {
-    wdj_abort("{.fn globe_map} needs an sf frame ({.code geometry = \"sf\"}).")
-  }
+  backend <- match.arg(backend)
   style <- match.arg(style)
   fill_q <- rlang::enquo(fill)
   fill_name <- rlang::as_name(fill_q)
-  vals <- data[[fill_name]]
 
+  if (backend == "polygon") {
+    need_pkg("mapproj", "for globe_map(backend = \"polygon\")")
+    # Bring a country-level table onto polygon geometry if it isn't already.
+    if (!all(c("long", "lat", "group") %in% names(data))) {
+      if (!"iso3c" %in% names(data)) {
+        wdj_abort("{.arg data} needs an {.field iso3c} column (or polygon geometry).")
+      }
+      data <- attach_geometry(
+        dplyr::distinct(tibble::as_tibble(data), .data$iso3c, .keep_all = TRUE),
+        geometry = "polygon"
+      )
+    }
+    vals <- data[[fill_name]]
+    fill_mapped <- fill_q
+    if (style %in% c("quantile", "jenks") && is.numeric(vals)) {
+      key <- intersect(c("iso3c", "group"), names(data))
+      bv <- if (length(key)) {
+        dplyr::distinct(tibble::as_tibble(data),
+                        .data[[key[1]]], .keep_all = TRUE)[[fill_name]]
+      } else vals
+      br <- compute_breaks(bv, style, n_bins)
+      data[[".wdj_bin"]] <- cut(vals, breaks = br, include.lowest = TRUE, dig.lab = 4)
+      fill_mapped <- rlang::quo(.data[[".wdj_bin"]])
+    }
+    p <- ggplot2::ggplot(
+      data, ggplot2::aes(.data$long, .data$lat, group = .data$group,
+                         fill = !!fill_mapped)
+    ) +
+      ggplot2::geom_polygon(color = if (borders) "grey25" else NA, linewidth = 0.1) +
+      ggplot2::coord_map("orthographic", orientation = c(lat, lon, 0)) +
+      add_fill_scale(style, palette, n_bins, na_label, legend %||% fill_name) +
+      theme_world_map()
+    if (!is.null(title)) p <- p + ggplot2::labs(title = title)
+    return(p)
+  }
+
+  # sf backend.
+  need_pkg("sf", "for globe_map()")
+  if (!is_sf(data)) {
+    wdj_abort("{.fn globe_map} needs an sf frame ({.code geometry = \"sf\"}) for {.code backend = \"sf\"}.")
+  }
+  vals <- data[[fill_name]]
   fill_mapped <- fill_q
   if (style %in% c("quantile", "jenks") && is.numeric(vals)) {
     br <- compute_breaks(vals, style, n_bins)

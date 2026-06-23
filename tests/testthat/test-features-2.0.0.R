@@ -1,4 +1,4 @@
-# Tests for functionality added in 1.1.0.
+# Tests for functionality added in 2.0.0.
 
 test_that("growth_rate computes yoy and cagr per country", {
   df <- data.frame(iso3c = "USA", year = 2000:2002, gdp = c(100, 110, 121))

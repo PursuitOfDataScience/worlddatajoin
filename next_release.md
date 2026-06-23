@@ -1,12 +1,12 @@
-# countryatlas — next release planning (target: 1.1.0)
+# countryatlas — next release planning (target: 2.0.0)
 
 Working document. Scope: (A) integrate **ggsql 0.4.1**, (B) brainstorm new
 features/functions, (C) **fix bugs found in 1.0.0** (the important part), and
 (D) housekeeping/deprecations.
 
-## Status (branch `v1.1.0-dev`)
+## Status (branch `v2.0.0-dev`)
 
-**Implemented in 1.1.0** (see `NEWS.md`): ggsql bridge (`as_ggsql_source()`,
+**Implemented in 2.0.0** (see `NEWS.md`): ggsql bridge (`as_ggsql_source()`,
 `world_query()`, `interactive_map(engine = "ggsql")`); all eight bug fixes in §3;
 projection expansion + `globe_map()` + `facet_map()`; `locate_country()`,
 `repair_country_names()`, `country_join_all()`, `growth_rate()`, `index_to()`,
@@ -15,7 +15,7 @@ projection expansion + `globe_map()` + `facet_map()`; `locate_country()`,
 viridis-based plotting tests run on CI (a `viridisLite` illegal-instruction
 crash on the dev node prevents running them locally).
 
-**Deferred to 1.2.0** (need live-API testing or data curation, so not shipped
+**Deferred to 2.1.0** (need live-API testing or data curation, so not shipped
 blind): external data-source adapters — §2.1 (OWID / Eurostat / V-Dem); the
 historical / dissolved-entity crosswalk — §2.2; subnational `admin1` geometry —
 §2.3; the disputed-territory de-facto/de-jure policy — §2.6; and a
@@ -178,7 +178,7 @@ same `iso3c`(+`year`) tidy shape so they drop straight into `country_join()`:
 
 ---
 
-## 3. Bugs found in 1.0.0 (fix in 1.1.0)
+## 3. Bugs found in 1.0.0 (fix in 2.0.0)
 
 Found by static review and then **reproduced on R 4.4.1** (`maps` +
 `countrycode`; `sf`/`WDI` weren't installed, so the two sf-only items are
@@ -310,7 +310,7 @@ Not a bug, but a polish item: add a `country_overrides()` alias (+ keep
 ## 4. Housekeeping / deprecations
 
 - **Resolve the `gdp_per_capita_2015` shim** (`R/world_data.R:104-109`). 1.0.0
-  promised a *one-cycle* alias; 1.1.0 is that cycle — drop it (or flip the
+  promised a *one-cycle* alias; 2.0.0 is that cycle — drop it (or flip the
   default and warn). The `next_release` note that triggered this review.
 - **Refresh `world_snapshot`** — `data-raw/build_datasets.R:18` pins
   `SNAPSHOT_YEAR <- 2022L`; bump to the latest year with good WDI coverage and
@@ -322,13 +322,13 @@ Not a bug, but a polish item: add a `country_overrides()` alias (+ keep
 
 ---
 
-## 5. Suggested cut for 1.1.0 (recommendation)
+## 5. Suggested cut for 2.0.0 (recommendation)
 
 1. **All of §3** (bug fixes) — these are correctness issues in core/visual paths.
 2. **ggsql export target + `world_query()` emitter** (§1.1–1.2, 1.4) + vignette.
 3. **Projection expansion + `globe_map()`** (§2.3/2.4) — small, high-visibility.
 4. Defer the broader data-source adapters (§2.1) and historical crosswalk (§2.2)
-   to 1.2.0 unless there's appetite; they're larger and want their own design.
+   to 2.1.0 unless there's appetite; they're larger and want their own design.
 
 ---
 

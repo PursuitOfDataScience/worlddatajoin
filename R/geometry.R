@@ -150,8 +150,12 @@ get_world_sf <- function(scale = "small", region = NULL,
   }
 
   # Antimeridian-safe before projecting so Russia/Fiji/NZ stop streaking.
-  ne <- tryCatch(sf::st_break_antimeridian(ne, lon_0 = recenter %||% 0),
-                 error = function(e) ne)
+  # (st_break_antimeridian's internal st_intersection notes that attributes are
+  # assumed spatially constant -- expected and harmless here, so suppress it.)
+  ne <- suppressWarnings(
+    tryCatch(sf::st_break_antimeridian(ne, lon_0 = recenter %||% 0),
+             error = function(e) ne)
+  )
   if (isTRUE(project)) {
     ne <- sf::st_transform(ne, crs = wdj_crs(projection, recenter))
   }
@@ -221,8 +225,10 @@ world_geometry <- function(what = c("countries", "centroids", "coastline",
     ocean = {
       box <- sf::st_as_sfc(sf::st_bbox(c(xmin = -180, ymin = -90, xmax = 180, ymax = 90),
                                        crs = sf::st_crs(4326)))
-      box <- tryCatch(sf::st_break_antimeridian(box, lon_0 = recenter %||% 0),
-                      error = function(e) box)
+      box <- suppressWarnings(
+        tryCatch(sf::st_break_antimeridian(box, lon_0 = recenter %||% 0),
+                 error = function(e) box)
+      )
       sf::st_transform(box, crs = wdj_crs(projection, recenter))
     }
   )

@@ -1,8 +1,12 @@
-# countryatlas 1.1.0
+# countryatlas 2.0.0
 
-A feature release that wires countryatlas into the database-rendering world via
+A major release that wires countryatlas into the database-rendering world via
 'ggsql', widens the map vocabulary, and fixes several correctness issues found
-by auditing 1.0.0.
+by auditing 1.0.0. The version is bumped to 2.0.0 because the bug fixes change
+the output of `world_map()` (quantile binning), `bubble_map()` / `flow_map()`
+(de-duplicated symbols), `geom_country_labels()` (label placement) and
+`convert_country()` (override-only entities) — code that depended on the old
+behaviour may see different maps or values.
 
 ## New: database-side rendering with ggsql
 

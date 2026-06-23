@@ -34,7 +34,11 @@ compute_breaks <- function(x, style, n_bins) {
   x <- x[is.finite(x)]
   if (has_pkg("classInt")) {
     cls <- switch(style, quantile = "quantile", jenks = "jenks", "quantile")
-    br <- classInt::classIntervals(x, n = n_bins, style = cls)$brks
+    # classInt is chatty when n equals the number of distinct values, or on
+    # ties; the binning is still valid, so don't leak the warning to callers.
+    br <- suppressWarnings(
+      classInt::classIntervals(x, n = n_bins, style = cls)
+    )$brks
     return(unique(br))
   }
   if (style == "jenks") {

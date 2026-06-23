@@ -95,8 +95,12 @@ fetch_wdi <- function(indicator, start, end, cache = TRUE,
       out <- p
     } else {
       val_cols <- setdiff(names(p), base_keys)
+      # Two iso2c codes can map to one iso3c, so a key can repeat; the duplicate
+      # rows are collapsed downstream (country_data distinct()s on iso3c/year).
+      # Declare the relationship so dplyr doesn't warn about it.
       out <- dplyr::full_join(out, p[, c("iso3c", "year", val_cols)],
-                              by = c("iso3c", "year"))
+                              by = c("iso3c", "year"),
+                              relationship = "many-to-many")
     }
   }
   if (is.null(out)) {

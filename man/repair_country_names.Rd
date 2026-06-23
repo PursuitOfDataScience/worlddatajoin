@@ -6,7 +6,7 @@
 \usage{
 repair_country_names(
   x,
-  threshold = 0.15,
+  threshold = 0.2,
   origin = "country.name",
   verbose = TRUE
 )
@@ -14,8 +14,9 @@ repair_country_names(
 \arguments{
 \item{x}{A vector of country names.}
 
-\item{threshold}{Maximum Jaro-Winkler distance to accept a repair (0 =
-identical, 1 = unrelated). Lower is stricter; default \code{0.15}.}
+\item{threshold}{Maximum string distance to accept a repair (0 = identical,
+1 = unrelated). Lower is stricter; default \code{0.2}. Uses Jaro-Winkler when
+\code{stringdist} is installed, otherwise a length-normalised edit distance.}
 
 \item{origin}{countrycode origin scheme (default \code{"country.name"}).}
 

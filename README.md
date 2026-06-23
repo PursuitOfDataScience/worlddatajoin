@@ -32,6 +32,23 @@ stitches together three otherwise disjoint worlds:
 The happy path is one call: `world_data(2020)`. Everything else is
 opt-in.
 
+## New in 2.0.0
+
+- **Render maps in the database** with [ggsql](https://ggsql.org):
+  `as_ggsql_source()`, `world_query()`,
+  `interactive_map(engine = "ggsql")`.
+- **More map types**: an orthographic globe (`globe_map()`), small
+  multiples (`facet_map()`), and 8 more projections (Winkel tripel,
+  orthographic, Gall–Peters, …).
+- **Point data onto the spine**: `locate_country()` (point-in-polygon).
+- **Cleaner joins**: `repair_country_names()` auto-fixes typos;
+  `country_join_all()` reduce-joins many tables at once.
+- **More analysis**: `growth_rate()`, `index_to()`, `share_of_world()`.
+- **More country groups**: Mercosur, GCC, Nordic, Visegrád.
+- **Correctness fixes** that change map output (quantile binning,
+  centroids, label placement, projections, override-only lookups) — full
+  [changelog](NEWS.md).
+
 ## Installation
 
 ``` r
@@ -218,6 +235,37 @@ world_query(gdp_per_capita, palette = "magma", transform = "log10",
 …and `as_ggsql_source()` / `interactive_map(engine = "ggsql")` register
 your curated table and render it in the database. See the *countryatlas
 and ggsql* vignette.
+
+## More ways in, more to compute
+
+Get point data onto the spine, repair messy names, reduce-join many
+tables, and run panel analysis — all keyed on `iso3c`:
+
+``` r
+# each country's share of a world total (within year, for a panel)
+share_of_world(data.frame(iso3c = c("USA", "CHN", "IND"), co2 = c(5, 15, 3)), co2)
+#> # A tibble: 3 × 3
+#>   iso3c   co2 co2_share
+#>   <chr> <dbl>     <dbl>
+#> 1 USA       5     0.217
+#> 2 CHN      15     0.652
+#> 3 IND       3     0.130
+
+# reduce-join several messy tables on the ISO spine at once
+t1 <- data.frame(country = c("Czechia", "South Korea"), gdp = c(1, 2))
+t2 <- data.frame(country = c("Czech Republic", "Korea, Rep."), pop = c(10, 51))
+t3 <- data.frame(country = c("Czechia", "Korea"), area = c(79, 100))
+country_join_all(list(t1, t2, t3), by = "country")
+#> # A tibble: 2 × 7
+#>   country.x     gdp iso3c country.y        pop country  area
+#>   <chr>       <dbl> <chr> <chr>          <dbl> <chr>   <dbl>
+#> 1 Czechia         1 CZE   Czech Republic    10 Czechia    79
+#> 2 South Korea     2 KOR   Korea, Rep.       51 Korea     100
+```
+
+`repair_country_names()` auto-fixes typos to the closest known country,
+`locate_country(lon, lat)` tags coordinates with the country that
+contains them, and `growth_rate()` / `index_to()` add panel metrics.
 
 ## Offline by default
 

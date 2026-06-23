@@ -128,8 +128,9 @@ audit_coverage <- function(data,
 #' result into [standardize_country()] / [join_world()].
 #'
 #' @param x A vector of country names.
-#' @param threshold Maximum Jaro-Winkler distance to accept a repair (0 =
-#'   identical, 1 = unrelated). Lower is stricter; default `0.15`.
+#' @param threshold Maximum string distance to accept a repair (0 = identical,
+#'   1 = unrelated). Lower is stricter; default `0.2`. Uses Jaro-Winkler when
+#'   `stringdist` is installed, otherwise a length-normalised edit distance.
 #' @param origin countrycode origin scheme (default `"country.name"`).
 #' @param verbose Whether to message the substitutions made (default `TRUE`).
 #'
@@ -139,7 +140,7 @@ audit_coverage <- function(data,
 #' @export
 #' @examples
 #' repair_country_names(c("United States", "Brzil", "Germny"))
-repair_country_names <- function(x, threshold = 0.15, origin = "country.name",
+repair_country_names <- function(x, threshold = 0.2, origin = "country.name",
                                  verbose = TRUE) {
   x <- as.character(x)
   report <- check_country_match(x, origin = origin, suggest = TRUE)
@@ -162,7 +163,7 @@ repair_country_names <- function(x, threshold = 0.15, origin = "country.name",
   if (isTRUE(verbose) && nrow(repairs)) {
     wdj_inform(c(
       "v" = "Repaired {nrow(repairs)} country name{?s}:",
-      "*" = "{.val {paste0(repairs$from, ' → ', repairs$to)}}"
+      "*" = "{.val {paste0(repairs$from, ' -> ', repairs$to)}}"
     ))
   }
   attr(out, "repairs") <- repairs

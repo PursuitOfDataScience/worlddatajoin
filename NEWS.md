@@ -24,7 +24,10 @@ behaviour may see different maps or values.
 
 ## New: maps, projections and helpers
 
-* `globe_map()` — an orthographic globe choropleth.
+* `globe_map()` — an orthographic globe choropleth, with `backend = "sf"`
+  (smoothest limb) or `backend = "polygon"` (needs only `maps` + `mapproj`).
+* `spin_globe()` — a rotating-globe animated GIF (one `globe_map()` frame per
+  central longitude, assembled with `gifski` or `magick`).
 * `facet_map()` — small-multiple choropleths (the static counterpart to
   `animate_world()`).
 * `wdj_crs()` gains eight projections (`mercator`, `winkel_tripel`, `eckert4`,

@@ -78,6 +78,16 @@ test_that("globe_map polygon backend constructs without sf", {
   expect_s3_class(p$coordinates, "CoordMap")
 })
 
+test_that("spin_globe needs a gif encoder", {
+  # Without gifski/magick it should fail fast, before rendering any frame.
+  skip_if(requireNamespace("gifski", quietly = TRUE) ||
+            requireNamespace("magick", quietly = TRUE))
+  expect_error(
+    spin_globe(world_snapshot$countries, continent, backend = "polygon",
+               n_frames = 2L)
+  )
+})
+
 test_that("polygon centroids are one antimeridian-safe row per iso3c", {
   skip_if_not_installed("maps")
   cent <- world_geometry("centroids", geometry = "polygon")

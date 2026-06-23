@@ -29,9 +29,10 @@
 #' [growth_rate()], [index_to()], [share_of_world()].
 #'
 #' @section Visualization:
-#' [world_map()], [globe_map()], [facet_map()], [bubble_map()], [bivariate_map()],
-#' [cartogram_map()], [tile_map()], [flow_map()], [animate_world()],
-#' [interactive_map()], [geom_country_labels()], [theme_world_map()].
+#' [world_map()], [globe_map()], [spin_globe()], [facet_map()], [bubble_map()],
+#' [bivariate_map()], [cartogram_map()], [tile_map()], [flow_map()],
+#' [animate_world()], [interactive_map()], [geom_country_labels()],
+#' [theme_world_map()].
 #'
 #' @section Database rendering (ggsql):
 #' [as_ggsql_source()], [world_query()].

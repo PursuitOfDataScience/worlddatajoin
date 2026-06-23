@@ -82,6 +82,7 @@ reference:
   contents:
   - world_map
   - globe_map
+  - spin_globe
   - facet_map
   - bubble_map
   - bivariate_map

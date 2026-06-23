@@ -61,6 +61,14 @@ world_data(2020, geometry = "sf") |>
   globe_map(gdp_per_capita, lon = 10, lat = 30)
 ```
 
+`spin_globe()` turns that into a rotating animation — one `globe_map()` frame per
+central longitude, assembled into a looping GIF with `gifski` (or `magick`):
+
+```{r eval = FALSE}
+spin_globe(world_snapshot$countries, continent, backend = "polygon",
+           style = "categorical", n_frames = 60)
+```
+
 ## Just the canvas
 
 `world_geometry()` returns projected, region-subset, antimeridian-safe geometry

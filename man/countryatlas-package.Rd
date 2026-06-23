@@ -47,9 +47,10 @@ The happy path stays one call: \code{\link[=world_data]{world_data()}}. Everythi
 
 \section{Visualization}{
 
-\code{\link[=world_map]{world_map()}}, \code{\link[=globe_map]{globe_map()}}, \code{\link[=facet_map]{facet_map()}}, \code{\link[=bubble_map]{bubble_map()}}, \code{\link[=bivariate_map]{bivariate_map()}},
-\code{\link[=cartogram_map]{cartogram_map()}}, \code{\link[=tile_map]{tile_map()}}, \code{\link[=flow_map]{flow_map()}}, \code{\link[=animate_world]{animate_world()}},
-\code{\link[=interactive_map]{interactive_map()}}, \code{\link[=geom_country_labels]{geom_country_labels()}}, \code{\link[=theme_world_map]{theme_world_map()}}.
+\code{\link[=world_map]{world_map()}}, \code{\link[=globe_map]{globe_map()}}, \code{\link[=spin_globe]{spin_globe()}}, \code{\link[=facet_map]{facet_map()}}, \code{\link[=bubble_map]{bubble_map()}},
+\code{\link[=bivariate_map]{bivariate_map()}}, \code{\link[=cartogram_map]{cartogram_map()}}, \code{\link[=tile_map]{tile_map()}}, \code{\link[=flow_map]{flow_map()}},
+\code{\link[=animate_world]{animate_world()}}, \code{\link[=interactive_map]{interactive_map()}}, \code{\link[=geom_country_labels]{geom_country_labels()}},
+\code{\link[=theme_world_map]{theme_world_map()}}.
 }
 
 \section{Database rendering (ggsql)}{

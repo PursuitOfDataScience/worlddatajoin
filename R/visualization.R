@@ -758,6 +758,69 @@ globe_map <- function(data, fill, lon = 0, lat = 20,
   p
 }
 
+#' Spin the globe
+#'
+#' An animated GIF of the world rotating on its axis: a sequence of orthographic
+#' [globe_map()] frames at evenly spaced central longitudes, assembled into a
+#' looping animation with the optional `gifski` (preferred) or `magick` package.
+#' Embeds directly in R Markdown / Quarto / a README.
+#'
+#' @param data A map-ready frame (see [globe_map()]): a country-level frame with
+#'   `iso3c` for the `"polygon"` backend, or an `sf` frame for `"sf"`.
+#' @param fill The fill column (unquoted).
+#' @param lat The latitude the globe is tilted toward (the viewer's eye line).
+#' @param n_frames Number of frames in one full 360 degrees rotation.
+#' @param fps Frames per second of the output animation.
+#' @param backend `"polygon"` (default; needs `maps` + `mapproj`, no `sf`) or
+#'   `"sf"`.
+#' @param width,height Pixel dimensions of the animation.
+#' @param file Optional output path (`.gif`); a temporary file is used if `NULL`.
+#' @param ... Passed to [globe_map()] (e.g. `fill` `style`, `palette`).
+#'
+#' @return The path to the written GIF, invisibly.
+#' @export
+#' @examples
+#' \dontrun{
+#' # No sf required:
+#' spin_globe(world_snapshot$countries, continent, backend = "polygon",
+#'            style = "categorical")
+#' }
+spin_globe <- function(data, fill, lat = 20, n_frames = 60, fps = 15,
+                       backend = c("polygon", "sf"), width = 480, height = 480,
+                       file = NULL, ...) {
+  backend <- match.arg(backend)
+  fill_q <- rlang::enquo(fill)
+  if (!has_pkg("gifski") && !has_pkg("magick")) {
+    need_pkg("gifski", "to assemble the animation (or install 'magick')")
+  }
+  n_frames <- max(2L, as.integer(n_frames))
+
+  # One full turn: drop the duplicated 360 == 0 frame so the loop is seamless.
+  lons <- utils::head(seq(0, 360, length.out = n_frames + 1L), -1L)
+  tmpdir <- tempfile("spin_globe_")
+  dir.create(tmpdir)
+  on.exit(unlink(tmpdir, recursive = TRUE), add = TRUE)
+  frames <- file.path(tmpdir, sprintf("frame_%04d.png", seq_along(lons)))
+
+  for (i in seq_along(lons)) {
+    p <- globe_map(data, !!fill_q, lon = lons[i], lat = lat, backend = backend, ...)
+    suppressWarnings(ggplot2::ggsave(
+      frames[i], p, width = width / 72, height = height / 72, dpi = 72,
+      bg = "white"
+    ))
+  }
+
+  out <- file %||% tempfile(fileext = ".gif")
+  if (has_pkg("gifski")) {
+    gifski::gifski(frames, gif_file = out, width = width, height = height,
+                   delay = 1 / fps, loop = TRUE, progress = FALSE)
+  } else {
+    anim <- magick::image_animate(magick::image_read(frames), fps = fps)
+    magick::image_write(anim, out)
+  }
+  invisible(out)
+}
+
 #' Small-multiple choropleths
 #'
 #' Facet a choropleth into small multiples (one panel per group or per year) --

@@ -206,8 +206,8 @@ equal-area tile grids (`tile_map()`), great-circle flows (`flow_map()`),
 an orthographic globe (`globe_map()`), small multiples (`facet_map()`),
 animation (`animate_world()`) and interactivity (`interactive_map()`).
 
-The world as a globe, not a rectangle — and the `"polygon"` backend needs
-only `maps` + `mapproj`, no `sf`:
+The world as a globe, not a rectangle — with the `"polygon"` backend (only
+`maps` + `mapproj`, no `sf`) you can draw it and even **spin** it:
 
 ``` r
 globe_map(world_snapshot$countries, continent, backend = "polygon",
@@ -215,6 +215,14 @@ globe_map(world_snapshot$countries, continent, backend = "polygon",
 ```
 
 <img src="man/figures/README-globe-1.png" width="70%" />
+
+``` r
+# assemble a rotating GIF (one full turn; needs gifski or magick)
+spin_globe(world_snapshot$countries, continent, backend = "polygon",
+           style = "categorical")
+```
+
+<img src="man/figures/README-globe-spin.gif" width="45%" />
 
 ``` r
 bubble_map(world_snapshot$countries, population)

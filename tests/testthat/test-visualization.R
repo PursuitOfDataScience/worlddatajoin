@@ -41,3 +41,17 @@ test_that("great_circle returns the requested number of points", {
   expect_equal(nrow(gc), 25)
   expect_named(gc, c("lon", "lat"))
 })
+
+test_that("world_map quantile breaks are country-weighted, not vertex-weighted", {
+  # One country (A) has 100 vertices, the others have 1; values are 1..4. The
+  # quantile breaks must come from the 4 country values, so each country lands
+  # in its own bin -- not be dominated by the 100 copies of value 1.
+  df <- rbind(
+    data.frame(iso3c = "A", group = 1, long = 0, lat = 0, val = 1)[rep(1, 100), ],
+    data.frame(iso3c = "B", group = 2, long = 1, lat = 1, val = 2),
+    data.frame(iso3c = "C", group = 3, long = 2, lat = 2, val = 3),
+    data.frame(iso3c = "D", group = 4, long = 3, lat = 3, val = 4)
+  )
+  p <- world_map(df, val, style = "quantile", n_bins = 4)
+  expect_equal(length(unique(stats::na.omit(as.character(p$data$.wdj_bin)))), 4L)
+})

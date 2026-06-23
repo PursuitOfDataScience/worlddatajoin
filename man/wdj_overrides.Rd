@@ -2,9 +2,12 @@
 % Please edit documentation in R/overrides.R
 \name{wdj_overrides}
 \alias{wdj_overrides}
+\alias{country_overrides}
 \title{Curated country-name overrides (replaces the silent drop-list)}
 \usage{
 wdj_overrides(extra = NULL)
+
+country_overrides(extra = NULL)
 }
 \arguments{
 \item{extra}{An optional named character vector of additional overrides
@@ -20,6 +23,9 @@ A documented \code{custom_match} table for entities that map backends
 (\code{\link[ggplot2:map_data]{ggplot2::map_data()}} and Natural Earth) get wrong or leave without an ISO
 code. Earlier versions of the package \emph{deleted} these regions; now they are
 \emph{matched} instead, so they stop silently disappearing from maps.
+
+\code{country_overrides()} is the preferred name as of the package's rename to
+countryatlas; \code{wdj_overrides()} is kept as a backward-compatible alias.
 }
 \details{
 The table maps a country/region name (as spelled by the geometry backends) to
@@ -31,4 +37,5 @@ single override is enough.
 \examples{
 wdj_overrides()
 wdj_overrides(c(Somaliland = "SOM"))
+country_overrides()
 }

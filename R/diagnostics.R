@@ -120,6 +120,55 @@ audit_coverage <- function(data,
   )
 }
 
+#' Auto-repair country names to their closest known match
+#'
+#' The "act on it" companion to [check_country_match()]: replaces unmatched
+#' country names with their closest known country name (by string distance), but
+#' only when the match is confident enough, and reports what it changed. Pipe the
+#' result into [standardize_country()] / [join_world()].
+#'
+#' @param x A vector of country names.
+#' @param threshold Maximum Jaro-Winkler distance to accept a repair (0 =
+#'   identical, 1 = unrelated). Lower is stricter; default `0.15`.
+#' @param origin countrycode origin scheme (default `"country.name"`).
+#' @param verbose Whether to message the substitutions made (default `TRUE`).
+#'
+#' @return A character vector the same length as `x`, with confident misses
+#'   replaced by the closest known country name (others left unchanged). The
+#'   applied substitutions are attached as the attribute `"repairs"`.
+#' @export
+#' @examples
+#' repair_country_names(c("United States", "Brzil", "Germny"))
+repair_country_names <- function(x, threshold = 0.15, origin = "country.name",
+                                 verbose = TRUE) {
+  x <- as.character(x)
+  report <- check_country_match(x, origin = origin, suggest = TRUE)
+  out <- x
+  changed <- !report$matched & !is.na(report$suggestion)
+  repairs <- tibble::tibble(from = character(), to = character())
+  for (i in which(changed)) {
+    cand <- report$suggestion[i]
+    d <- if (has_pkg("stringdist")) {
+      stringdist::stringdist(tolower(x[i]), tolower(cand), method = "jw")
+    } else {
+      utils::adist(tolower(x[i]), tolower(cand))[1, 1] /
+        max(nchar(x[i]), nchar(cand), 1L)
+    }
+    if (length(d) && !is.na(d) && d <= threshold) {
+      out[i] <- cand
+      repairs <- tibble::add_row(repairs, from = x[i], to = cand)
+    }
+  }
+  if (isTRUE(verbose) && nrow(repairs)) {
+    wdj_inform(c(
+      "v" = "Repaired {nrow(repairs)} country name{?s}:",
+      "*" = "{.val {paste0(repairs$from, ' → ', repairs$to)}}"
+    ))
+  }
+  attr(out, "repairs") <- repairs
+  out
+}
+
 #' @export
 print.wdj_coverage <- function(x, ...) {
   cli::cli_h1("Coverage audit")

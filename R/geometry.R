@@ -1,20 +1,34 @@
 # Geometry backends & utilities -------------------------------------------------
 
+# The projections countryatlas knows how to build a CRS for.
+wdj_projections <- function() {
+  c("equal_earth", "robinson", "mollweide", "natural_earth", "plate_carree",
+    "mercator", "winkel_tripel", "eckert4", "gall_peters", "orthographic",
+    "azimuthal_equal_area", "north_polar", "south_polar")
+}
+
 # Map projection -> a CRS usable by sf::st_transform / ggplot2::coord_sf.
-# `recenter` shifts the central meridian (e.g. 150 for a Pacific-centred map).
-wdj_crs <- function(projection = "equal_earth", recenter = NULL) {
-  projection <- match.arg(
-    projection,
-    c("equal_earth", "robinson", "mollweide", "natural_earth", "plate_carree")
-  )
-  lon0 <- if (is.null(recenter)) 0 else recenter
+# `recenter` shifts the central meridian (e.g. 150 for a Pacific-centred map);
+# `lat0` sets the central latitude for the azimuthal projections (orthographic).
+wdj_crs <- function(projection = "equal_earth", recenter = NULL, lat0 = NULL) {
+  projection <- match.arg(projection, wdj_projections())
+  lon0 <- recenter %||% 0
   proj4 <- switch(
     projection,
-    equal_earth   = "+proj=eqearth",
-    robinson      = "+proj=robin",
-    mollweide     = "+proj=moll",
-    natural_earth = "+proj=natearth",
-    plate_carree  = "+proj=longlat"
+    equal_earth          = "+proj=eqearth",
+    robinson             = "+proj=robin",
+    mollweide            = "+proj=moll",
+    natural_earth        = "+proj=natearth",
+    # Plate carree is equirectangular (+proj=eqc), NOT geographic (+proj=longlat).
+    plate_carree         = "+proj=eqc +lat_ts=0",
+    mercator             = "+proj=merc",
+    winkel_tripel        = "+proj=wintri",
+    eckert4              = "+proj=eck4",
+    gall_peters          = "+proj=cea +lat_ts=45",
+    orthographic         = paste0("+proj=ortho +lat_0=", lat0 %||% 20),
+    azimuthal_equal_area = paste0("+proj=laea +lat_0=", lat0 %||% 0),
+    north_polar          = "+proj=laea +lat_0=90",
+    south_polar          = "+proj=laea +lat_0=-90"
   )
   paste0(proj4, " +lon_0=", lon0, " +datum=WGS84 +units=m +no_defs")
 }
@@ -214,14 +228,37 @@ world_geometry <- function(what = c("countries", "centroids", "coastline",
   )
 }
 
-# Area-weighted centroid per country from polygon rows (label-safe enough for
-# the polygon backend; the sf path uses st_point_on_surface).
+# Spherical polygon area (km^2) of one lon/lat ring. Used to pick a country's
+# largest piece so the centroid is stable and antimeridian-safe (a bounding-box
+# midpoint over *all* pieces lands the US/Fiji/NZ label in the wrong ocean).
+ring_area_km2 <- function(lon, lat) {
+  ok <- is.finite(lon) & is.finite(lat)
+  lon <- lon[ok]; lat <- lat[ok]
+  n <- length(lon)
+  if (n < 3L) return(0)
+  R <- 6371.0088; d2r <- pi / 180
+  lon <- lon * d2r; lat <- lat * d2r
+  i <- seq_len(n); j <- c(2:n, 1L)
+  abs(sum((lon[j] - lon[i]) * (2 + sin(lat[i]) + sin(lat[j]))) * R^2 / 2)
+}
+
+# One centroid per iso3c from polygon rows: the bounding-box midpoint of the
+# country's *largest* piece. One row per country (overrides map several map_data
+# names -- Azores/Madeira -> PRT -- to one iso3c, so grouping must collapse them,
+# or downstream joins in bubble_map()/flow_map() fan out).
 polygon_centroids <- function(poly) {
   poly %>%
-    dplyr::group_by(.data$iso3c, .data$region) %>%
+    dplyr::filter(!is.na(.data$iso3c)) %>%
+    dplyr::group_by(.data$iso3c, .data$group) %>%
     dplyr::summarise(
-      centroid_lon = mean(range(.data$long, na.rm = TRUE)),
-      centroid_lat = mean(range(.data$lat, na.rm = TRUE)),
+      g_lon = mean(range(.data$long, na.rm = TRUE)),
+      g_lat = mean(range(.data$lat, na.rm = TRUE)),
+      g_area = ring_area_km2(.data$long, .data$lat),
+      .groups = "drop_last"
+    ) %>%
+    dplyr::summarise(
+      centroid_lon = .data$g_lon[which.max(.data$g_area)],
+      centroid_lat = .data$g_lat[which.max(.data$g_area)],
       .groups = "drop"
     )
 }
@@ -288,4 +325,48 @@ attach_geometry <- function(data,
   drop <- setdiff(intersect(names(geom), names(data)), by)
   geom <- geom[, setdiff(names(geom), drop), drop = FALSE]
   dplyr::left_join(geom, data, by = by)
+}
+
+#' Tag coordinates with the country that contains them
+#'
+#' Point-in-polygon lookup: given longitude / latitude vectors (or an `sf` POINT
+#' object), return the `iso3c` of the country each point falls in -- the bridge
+#' for getting point data (events, stations, observations) onto the country
+#' spine so it can be joined, aggregated and mapped like everything else.
+#'
+#' @param lon,lat Numeric vectors of longitude / latitude (recycled together;
+#'   ignored if `points` is supplied).
+#' @param points Optional `sf` POINT object to use instead of `lon`/`lat`.
+#' @param scale Natural Earth resolution for the lookup geometry.
+#' @param add Extra attributes to return alongside `iso3c` (any
+#'   [convert_country()] destination, e.g. `"country"`, `"continent"`).
+#'
+#' @return A tibble with one row per point: `iso3c` plus any `add` columns
+#'   (`NA` for points that fall in no country, e.g. open ocean).
+#' @export
+#' @examples
+#' \dontrun{
+#' locate_country(lon = c(2.35, -74.0), lat = c(48.85, 40.7))  # Paris, NYC
+#' }
+locate_country <- function(lon = NULL, lat = NULL, points = NULL,
+                           scale = "small", add = "country") {
+  need_pkg("sf", "for locate_country()")
+  geom <- get_world_sf(scale = scale, project = FALSE)        # lon/lat (EPSG:4326)
+  if (is.null(points)) {
+    if (is.null(lon) || is.null(lat) || length(lon) != length(lat)) {
+      wdj_abort("Supply equal-length {.arg lon} and {.arg lat}, or an {.arg points} sf object.")
+    }
+    points <- sf::st_as_sf(data.frame(lon = lon, lat = lat),
+                           coords = c("lon", "lat"), crs = 4326)
+  } else {
+    points <- sf::st_transform(points, 4326)
+  }
+  hit <- suppressMessages(sf::st_intersects(points, geom))
+  idx <- vapply(hit, function(h) if (length(h)) h[[1]] else NA_integer_, integer(1))
+  iso3c <- geom$iso3c[idx]
+  out <- tibble::tibble(iso3c = iso3c)
+  for (a in setdiff(add, "iso3c")) {
+    out[[a]] <- convert_country(iso3c, to = a, from = "iso3c", warn = FALSE)
+  }
+  out
 }

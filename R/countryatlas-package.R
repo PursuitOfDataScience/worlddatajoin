@@ -9,13 +9,15 @@
 #' The happy path stays one call: [world_data()]. Everything else is opt-in.
 #'
 #' @section Core data assembly:
-#' [world_data()], [country_data()], [world_geometry()].
+#' [world_data()], [country_data()], [world_geometry()], [locate_country()].
 #'
 #' @section The join engine:
-#' [standardize_country()], [join_world()], [attach_geometry()], [country_join()].
+#' [standardize_country()], [join_world()], [attach_geometry()], [country_join()],
+#' [country_join_all()].
 #'
 #' @section Diagnostics:
-#' [check_country_match()], [wdj_overrides()], [audit_coverage()].
+#' [check_country_match()], [repair_country_names()], [country_overrides()],
+#' [audit_coverage()].
 #'
 #' @section Reference data:
 #' [convert_country()], [country_codes()], [country_groups()], [in_group()],
@@ -23,12 +25,16 @@
 #' [country_groups_tbl], [world_snapshot], [world_tiles].
 #'
 #' @section Analysis helpers:
-#' [per_capita()], [aggregate_regions()], [rank_countries()], [complete_years()].
+#' [per_capita()], [aggregate_regions()], [rank_countries()], [complete_years()],
+#' [growth_rate()], [index_to()], [share_of_world()].
 #'
 #' @section Visualization:
-#' [world_map()], [bubble_map()], [bivariate_map()], [cartogram_map()],
-#' [tile_map()], [flow_map()], [animate_world()], [interactive_map()],
-#' [geom_country_labels()], [theme_world_map()].
+#' [world_map()], [globe_map()], [facet_map()], [bubble_map()], [bivariate_map()],
+#' [cartogram_map()], [tile_map()], [flow_map()], [animate_world()],
+#' [interactive_map()], [geom_country_labels()], [theme_world_map()].
+#'
+#' @section Database rendering (ggsql):
+#' [as_ggsql_source()], [world_query()].
 #'
 #' @keywords internal
 "_PACKAGE"

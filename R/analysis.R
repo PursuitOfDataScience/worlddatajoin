@@ -78,9 +78,6 @@ aggregate_regions <- function(data, value, by = "region", fun = "sum",
                               weight = NULL) {
   val_name <- rlang::as_name(rlang::enquo(value))
   fun <- match.arg(fun, c("sum", "mean", "median", "min", "max", "weighted_mean"))
-  if (length(by) > 1L) {
-    if ("year" %in% names(data)) by <- by
-  }
   missing_by <- setdiff(by, names(data))
   if (length(missing_by)) {
     wdj_abort("Grouping column{?s} {.val {missing_by}} not found in {.arg data}.")
@@ -211,4 +208,123 @@ wdj_interp_linear <- function(x, y) {
   ok <- !is.na(y)
   if (sum(ok) < 2L) return(y)
   stats::approx(x[ok], y[ok], xout = x, rule = 1)$y
+}
+
+#' Year-on-year (or compound) growth rate
+#'
+#' Adds a growth-rate column to a panel: either the period-over-period change
+#' (`"yoy"`) or the compound annual growth rate from the first observed year
+#' (`"cagr"`), computed per country.
+#'
+#' @param data A panel with `iso3c` and `year`.
+#' @param value The value column (unquoted).
+#' @param type `"yoy"` (default, period-over-period) or `"cagr"` (compound
+#'   annual growth rate vs. the first non-`NA` year).
+#' @param suffix Suffix for the new column (default `"_growth"`).
+#'
+#' @return `data` with a growth-rate column added (a proportion, so 0.03 = 3%).
+#' @export
+#' @examples
+#' df <- data.frame(iso3c = "USA", year = 2000:2002, gdp = c(100, 110, 121))
+#' growth_rate(df, gdp)
+growth_rate <- function(data, value, type = c("yoy", "cagr"),
+                        suffix = "_growth") {
+  type <- match.arg(type)
+  val_name <- rlang::as_name(rlang::enquo(value))
+  if (!all(c("iso3c", "year") %in% names(data))) {
+    wdj_abort("{.arg data} must have {.field iso3c} and {.field year} columns.")
+  }
+  if (!val_name %in% names(data)) {
+    wdj_abort("Column {.val {val_name}} not found in {.arg data}.")
+  }
+  new_col <- paste0(val_name, suffix)
+  out <- data %>%
+    dplyr::group_by(.data$iso3c) %>%
+    dplyr::arrange(.data$year, .by_group = TRUE)
+  out <- if (type == "yoy") {
+    dplyr::mutate(
+      out,
+      "{new_col}" := .data[[val_name]] / dplyr::lag(.data[[val_name]]) - 1
+    )
+  } else {
+    dplyr::mutate(
+      out,
+      "{new_col}" := {
+        base_i <- which(!is.na(.data[[val_name]]))[1]
+        v0 <- .data[[val_name]][base_i]; y0 <- .data$year[base_i]
+        n <- .data$year - y0
+        ifelse(n > 0 & !is.na(v0) & v0 > 0,
+               (.data[[val_name]] / v0)^(1 / n) - 1, NA_real_)
+      }
+    )
+  }
+  dplyr::ungroup(out)
+}
+
+#' Rebase a series to an index (base year = 100)
+#'
+#' Rescales a value column so the chosen base year equals `to` (100 by default),
+#' per country -- the standard way to compare trajectories that start at very
+#' different levels.
+#'
+#' @param data A panel with `iso3c` and `year`.
+#' @param value The value column (unquoted).
+#' @param base_year The year set equal to `to`.
+#' @param to The index value the base year maps to (default `100`).
+#' @param suffix Suffix for the new column (default `"_index"`).
+#'
+#' @return `data` with an index column added.
+#' @export
+#' @examples
+#' df <- data.frame(iso3c = "USA", year = 2000:2002, gdp = c(50, 55, 60))
+#' index_to(df, gdp, base_year = 2000)
+index_to <- function(data, value, base_year, to = 100, suffix = "_index") {
+  val_name <- rlang::as_name(rlang::enquo(value))
+  if (!all(c("iso3c", "year") %in% names(data))) {
+    wdj_abort("{.arg data} must have {.field iso3c} and {.field year} columns.")
+  }
+  new_col <- paste0(val_name, suffix)
+  out <- data %>%
+    dplyr::group_by(.data$iso3c) %>%
+    dplyr::mutate(
+      "{new_col}" := {
+        base <- .data[[val_name]][.data$year == base_year][1]
+        if (length(base) == 0L || is.na(base) || base == 0) NA_real_
+        else .data[[val_name]] / base * to
+      }
+    )
+  dplyr::ungroup(out)
+}
+
+#' Each country's share of the world total
+#'
+#' Adds a column giving each country's value as a share of the (year's) world
+#' total -- e.g. share of global emissions or GDP. Operates within `year` when a
+#' panel is supplied.
+#'
+#' @param data A country-level (or panel) data frame.
+#' @param value The value column (unquoted).
+#' @param suffix Suffix for the new column (default `"_share"`).
+#'
+#' @return `data` with a share column added (a proportion in `[0, 1]`).
+#' @export
+#' @examples
+#' df <- data.frame(iso3c = c("USA", "CHN"), co2 = c(5, 10))
+#' share_of_world(df, co2)
+share_of_world <- function(data, value, suffix = "_share") {
+  val_name <- rlang::as_name(rlang::enquo(value))
+  if (!val_name %in% names(data)) {
+    wdj_abort("Column {.val {val_name}} not found in {.arg data}.")
+  }
+  new_col <- paste0(val_name, suffix)
+  out <- if ("year" %in% names(data)) {
+    dplyr::group_by(data, .data$year)
+  } else {
+    data
+  }
+  out <- dplyr::mutate(
+    out,
+    "{new_col}" := .data[[val_name]] / sum(.data[[val_name]], na.rm = TRUE)
+  )
+  dplyr::ungroup(tibble::as_tibble(out))
 }

@@ -66,6 +66,17 @@ wdj_overrides <- function(extra = NULL) {
   base
 }
 
+#' @description
+#' `country_overrides()` is the preferred name as of the package's rename to
+#' countryatlas; `wdj_overrides()` is kept as a backward-compatible alias.
+#' @rdname wdj_overrides
+#' @export
+#' @examples
+#' country_overrides()
+country_overrides <- function(extra = NULL) {
+  wdj_overrides(extra)
+}
+
 # Small fallback table for ISO3c codes that `countrycode` does not classify
 # into a continent / region (notably Kosovo's user-assigned XKX).
 wdj_code_fallback <- function() {

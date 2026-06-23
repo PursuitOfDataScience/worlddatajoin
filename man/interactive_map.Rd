@@ -8,7 +8,7 @@ interactive_map(
   data,
   fill,
   tooltip = NULL,
-  engine = c("plotly", "ggiraph", "leaflet"),
+  engine = c("plotly", "ggiraph", "leaflet", "ggsql"),
   ...
 )
 }
@@ -19,9 +19,11 @@ interactive_map(
 
 \item{tooltip}{Optional tooltip column (unquoted).}
 
-\item{engine}{\code{"plotly"} (default), \code{"ggiraph"} or \code{"leaflet"}.}
+\item{engine}{\code{"plotly"} (default), \code{"ggiraph"}, \code{"leaflet"} or \code{"ggsql"}
+(database-side rendering to a Vega-Lite widget; needs an \code{sf} frame).}
 
-\item{...}{Passed to \code{\link[=world_map]{world_map()}} for the plotly/ggiraph engines.}
+\item{...}{Passed to \code{\link[=world_map]{world_map()}} for the plotly/ggiraph engines, or to
+\code{\link[=world_query]{world_query()}} for the \code{"ggsql"} engine.}
 }
 \value{
 An interactive widget.
@@ -33,5 +35,7 @@ R Markdown / Quarto. Engines are all optional \code{Suggests}.
 \examples{
 \dontrun{
 world_data(2020) |> interactive_map(gdp_per_capita)
+world_data(2020, geometry = "sf") |>
+  interactive_map(gdp_per_capita, engine = "ggsql", transform = "log10")
 }
 }

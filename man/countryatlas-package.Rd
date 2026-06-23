@@ -17,17 +17,19 @@ The happy path stays one call: \code{\link[=world_data]{world_data()}}. Everythi
 }
 \section{Core data assembly}{
 
-\code{\link[=world_data]{world_data()}}, \code{\link[=country_data]{country_data()}}, \code{\link[=world_geometry]{world_geometry()}}.
+\code{\link[=world_data]{world_data()}}, \code{\link[=country_data]{country_data()}}, \code{\link[=world_geometry]{world_geometry()}}, \code{\link[=locate_country]{locate_country()}}.
 }
 
 \section{The join engine}{
 
-\code{\link[=standardize_country]{standardize_country()}}, \code{\link[=join_world]{join_world()}}, \code{\link[=attach_geometry]{attach_geometry()}}, \code{\link[=country_join]{country_join()}}.
+\code{\link[=standardize_country]{standardize_country()}}, \code{\link[=join_world]{join_world()}}, \code{\link[=attach_geometry]{attach_geometry()}}, \code{\link[=country_join]{country_join()}},
+\code{\link[=country_join_all]{country_join_all()}}.
 }
 
 \section{Diagnostics}{
 
-\code{\link[=check_country_match]{check_country_match()}}, \code{\link[=wdj_overrides]{wdj_overrides()}}, \code{\link[=audit_coverage]{audit_coverage()}}.
+\code{\link[=check_country_match]{check_country_match()}}, \code{\link[=repair_country_names]{repair_country_names()}}, \code{\link[=country_overrides]{country_overrides()}},
+\code{\link[=audit_coverage]{audit_coverage()}}.
 }
 
 \section{Reference data}{
@@ -39,14 +41,20 @@ The happy path stays one call: \code{\link[=world_data]{world_data()}}. Everythi
 
 \section{Analysis helpers}{
 
-\code{\link[=per_capita]{per_capita()}}, \code{\link[=aggregate_regions]{aggregate_regions()}}, \code{\link[=rank_countries]{rank_countries()}}, \code{\link[=complete_years]{complete_years()}}.
+\code{\link[=per_capita]{per_capita()}}, \code{\link[=aggregate_regions]{aggregate_regions()}}, \code{\link[=rank_countries]{rank_countries()}}, \code{\link[=complete_years]{complete_years()}},
+\code{\link[=growth_rate]{growth_rate()}}, \code{\link[=index_to]{index_to()}}, \code{\link[=share_of_world]{share_of_world()}}.
 }
 
 \section{Visualization}{
 
-\code{\link[=world_map]{world_map()}}, \code{\link[=bubble_map]{bubble_map()}}, \code{\link[=bivariate_map]{bivariate_map()}}, \code{\link[=cartogram_map]{cartogram_map()}},
-\code{\link[=tile_map]{tile_map()}}, \code{\link[=flow_map]{flow_map()}}, \code{\link[=animate_world]{animate_world()}}, \code{\link[=interactive_map]{interactive_map()}},
-\code{\link[=geom_country_labels]{geom_country_labels()}}, \code{\link[=theme_world_map]{theme_world_map()}}.
+\code{\link[=world_map]{world_map()}}, \code{\link[=globe_map]{globe_map()}}, \code{\link[=facet_map]{facet_map()}}, \code{\link[=bubble_map]{bubble_map()}}, \code{\link[=bivariate_map]{bivariate_map()}},
+\code{\link[=cartogram_map]{cartogram_map()}}, \code{\link[=tile_map]{tile_map()}}, \code{\link[=flow_map]{flow_map()}}, \code{\link[=animate_world]{animate_world()}},
+\code{\link[=interactive_map]{interactive_map()}}, \code{\link[=geom_country_labels]{geom_country_labels()}}, \code{\link[=theme_world_map]{theme_world_map()}}.
+}
+
+\section{Database rendering (ggsql)}{
+
+\code{\link[=as_ggsql_source]{as_ggsql_source()}}, \code{\link[=world_query]{world_query()}}.
 }
 
 \seealso{
@@ -60,6 +68,11 @@ Useful links:
 }
 \author{
 \strong{Maintainer}: Youzhi Yu \email{yuyouzhi666@icloud.com}
+
+Authors:
+\itemize{
+  \item Youzhi Yu \email{yuyouzhi666@icloud.com}
+}
 
 }
 \keyword{internal}

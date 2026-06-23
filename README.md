@@ -186,6 +186,7 @@ in_group(c("France", "United States", "Japan"), "EU")
 Beyond the choropleth: proportional-symbol (`bubble_map()`), bivariate
 (`bivariate_map()`), area-honest cartograms (`cartogram_map()`),
 equal-area tile grids (`tile_map()`), great-circle flows (`flow_map()`),
+an orthographic globe (`globe_map()`), small multiples (`facet_map()`),
 animation (`animate_world()`) and interactivity (`interactive_map()`).
 
 ``` r
@@ -193,6 +194,30 @@ bubble_map(world_snapshot$countries, population)
 ```
 
 <img src="man/figures/README-readme-bubble-1.png" width="100%" />
+
+## Render in the database with ggsql
+
+[ggsql](https://ggsql.org) draws plots *in the database* (DuckDB) and
+returns a Vega-Lite widget — no ggplot2 or `sf` runtime needed.
+countryatlas does the part ggsql’s static world can’t (ISO
+reconciliation, overrides, the WDI join); ggsql does the part
+countryatlas doesn’t (push-down + web-ready output). `world_query()`
+emits the spatial query (no dependencies):
+
+``` r
+world_query(gdp_per_capita, palette = "magma", transform = "log10",
+            title = "GDP per capita")
+#> VISUALISE gdp_per_capita AS fill
+#> FROM countryatlas_world
+#> DRAW spatial
+#> PROJECT TO equal_earth
+#> SCALE fill TO magma VIA log10
+#> LABEL title => 'GDP per capita'
+```
+
+…and `as_ggsql_source()` / `interactive_map(engine = "ggsql")` register
+your curated table and render it in the database. See the *countryatlas
+and ggsql* vignette.
 
 ## Offline by default
 
@@ -203,5 +228,6 @@ the World Bank API.
 ## Learn more
 
 See the vignettes — *Getting started*, *Joining your own data*, *Modern
-maps with sf & projections*, and *Beyond the choropleth* — and the
+maps with sf & projections*, *Beyond the choropleth*, and *countryatlas
+and ggsql* — and the
 [reference site](https://pursuitofdatascience.github.io/countryatlas/).

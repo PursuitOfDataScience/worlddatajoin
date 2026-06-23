@@ -57,11 +57,18 @@ convert_country <- function(x, to = "iso3c", from = "country.name",
                             custom_match = wdj_overrides(), warn = TRUE) {
   m <- convert_dest_map()
   dest <- if (to %in% names(m)) m[[to]] else to
-  # Overrides are keyed to iso3c; only meaningful when from = country.name.
-  cm <- if (identical(from, "country.name") && to %in% c("iso3c")) custom_match else NULL
+  # When reading names, resolve to the override-corrected iso3c first and then
+  # convert iso3c -> destination, so curated entities (Kosovo, Canary Islands,
+  # ...) resolve for EVERY destination, not just iso3c.
+  if (identical(from, "country.name")) {
+    iso <- wdj_to_iso3c(x, origin = "country.name", custom_match = custom_match)
+    if (identical(dest, "iso3c")) return(iso)
+    return(suppressWarnings(
+      countrycode::countrycode(iso, origin = "iso3c", destination = dest, warn = warn)
+    ))
+  }
   suppressWarnings(
-    countrycode::countrycode(x, origin = from, destination = dest,
-                             custom_match = cm, warn = warn)
+    countrycode::countrycode(x, origin = from, destination = dest, warn = warn)
   )
 }
 
@@ -111,7 +118,8 @@ country_codes <- function(codes = NULL) {
 #'
 #' @param group One or more group names: any of `"EU"`, `"OECD"`, `"G7"`,
 #'   `"G20"`, `"BRICS"`, `"ASEAN"`, `"EFTA"`, `"Commonwealth"`, `"OPEC"`,
-#'   `"EuroZone"`, `"NATO"`. If `NULL`, the whole table is returned.
+#'   `"EuroZone"`, `"NATO"`, `"Mercosur"`, `"GCC"`, `"Nordic"`, `"Visegrad"`.
+#'   If `NULL`, the whole table is returned.
 #'
 #' @return A tibble of `group`, `iso3c`, `country`.
 #' @export

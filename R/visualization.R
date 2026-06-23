@@ -58,8 +58,11 @@ compute_breaks <- function(x, style, n_bins) {
 #' @param fill The fill column (unquoted).
 #' @param style `"continuous"` (default), `"binned"`, `"quantile"`, `"jenks"`
 #'   or `"categorical"`.
-#' @param projection For the `sf` backend: `"equal_earth"` (default),
-#'   `"robinson"`, `"mollweide"`, `"natural_earth"` or `"plate_carree"`.
+#' @param projection For the `sf` backend, any of the projections in
+#'   [world_geometry()]: `"equal_earth"` (default), `"robinson"`, `"mollweide"`,
+#'   `"natural_earth"`, `"plate_carree"`, `"mercator"`, `"winkel_tripel"`,
+#'   `"eckert4"`, `"gall_peters"`, `"orthographic"`, `"azimuthal_equal_area"`,
+#'   `"north_polar"` or `"south_polar"`.
 #' @param palette Optional palette name passed to the relevant `ggplot2` scale.
 #' @param n_bins Number of bins for binned/quantile/jenks styles.
 #' @param borders Draw country borders (default `TRUE`).
@@ -94,7 +97,19 @@ world_map <- function(data, fill,
   # Pre-compute binning for quantile/jenks by cutting into an ordered factor.
   fill_mapped <- fill_q
   if (style %in% c("quantile", "jenks") && is.numeric(vals)) {
-    br <- compute_breaks(vals, style, n_bins)
+    # Compute breaks on ONE value per country, not per polygon vertex: the
+    # polygon backend repeats a country's value once per boundary point, so
+    # breaking on `vals` would weight each country by its geometric complexity
+    # and a "quantile" map would no longer hold ~equal countries per colour.
+    break_vals <- vals
+    if (!sf_mode) {
+      key <- intersect(c("iso3c", "group"), names(data))
+      if (length(key)) {
+        break_vals <- dplyr::distinct(tibble::as_tibble(data),
+                                      .data[[key[1]]], .keep_all = TRUE)[[fill_name]]
+      }
+    }
+    br <- compute_breaks(break_vals, style, n_bins)
     data[[".wdj_bin"]] <- cut(vals, breaks = br, include.lowest = TRUE, dig.lab = 4)
     fill_mapped <- rlang::quo(.data[[".wdj_bin"]])
   }
@@ -182,30 +197,49 @@ bubble_map <- function(data, size, color = NULL, projection = "equal_earth",
   if (!"iso3c" %in% names(data)) {
     wdj_abort("{.arg data} must contain an {.field iso3c} column.")
   }
-  data <- tibble::as_tibble(data)
+  # One row per country, so a country contributes a single bubble.
+  data <- dplyr::distinct(tibble::as_tibble(data), .data$iso3c, .keep_all = TRUE)
 
   if (backend == "sf") {
-    cent <- world_geometry("centroids", geometry = "sf", projection = projection)
-    cent <- sf::st_drop_geometry(cent)
-  } else {
-    cent <- world_geometry("centroids", geometry = "polygon")
+    need_pkg("sf", "for bubble_map(backend = \"sf\")")
+    # Keep the base map and the bubbles in the SAME projected CRS, then let
+    # coord_sf() draw both. (The old code put metre-scale sf centroids on a
+    # degree-scale polygon base map, so the bubbles flew off the map.)
+    countries <- world_geometry("countries", geometry = "sf", projection = projection)
+    pts_sf <- sf_centroids(countries)[, "iso3c"]
+    pts_sf <- dplyr::left_join(pts_sf, sf::st_drop_geometry(data), by = "iso3c")
+    aes_pt <- if (!rlang::quo_is_null(color_q)) {
+      ggplot2::aes(size = !!size_q, color = !!color_q)
+    } else {
+      ggplot2::aes(size = !!size_q)
+    }
+    return(
+      ggplot2::ggplot() +
+        ggplot2::geom_sf(data = countries, fill = "grey92", color = "grey80",
+                         linewidth = 0.1) +
+        ggplot2::geom_sf(data = pts_sf, mapping = aes_pt, alpha = alpha) +
+        ggplot2::scale_size_area(max_size = max_size) +
+        ggplot2::coord_sf(crs = wdj_crs(projection)) +
+        theme_world_map()
+    )
   }
+
+  # Polygon backend: base map and centroids are both in lon/lat degrees.
+  cent <- world_geometry("centroids", geometry = "polygon")
   pts <- dplyr::left_join(data, cent[, c("iso3c", "centroid_lon", "centroid_lat")],
                           by = "iso3c")
-
-  base <- ggplot2::ggplot() +
-    ggplot2::geom_polygon(
-      data = world_geometry("countries", geometry = "polygon"),
-      ggplot2::aes(.data$long, .data$lat, group = .data$group),
-      fill = "grey92", color = "grey80", linewidth = 0.1
-    )
   aes_pt <- if (!rlang::quo_is_null(color_q)) {
     ggplot2::aes(.data$centroid_lon, .data$centroid_lat,
                  size = !!size_q, color = !!color_q)
   } else {
     ggplot2::aes(.data$centroid_lon, .data$centroid_lat, size = !!size_q)
   }
-  base +
+  ggplot2::ggplot() +
+    ggplot2::geom_polygon(
+      data = world_geometry("countries", geometry = "polygon"),
+      ggplot2::aes(.data$long, .data$lat, group = .data$group),
+      fill = "grey92", color = "grey80", linewidth = 0.1
+    ) +
     ggplot2::geom_point(data = pts, mapping = aes_pt, alpha = alpha) +
     ggplot2::scale_size_area(max_size = max_size) +
     ggplot2::coord_quickmap() +
@@ -468,20 +502,33 @@ animate_world <- function(data, fill, time = year, projection = "equal_earth",
 #' @param data A map-ready frame.
 #' @param fill The fill column (unquoted).
 #' @param tooltip Optional tooltip column (unquoted).
-#' @param engine `"plotly"` (default), `"ggiraph"` or `"leaflet"`.
-#' @param ... Passed to [world_map()] for the plotly/ggiraph engines.
+#' @param engine `"plotly"` (default), `"ggiraph"`, `"leaflet"` or `"ggsql"`
+#'   (database-side rendering to a Vega-Lite widget; needs an `sf` frame).
+#' @param ... Passed to [world_map()] for the plotly/ggiraph engines, or to
+#'   [world_query()] for the `"ggsql"` engine.
 #'
 #' @return An interactive widget.
 #' @export
 #' @examples
 #' \dontrun{
 #' world_data(2020) |> interactive_map(gdp_per_capita)
+#' world_data(2020, geometry = "sf") |>
+#'   interactive_map(gdp_per_capita, engine = "ggsql", transform = "log10")
 #' }
 interactive_map <- function(data, fill, tooltip = NULL,
-                            engine = c("plotly", "ggiraph", "leaflet"), ...) {
+                            engine = c("plotly", "ggiraph", "leaflet", "ggsql"),
+                            ...) {
   engine <- match.arg(engine)
   fill_q <- rlang::enquo(fill)
   need_pkg(engine, sprintf("for interactive_map(engine = \"%s\")", engine))
+
+  if (engine == "ggsql") {
+    need_pkg("sf", "engine = \"ggsql\" needs an sf frame (geometry = \"sf\")")
+    reader <- ggsql::duckdb_reader()
+    ggsql::ggsql_register(reader, ggsql_wkb_frame(data), "countryatlas_world")
+    q <- world_query(!!fill_q, source = "countryatlas_world", ...)
+    return(ggsql::ggsql_execute(reader, unclass(q)))
+  }
 
   if (engine == "plotly") {
     p <- world_map(data, !!fill_q, ...)
@@ -552,13 +599,21 @@ geom_country_labels <- function(mapping = NULL, repel = TRUE, flag = FALSE,
     if (!all(c("long", "lat", "iso3c") %in% names(d))) {
       return(d[0, , drop = FALSE])
     }
-    out <- d %>%
-      dplyr::group_by(.data$iso3c) %>%
-      dplyr::summarise(
-        long = mean(range(.data$long, na.rm = TRUE)),
-        lat = mean(range(.data$lat, na.rm = TRUE)),
-        .groups = "drop"
-      )
+    # One antimeridian-safe centroid per country (largest piece), so the US /
+    # Fiji / NZ labels don't drift into the wrong ocean.
+    out <- if ("group" %in% names(d)) {
+      polygon_centroids(d)
+    } else {
+      d %>%
+        dplyr::group_by(.data$iso3c) %>%
+        dplyr::summarise(
+          centroid_lon = mean(range(.data$long, na.rm = TRUE)),
+          centroid_lat = mean(range(.data$lat, na.rm = TRUE)),
+          .groups = "drop"
+        )
+    }
+    names(out)[names(out) == "centroid_lon"] <- "long"
+    names(out)[names(out) == "centroid_lat"] <- "lat"
     out$flag <- convert_country(out$iso3c, to = "flag", from = "iso3c")
     out
   }
@@ -599,4 +654,86 @@ simplify_geometry <- function(x, keep = 0.05, ...) {
   }
   wdj_warn("Package {.pkg rmapshaper} not installed; using {.fn sf::st_simplify}.")
   sf::st_simplify(x, dTolerance = (1 - keep) * 10000, preserveTopology = TRUE)
+}
+
+#' Orthographic globe choropleth
+#'
+#' The world as a globe (orthographic projection) centred on `lon`/`lat` -- the
+#' honest answer to "the whole world on a rectangle exaggerates the poles". Takes
+#' the same `sf` frame and `style` options as [world_map()].
+#'
+#' @param data An `sf` map-ready frame (use `geometry = "sf"`).
+#' @param fill The fill column (unquoted).
+#' @param lon,lat The longitude / latitude the globe is centred on (the face
+#'   pointing at the viewer).
+#' @param style,palette,n_bins,borders,title,legend,na_label As in [world_map()].
+#'
+#' @return A `ggplot` object.
+#' @export
+#' @examples
+#' \dontrun{
+#' world_data(2020, geometry = "sf") |>
+#'   globe_map(gdp_per_capita, lon = 10, lat = 30)
+#' }
+globe_map <- function(data, fill, lon = 0, lat = 20,
+                      style = c("continuous", "binned", "quantile", "jenks",
+                                "categorical"),
+                      palette = NULL, n_bins = 5, borders = TRUE,
+                      title = NULL, legend = NULL, na_label = "No data") {
+  need_pkg("sf", "for globe_map()")
+  if (!is_sf(data)) {
+    wdj_abort("{.fn globe_map} needs an sf frame ({.code geometry = \"sf\"}).")
+  }
+  style <- match.arg(style)
+  fill_q <- rlang::enquo(fill)
+  fill_name <- rlang::as_name(fill_q)
+  vals <- data[[fill_name]]
+
+  fill_mapped <- fill_q
+  if (style %in% c("quantile", "jenks") && is.numeric(vals)) {
+    br <- compute_breaks(vals, style, n_bins)
+    data[[".wdj_bin"]] <- cut(vals, breaks = br, include.lowest = TRUE, dig.lab = 4)
+    fill_mapped <- rlang::quo(.data[[".wdj_bin"]])
+  }
+
+  p <- ggplot2::ggplot(data) +
+    ggplot2::geom_sf(ggplot2::aes(fill = !!fill_mapped),
+                     color = if (borders) "grey30" else NA, linewidth = 0.1) +
+    ggplot2::coord_sf(crs = wdj_crs("orthographic", recenter = lon, lat0 = lat)) +
+    add_fill_scale(style, palette, n_bins, na_label, legend %||% fill_name) +
+    theme_world_map()
+  if (!is.null(title)) p <- p + ggplot2::labs(title = title)
+  p
+}
+
+#' Small-multiple choropleths
+#'
+#' Facet a choropleth into small multiples (one panel per group or per year) --
+#' the static counterpart to [animate_world()], for print and side-by-side
+#' comparison. Builds a [world_map()] and facets it on `facet`.
+#'
+#' @param data A map-ready frame (polygon or sf) containing the `facet` column.
+#' @param fill The fill column (unquoted).
+#' @param facet The faceting column (unquoted; e.g. `year` or `continent`).
+#' @param ncol Number of facet columns (passed to [ggplot2::facet_wrap()]).
+#' @param ... Passed to [world_map()] (e.g. `style`, `projection`).
+#'
+#' @return A faceted `ggplot` object.
+#' @export
+#' @examples
+#' \donttest{
+#' snap <- countryatlas::world_snapshot$countries
+#' if (requireNamespace("maps", quietly = TRUE)) {
+#'   mapdf <- attach_geometry(snap, geometry = "polygon")
+#'   facet_map(mapdf, gdp_per_capita, continent, style = "quantile")
+#' }
+#' }
+facet_map <- function(data, fill, facet, ncol = NULL, ...) {
+  fill_q <- rlang::enquo(fill)
+  facet_name <- rlang::as_name(rlang::enquo(facet))
+  if (!facet_name %in% names(data)) {
+    wdj_abort("Facet column {.val {facet_name}} not found in {.arg data}.")
+  }
+  world_map(data, !!fill_q, ...) +
+    ggplot2::facet_wrap(ggplot2::vars(.data[[facet_name]]), ncol = ncol)
 }

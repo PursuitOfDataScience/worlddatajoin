@@ -9,7 +9,8 @@ country_groups(group = NULL)
 \arguments{
 \item{group}{One or more group names: any of \code{"EU"}, \code{"OECD"}, \code{"G7"},
 \code{"G20"}, \code{"BRICS"}, \code{"ASEAN"}, \code{"EFTA"}, \code{"Commonwealth"}, \code{"OPEC"},
-\code{"EuroZone"}, \code{"NATO"}. If \code{NULL}, the whole table is returned.}
+\code{"EuroZone"}, \code{"NATO"}, \code{"Mercosur"}, \code{"GCC"}, \code{"Nordic"}, \code{"Visegrad"}.
+If \code{NULL}, the whole table is returned.}
 }
 \value{
 A tibble of \code{group}, \code{iso3c}, \code{country}.

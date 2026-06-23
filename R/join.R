@@ -129,3 +129,50 @@ country_join <- function(x, y, by_x, by_y,
                      full = dplyr::full_join)
   join_fun(x, y, by = "iso3c", suffix = suffix)
 }
+
+#' Join many messy country tables on the ISO spine
+#'
+#' The many-table generalisation of [country_join()]: reduce-join a list of data
+#' frames that each key on country names or codes, reconciling every one to
+#' `iso3c` first.
+#'
+#' @param tables A list of data frames.
+#' @param by A single country-column name present in every table, or a character
+#'   vector giving the column for each table.
+#' @param origin countrycode origin scheme(s) for the key column(s) (default
+#'   `"country.name"`; length 1 or one per table).
+#' @param type Join type: `"full"` (default), `"left"` or `"inner"`.
+#'
+#' @return A single tibble joined on `iso3c` (clashing non-key columns get
+#'   dplyr's default `.x`/`.y` suffixes).
+#' @export
+#' @examples
+#' a <- data.frame(country = c("Czechia", "South Korea"), gdp = c(1, 2))
+#' b <- data.frame(country = c("Czech Republic", "Korea, Rep."), pop = c(10, 51))
+#' d <- data.frame(country = c("Czechia", "Korea"), area = c(79, 100))
+#' country_join_all(list(a, b, d), by = "country")
+country_join_all <- function(tables, by, origin = "country.name",
+                             type = c("full", "left", "inner")) {
+  type <- match.arg(type)
+  if (!is.list(tables) || !length(tables)) {
+    wdj_abort("{.arg tables} must be a non-empty list of data frames.")
+  }
+  n <- length(tables)
+  by <- if (length(by) == 1L) rep(by, n) else by
+  origin <- if (length(origin) == 1L) rep(origin, n) else origin
+  if (length(by) != n) {
+    wdj_abort("{.arg by} must be length 1 or length {n} (one column per table).")
+  }
+
+  prepped <- lapply(seq_len(n), function(i) {
+    tb <- tibble::as_tibble(tables[[i]])
+    if (!by[i] %in% names(tb)) {
+      wdj_abort("Column {.val {by[i]}} not found in table {i}.")
+    }
+    tb[["iso3c"]] <- wdj_to_iso3c(tb[[by[i]]], origin = origin[i])
+    tb
+  })
+  join_fun <- switch(type, left = dplyr::left_join,
+                     inner = dplyr::inner_join, full = dplyr::full_join)
+  Reduce(function(x, y) join_fun(x, y, by = "iso3c"), prepped)
+}

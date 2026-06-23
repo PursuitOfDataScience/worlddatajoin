@@ -68,7 +68,12 @@ groups <- list(
     "Saint Vincent and the Grenadines","Samoa","Seychelles","Sierra Leone",
     "Singapore","Solomon Islands","South Africa","Sri Lanka","Tanzania","Togo",
     "Tonga","Trinidad and Tobago","Tuvalu","Uganda","United Kingdom","Vanuatu",
-    "Zambia")
+    "Zambia"),
+  Mercosur = c("Argentina","Brazil","Paraguay","Uruguay","Bolivia"),
+  GCC = c("Bahrain","Kuwait","Oman","Qatar","Saudi Arabia",
+          "United Arab Emirates"),
+  Nordic = c("Denmark","Finland","Iceland","Norway","Sweden"),
+  Visegrad = c("Czechia","Hungary","Poland","Slovakia")
 )
 
 country_groups_tbl <- do.call(rbind, lapply(names(groups), function(g) {

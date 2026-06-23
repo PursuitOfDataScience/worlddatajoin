@@ -28,6 +28,8 @@ navbar:
         href: articles/sf-and-projections.html
       - text: Beyond the choropleth
         href: articles/beyond-the-choropleth.html
+      - text: countryatlas and ggsql
+        href: articles/countryatlas-and-ggsql.html
       - text: "Full introduction (formal)"
         href: articles/countryatlas.html
 
@@ -38,6 +40,7 @@ reference:
   - world_data
   - country_data
   - world_geometry
+  - locate_country
 
 - title: The join engine
   desc: The package's mission, exposed for your own data.
@@ -46,11 +49,13 @@ reference:
   - join_world
   - attach_geometry
   - country_join
+  - country_join_all
 
 - title: Diagnostics & data quality
   desc: Never lose a country silently.
   contents:
   - check_country_match
+  - repair_country_names
   - wdj_overrides
   - audit_coverage
 
@@ -68,11 +73,16 @@ reference:
   - aggregate_regions
   - rank_countries
   - complete_years
+  - growth_rate
+  - index_to
+  - share_of_world
 
 - title: Visualization
   desc: A full vocabulary of projected, area-honest maps.
   contents:
   - world_map
+  - globe_map
+  - facet_map
   - bubble_map
   - bivariate_map
   - cartogram_map
@@ -83,6 +93,12 @@ reference:
   - geom_country_labels
   - theme_world_map
   - simplify_geometry
+
+- title: Database rendering (ggsql)
+  desc: Hand curated tables to ggsql for database-side spatial rendering.
+  contents:
+  - as_ggsql_source
+  - world_query
 
 - title: Performance & caching
   contents:

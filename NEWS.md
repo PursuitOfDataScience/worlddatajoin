@@ -1,3 +1,62 @@
+# countryatlas 1.1.0
+
+A feature release that wires countryatlas into the database-rendering world via
+'ggsql', widens the map vocabulary, and fixes several correctness issues found
+by auditing 1.0.0.
+
+## New: database-side rendering with ggsql
+
+* `as_ggsql_source()` exports a curated, ISO-reconciled, WDI-joined table (with
+  `sf` geometry WKB-encoded) as a [ggsql](https://ggsql.org) source — a DuckDB
+  connection, a Parquet file, or a nanoarrow stream. countryatlas does the
+  reconciliation ggsql's static bundled world can't; ggsql does the database
+  push-down and Vega-Lite output countryatlas doesn't.
+* `world_query()` emits a `ggsql` spatial query (`VISUALISE … DRAW spatial
+  PROJECT TO … SCALE … LABEL …`) — a dependency-free string builder.
+* `interactive_map(engine = "ggsql")` registers the data and renders the map in
+  DuckDB, returning a Vega-Lite widget.
+* `ggsql`, `duckdb`, `DBI` and `nanoarrow` are optional `Suggests`. See the new
+  *countryatlas and ggsql* vignette.
+
+## New: maps, projections and helpers
+
+* `globe_map()` — an orthographic globe choropleth.
+* `facet_map()` — small-multiple choropleths (the static counterpart to
+  `animate_world()`).
+* `wdj_crs()` gains eight projections (`mercator`, `winkel_tripel`, `eckert4`,
+  `gall_peters`, `orthographic`, `azimuthal_equal_area`, `north_polar`,
+  `south_polar`); `world_map()` / `world_geometry()` accept them all.
+* `locate_country()` — point-in-polygon lookup tagging `lon`/`lat` with `iso3c`.
+* `repair_country_names()` — the "act on it" companion to
+  `check_country_match()`: auto-applies confident string-distance fixes.
+* `country_join_all()` — reduce-join many messy country tables on the ISO spine.
+* `growth_rate()`, `index_to()`, `share_of_world()` — panel analysis helpers.
+* `country_overrides()` — preferred name for `wdj_overrides()` (kept as an
+  alias) after the rename to countryatlas.
+* `country_groups_tbl` gains `Mercosur`, `GCC`, `Nordic` and `Visegrad`.
+
+## Bug fixes
+
+* `world_map(style = "quantile"/"jenks")` computed breaks over polygon
+  **vertices**, so a country's geometric complexity biased the quantiles and the
+  bins held unequal numbers of countries. Breaks are now computed on one value
+  per country.
+* `bubble_map(backend = "sf")` placed bubbles in projected metres on a degrees
+  base map (off the map). The base map and bubbles now share one projected CRS
+  via `coord_sf()`.
+* Polygon centroids returned more than one row for ten `iso3c` codes (overrides
+  map several names — Azores/Madeira → PRT — to one code), fanning out joins in
+  `bubble_map()` / `flow_map()`. Centroids are now one antimeridian-safe row per
+  country (the largest piece).
+* `geom_country_labels()` placed labels at the bounding-box midpoint over all of
+  a country's pieces, so the US / Fiji / NZ labels drifted into the wrong ocean.
+  Labels now sit on each country's largest piece.
+* `projection = "plate_carree"` built an incoherent PROJ string
+  (`+proj=longlat … +units=m`); it is now true equirectangular (`+proj=eqc`).
+* `convert_country()` only applied `wdj_overrides()` for `to = "iso3c"`, so
+  override-only entities (e.g. "Canary Islands") returned `NA` for derived
+  destinations. It now routes through the corrected `iso3c` first.
+
 # countryatlas 1.0.0
 
 A single, comprehensive release that takes the package from a one-function proof

@@ -1,6 +1,112 @@
 # Changelog
 
+## countryatlas 2.0.0
+
+A major release that wires countryatlas into the database-rendering
+world via ‘ggsql’, widens the map vocabulary, and fixes several
+correctness issues found by auditing 1.0.0. The version is bumped to
+2.0.0 because the bug fixes change the output of
+[`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md)
+(quantile binning),
+[`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md)
+/
+[`flow_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/flow_map.md)
+(de-duplicated symbols),
+[`geom_country_labels()`](https://pursuitofdatascience.github.io/countryatlas/reference/geom_country_labels.md)
+(label placement) and
+[`convert_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/convert_country.md)
+(override-only entities) — code that depended on the old behaviour may
+see different maps or values.
+
+### New: database-side rendering with ggsql
+
+- [`as_ggsql_source()`](https://pursuitofdatascience.github.io/countryatlas/reference/as_ggsql_source.md)
+  exports a curated, ISO-reconciled, WDI-joined table (with `sf`
+  geometry WKB-encoded) as a [ggsql](https://ggsql.org) source — a
+  DuckDB connection, a Parquet file, or a nanoarrow stream. countryatlas
+  does the reconciliation ggsql’s static bundled world can’t; ggsql does
+  the database push-down and Vega-Lite output countryatlas doesn’t.
+- [`world_query()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_query.md)
+  emits a `ggsql` spatial query
+  (`VISUALISE … DRAW spatial PROJECT TO … SCALE … LABEL …`) — a
+  dependency-free string builder.
+- `interactive_map(engine = "ggsql")` registers the data and renders the
+  map in DuckDB, returning a Vega-Lite widget.
+- `ggsql`, `duckdb`, `DBI` and `nanoarrow` are optional `Suggests`. See
+  the new *countryatlas and ggsql* vignette.
+
+### New: maps, projections and helpers
+
+- [`globe_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/globe_map.md)
+  — an orthographic globe choropleth, with `backend = "sf"` (smoothest
+  limb) or `backend = "polygon"` (needs only `maps` + `mapproj`).
+- [`spin_globe()`](https://pursuitofdatascience.github.io/countryatlas/reference/spin_globe.md)
+  — a rotating-globe animated GIF (one
+  [`globe_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/globe_map.md)
+  frame per central longitude, assembled with `gifski` or `magick`).
+- [`facet_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/facet_map.md)
+  — small-multiple choropleths (the static counterpart to
+  [`animate_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/animate_world.md)).
+- `wdj_crs()` gains eight projections (`mercator`, `winkel_tripel`,
+  `eckert4`, `gall_peters`, `orthographic`, `azimuthal_equal_area`,
+  `north_polar`, `south_polar`);
+  [`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md)
+  /
+  [`world_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_geometry.md)
+  accept them all.
+- [`locate_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/locate_country.md)
+  — point-in-polygon lookup tagging `lon`/`lat` with `iso3c`.
+- [`repair_country_names()`](https://pursuitofdatascience.github.io/countryatlas/reference/repair_country_names.md)
+  — the “act on it” companion to
+  [`check_country_match()`](https://pursuitofdatascience.github.io/countryatlas/reference/check_country_match.md):
+  auto-applies confident string-distance fixes.
+- [`country_join_all()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join_all.md)
+  — reduce-join many messy country tables on the ISO spine.
+- [`growth_rate()`](https://pursuitofdatascience.github.io/countryatlas/reference/growth_rate.md),
+  [`index_to()`](https://pursuitofdatascience.github.io/countryatlas/reference/index_to.md),
+  [`share_of_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/share_of_world.md)
+  — panel analysis helpers.
+- [`country_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)
+  — preferred name for
+  [`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)
+  (kept as an alias) after the rename to countryatlas.
+- `country_groups_tbl` gains `Mercosur`, `GCC`, `Nordic` and `Visegrad`.
+
+### Bug fixes
+
+- `world_map(style = "quantile"/"jenks")` computed breaks over polygon
+  **vertices**, so a country’s geometric complexity biased the quantiles
+  and the bins held unequal numbers of countries. Breaks are now
+  computed on one value per country.
+- `bubble_map(backend = "sf")` placed bubbles in projected metres on a
+  degrees base map (off the map). The base map and bubbles now share one
+  projected CRS via
+  [`coord_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html).
+- Polygon centroids returned more than one row for ten `iso3c` codes
+  (overrides map several names — Azores/Madeira → PRT — to one code),
+  fanning out joins in
+  [`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md)
+  /
+  [`flow_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/flow_map.md).
+  Centroids are now one antimeridian-safe row per country (the largest
+  piece).
+- [`geom_country_labels()`](https://pursuitofdatascience.github.io/countryatlas/reference/geom_country_labels.md)
+  placed labels at the bounding-box midpoint over all of a country’s
+  pieces, so the US / Fiji / NZ labels drifted into the wrong ocean.
+  Labels now sit on each country’s largest piece.
+- `projection = "plate_carree"` built an incoherent PROJ string
+  (`+proj=longlat … +units=m`); it is now true equirectangular
+  (`+proj=eqc`).
+- [`convert_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/convert_country.md)
+  only applied
+  [`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)
+  for `to = "iso3c"`, so override-only entities (e.g. “Canary Islands”)
+  returned `NA` for derived destinations. It now routes through the
+  corrected `iso3c` first.
+
 ## countryatlas 1.0.0
+
+CRAN release: 2026-06-24
 
 A single, comprehensive release that takes the package from a
 one-function proof of concept to a complete toolkit for joining world

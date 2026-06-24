@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">countryatlas</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,6 +23,7 @@
     <li><a class="dropdown-item" href="../articles/joining-your-own-data.html">Joining your own data</a></li>
     <li><a class="dropdown-item" href="../articles/sf-and-projections.html">Modern maps with sf &amp; projections</a></li>
     <li><a class="dropdown-item" href="../articles/beyond-the-choropleth.html">Beyond the choropleth</a></li>
+    <li><a class="dropdown-item" href="../articles/countryatlas-and-ggsql.html">countryatlas and ggsql</a></li>
     <li><a class="dropdown-item" href="../articles/countryatlas.html">Full introduction (formal)</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -41,7 +42,59 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.0.0" id="countryatlas-100">countryatlas 1.0.0<a class="anchor" aria-label="anchor" href="#countryatlas-100"></a></h2>
+<h2 class="pkg-version" data-toc-text="2.0.0" id="countryatlas-200">countryatlas 2.0.0<a class="anchor" aria-label="anchor" href="#countryatlas-200"></a></h2>
+<p>A major release that wires countryatlas into the database-rendering world via ‘ggsql’, widens the map vocabulary, and fixes several correctness issues found by auditing 1.0.0. The version is bumped to 2.0.0 because the bug fixes change the output of <code><a href="../reference/world_map.html">world_map()</a></code> (quantile binning), <code><a href="../reference/bubble_map.html">bubble_map()</a></code> / <code><a href="../reference/flow_map.html">flow_map()</a></code> (de-duplicated symbols), <code><a href="../reference/geom_country_labels.html">geom_country_labels()</a></code> (label placement) and <code><a href="../reference/convert_country.html">convert_country()</a></code> (override-only entities) — code that depended on the old behaviour may see different maps or values.</p>
+<div class="section level3">
+<h3 id="new-database-side-rendering-with-ggsql-2-0-0">New: database-side rendering with ggsql<a class="anchor" aria-label="anchor" href="#new-database-side-rendering-with-ggsql-2-0-0"></a></h3>
+<ul><li>
+<code><a href="../reference/as_ggsql_source.html">as_ggsql_source()</a></code> exports a curated, ISO-reconciled, WDI-joined table (with <code>sf</code> geometry WKB-encoded) as a <a href="https://ggsql.org" class="external-link">ggsql</a> source — a DuckDB connection, a Parquet file, or a nanoarrow stream. countryatlas does the reconciliation ggsql’s static bundled world can’t; ggsql does the database push-down and Vega-Lite output countryatlas doesn’t.</li>
+<li>
+<code><a href="../reference/world_query.html">world_query()</a></code> emits a <code>ggsql</code> spatial query (<code>VISUALISE … DRAW spatial PROJECT TO … SCALE … LABEL …</code>) — a dependency-free string builder.</li>
+<li>
+<code>interactive_map(engine = "ggsql")</code> registers the data and renders the map in DuckDB, returning a Vega-Lite widget.</li>
+<li>
+<code>ggsql</code>, <code>duckdb</code>, <code>DBI</code> and <code>nanoarrow</code> are optional <code>Suggests</code>. See the new <em>countryatlas and ggsql</em> vignette.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-maps-projections-and-helpers-2-0-0">New: maps, projections and helpers<a class="anchor" aria-label="anchor" href="#new-maps-projections-and-helpers-2-0-0"></a></h3>
+<ul><li>
+<code><a href="../reference/globe_map.html">globe_map()</a></code> — an orthographic globe choropleth, with <code>backend = "sf"</code> (smoothest limb) or <code>backend = "polygon"</code> (needs only <code>maps</code> + <code>mapproj</code>).</li>
+<li>
+<code><a href="../reference/spin_globe.html">spin_globe()</a></code> — a rotating-globe animated GIF (one <code><a href="../reference/globe_map.html">globe_map()</a></code> frame per central longitude, assembled with <code>gifski</code> or <code>magick</code>).</li>
+<li>
+<code><a href="../reference/facet_map.html">facet_map()</a></code> — small-multiple choropleths (the static counterpart to <code><a href="../reference/animate_world.html">animate_world()</a></code>).</li>
+<li>
+<code>wdj_crs()</code> gains eight projections (<code>mercator</code>, <code>winkel_tripel</code>, <code>eckert4</code>, <code>gall_peters</code>, <code>orthographic</code>, <code>azimuthal_equal_area</code>, <code>north_polar</code>, <code>south_polar</code>); <code><a href="../reference/world_map.html">world_map()</a></code> / <code><a href="../reference/world_geometry.html">world_geometry()</a></code> accept them all.</li>
+<li>
+<code><a href="../reference/locate_country.html">locate_country()</a></code> — point-in-polygon lookup tagging <code>lon</code>/<code>lat</code> with <code>iso3c</code>.</li>
+<li>
+<code><a href="../reference/repair_country_names.html">repair_country_names()</a></code> — the “act on it” companion to <code><a href="../reference/check_country_match.html">check_country_match()</a></code>: auto-applies confident string-distance fixes.</li>
+<li>
+<code><a href="../reference/country_join_all.html">country_join_all()</a></code> — reduce-join many messy country tables on the ISO spine.</li>
+<li>
+<code><a href="../reference/growth_rate.html">growth_rate()</a></code>, <code><a href="../reference/index_to.html">index_to()</a></code>, <code><a href="../reference/share_of_world.html">share_of_world()</a></code> — panel analysis helpers.</li>
+<li>
+<code><a href="../reference/wdj_overrides.html">country_overrides()</a></code> — preferred name for <code><a href="../reference/wdj_overrides.html">wdj_overrides()</a></code> (kept as an alias) after the rename to countryatlas.</li>
+<li>
+<code>country_groups_tbl</code> gains <code>Mercosur</code>, <code>GCC</code>, <code>Nordic</code> and <code>Visegrad</code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-2-0-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-2-0-0"></a></h3>
+<ul><li>
+<code>world_map(style = "quantile"/"jenks")</code> computed breaks over polygon <strong>vertices</strong>, so a country’s geometric complexity biased the quantiles and the bins held unequal numbers of countries. Breaks are now computed on one value per country.</li>
+<li>
+<code>bubble_map(backend = "sf")</code> placed bubbles in projected metres on a degrees base map (off the map). The base map and bubbles now share one projected CRS via <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">coord_sf()</a></code>.</li>
+<li>Polygon centroids returned more than one row for ten <code>iso3c</code> codes (overrides map several names — Azores/Madeira → PRT — to one code), fanning out joins in <code><a href="../reference/bubble_map.html">bubble_map()</a></code> / <code><a href="../reference/flow_map.html">flow_map()</a></code>. Centroids are now one antimeridian-safe row per country (the largest piece).</li>
+<li>
+<code><a href="../reference/geom_country_labels.html">geom_country_labels()</a></code> placed labels at the bounding-box midpoint over all of a country’s pieces, so the US / Fiji / NZ labels drifted into the wrong ocean. Labels now sit on each country’s largest piece.</li>
+<li>
+<code>projection = "plate_carree"</code> built an incoherent PROJ string (<code>+proj=longlat … +units=m</code>); it is now true equirectangular (<code>+proj=eqc</code>).</li>
+<li>
+<code><a href="../reference/convert_country.html">convert_country()</a></code> only applied <code><a href="../reference/wdj_overrides.html">wdj_overrides()</a></code> for <code>to = "iso3c"</code>, so override-only entities (e.g. “Canary Islands”) returned <code>NA</code> for derived destinations. It now routes through the corrected <code>iso3c</code> first.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.0" id="countryatlas-100">countryatlas 1.0.0<a class="anchor" aria-label="anchor" href="#countryatlas-100"></a></h2><p class="text-muted">CRAN release: 2026-06-24</p>
 <p>A single, comprehensive release that takes the package from a one-function proof of concept to a complete toolkit for joining world data to maps. The spirit is unchanged — <em>ISO codes as the universal join key, one call to a map-ready table</em> — but pushed to its full potential.</p>
 <div class="section level3">
 <h3 id="breaking-ish-changes-1-0-0">Breaking-ish changes<a class="anchor" aria-label="anchor" href="#breaking-ish-changes-1-0-0"></a></h3>

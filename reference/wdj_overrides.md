@@ -6,10 +6,16 @@ and Natural Earth) get wrong or leave without an ISO code. Earlier
 versions of the package *deleted* these regions; now they are *matched*
 instead, so they stop silently disappearing from maps.
 
+`country_overrides()` is the preferred name as of the package's rename
+to countryatlas; `wdj_overrides()` is kept as a backward-compatible
+alias.
+
 ## Usage
 
 ``` r
 wdj_overrides(extra = NULL)
+
+country_overrides(extra = NULL)
 ```
 
 ## Arguments
@@ -92,4 +98,31 @@ wdj_overrides(c(Somaliland = "SOM"))
 #>                          "VGB"                          "GBR" 
 #>            Kosovo, Republic of                     Somaliland 
 #>                          "XKX"                          "SOM" 
+country_overrides()
+#>               Ascension Island                         Azores 
+#>                          "SHN"                          "PRT" 
+#>                        Barbuda                        Bonaire 
+#>                          "ATG"                          "BES" 
+#>                 Canary Islands             Chagos Archipelago 
+#>                          "ESP"                          "IOT" 
+#>                     Grenadines                   Heard Island 
+#>                          "VCT"                          "HMD" 
+#>                         Kosovo                Madeira Islands 
+#>                          "XKX"                          "PRT" 
+#>                     Micronesia                           Saba 
+#>                          "FSM"                          "BES" 
+#>                   Saint Martin                Siachen Glacier 
+#>                          "MAF"                          "IND" 
+#>                 Sint Eustatius                 Virgin Islands 
+#>                          "BES"                          "VIR" 
+#>               Saint Barthelemy                        Curacao 
+#>                          "BLM"                          "CUW" 
+#>                        Madeira Federated States of Micronesia 
+#>                          "PRT"                          "FSM" 
+#>          Micronesia, Fed. Sts.           Virgin Islands, U.S. 
+#>                          "FSM"                          "VIR" 
+#>         British Virgin Islands                Channel Islands 
+#>                          "VGB"                          "GBR" 
+#>            Kosovo, Republic of 
+#>                          "XKX" 
 ```

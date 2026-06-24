@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="index.html">countryatlas</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +43,7 @@
     <li><a class="dropdown-item" href="articles/joining-your-own-data.html">Joining your own data</a></li>
     <li><a class="dropdown-item" href="articles/sf-and-projections.html">Modern maps with sf &amp; projections</a></li>
     <li><a class="dropdown-item" href="articles/beyond-the-choropleth.html">Beyond the choropleth</a></li>
+    <li><a class="dropdown-item" href="articles/countryatlas-and-ggsql.html">countryatlas and ggsql</a></li>
     <li><a class="dropdown-item" href="articles/countryatlas.html">Full introduction (formal)</a></li>
   </ul>
 </li>
@@ -77,6 +78,26 @@
 <strong><a href="https://github.com/vincentarelbundock/countrycode" class="external-link">countrycode</a></strong> — the Rosetta stone (ISO codes, continents, regions) that makes the join possible.</li>
 </ul>
 <p>The happy path is one call: <code>world_data(2020)</code>. Everything else is opt-in.</p>
+<div class="section level2">
+<h2 id="new-in-200">New in 2.0.0<a class="anchor" aria-label="anchor" href="#new-in-200"></a>
+</h2>
+<ul>
+<li>
+<strong>Render maps in the database</strong> with <a href="https://ggsql.org" class="external-link">ggsql</a>: <code><a href="reference/as_ggsql_source.html">as_ggsql_source()</a></code>, <code><a href="reference/world_query.html">world_query()</a></code>, <code>interactive_map(engine = "ggsql")</code>.</li>
+<li>
+<strong>More map types</strong>: an orthographic globe (<code><a href="reference/globe_map.html">globe_map()</a></code>), small multiples (<code><a href="reference/facet_map.html">facet_map()</a></code>), and 8 more projections (Winkel tripel, orthographic, Gall–Peters, …).</li>
+<li>
+<strong>Point data onto the spine</strong>: <code><a href="reference/locate_country.html">locate_country()</a></code> (point-in-polygon).</li>
+<li>
+<strong>Cleaner joins</strong>: <code><a href="reference/repair_country_names.html">repair_country_names()</a></code> auto-fixes typos; <code><a href="reference/country_join_all.html">country_join_all()</a></code> reduce-joins many tables at once.</li>
+<li>
+<strong>More analysis</strong>: <code><a href="reference/growth_rate.html">growth_rate()</a></code>, <code><a href="reference/index_to.html">index_to()</a></code>, <code><a href="reference/share_of_world.html">share_of_world()</a></code>.</li>
+<li>
+<strong>More country groups</strong>: Mercosur, GCC, Nordic, Visegrád.</li>
+<li>
+<strong>Correctness fixes</strong> that change map output (quantile binning, centroids, label placement, projections, override-only lookups) — full <a href="NEWS.html">changelog</a>.</li>
+</ul>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -200,10 +221,61 @@
 <div class="section level2">
 <h2 id="a-whole-vocabulary-of-honest-maps">A whole vocabulary of honest maps<a class="anchor" aria-label="anchor" href="#a-whole-vocabulary-of-honest-maps"></a>
 </h2>
-<p>Beyond the choropleth: proportional-symbol (<code><a href="reference/bubble_map.html">bubble_map()</a></code>), bivariate (<code><a href="reference/bivariate_map.html">bivariate_map()</a></code>), area-honest cartograms (<code><a href="reference/cartogram_map.html">cartogram_map()</a></code>), equal-area tile grids (<code><a href="reference/tile_map.html">tile_map()</a></code>), great-circle flows (<code><a href="reference/flow_map.html">flow_map()</a></code>), animation (<code><a href="reference/animate_world.html">animate_world()</a></code>) and interactivity (<code><a href="reference/interactive_map.html">interactive_map()</a></code>).</p>
+<p>Beyond the choropleth: proportional-symbol (<code><a href="reference/bubble_map.html">bubble_map()</a></code>), bivariate (<code><a href="reference/bivariate_map.html">bivariate_map()</a></code>), area-honest cartograms (<code><a href="reference/cartogram_map.html">cartogram_map()</a></code>), equal-area tile grids (<code><a href="reference/tile_map.html">tile_map()</a></code>), great-circle flows (<code><a href="reference/flow_map.html">flow_map()</a></code>), an orthographic globe (<code><a href="reference/globe_map.html">globe_map()</a></code>), small multiples (<code><a href="reference/facet_map.html">facet_map()</a></code>), animation (<code><a href="reference/animate_world.html">animate_world()</a></code>) and interactivity (<code><a href="reference/interactive_map.html">interactive_map()</a></code>).</p>
+<p>The world as a globe, not a rectangle — with the <code>"polygon"</code> backend (only <code>maps</code> + <code>mapproj</code>, no <code>sf</code>) you can draw it and even <strong>spin</strong> it:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/globe_map.html">globe_map</a></span><span class="op">(</span><span class="va">world_snapshot</span><span class="op">$</span><span class="va">countries</span>, <span class="va">continent</span>, backend <span class="op">=</span> <span class="st">"polygon"</span>,</span>
+<span>          style <span class="op">=</span> <span class="st">"categorical"</span>, lon <span class="op">=</span> <span class="fl">10</span>, lat <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-globe-1.png" width="70%"></p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># assemble a rotating GIF (one full turn; needs gifski or magick)</span></span>
+<span><span class="fu"><a href="reference/spin_globe.html">spin_globe</a></span><span class="op">(</span><span class="va">world_snapshot</span><span class="op">$</span><span class="va">countries</span>, <span class="va">continent</span>, backend <span class="op">=</span> <span class="st">"polygon"</span>,</span>
+<span>           style <span class="op">=</span> <span class="st">"categorical"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-globe-spin.gif" width="45%"></p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/bubble_map.html">bubble_map</a></span><span class="op">(</span><span class="va">world_snapshot</span><span class="op">$</span><span class="va">countries</span>, <span class="va">population</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-readme-bubble-1.png" width="100%"></p>
+</div>
+<div class="section level2">
+<h2 id="render-in-the-database-with-ggsql">Render in the database with ggsql<a class="anchor" aria-label="anchor" href="#render-in-the-database-with-ggsql"></a>
+</h2>
+<p><a href="https://ggsql.org" class="external-link">ggsql</a> draws plots <em>in the database</em> (DuckDB) and returns a Vega-Lite widget — no ggplot2 or <code>sf</code> runtime needed. countryatlas does the part ggsql’s static world can’t (ISO reconciliation, overrides, the WDI join); ggsql does the part countryatlas doesn’t (push-down + web-ready output). <code><a href="reference/world_query.html">world_query()</a></code> emits the spatial query (no dependencies):</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/world_query.html">world_query</a></span><span class="op">(</span><span class="va">gdp_per_capita</span>, palette <span class="op">=</span> <span class="st">"magma"</span>, transform <span class="op">=</span> <span class="st">"log10"</span>,</span>
+<span>            title <span class="op">=</span> <span class="st">"GDP per capita"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; VISUALISE gdp_per_capita AS fill</span></span>
+<span><span class="co">#&gt; FROM countryatlas_world</span></span>
+<span><span class="co">#&gt; DRAW spatial</span></span>
+<span><span class="co">#&gt; PROJECT TO equal_earth</span></span>
+<span><span class="co">#&gt; SCALE fill TO magma VIA log10</span></span>
+<span><span class="co">#&gt; LABEL title =&gt; 'GDP per capita'</span></span></code></pre></div>
+<p>…and <code><a href="reference/as_ggsql_source.html">as_ggsql_source()</a></code> / <code>interactive_map(engine = "ggsql")</code> register your curated table and render it in the database. See the <em>countryatlas and ggsql</em> vignette.</p>
+</div>
+<div class="section level2">
+<h2 id="more-ways-in-more-to-compute">More ways in, more to compute<a class="anchor" aria-label="anchor" href="#more-ways-in-more-to-compute"></a>
+</h2>
+<p>Get point data onto the spine, repair messy names, reduce-join many tables, and run panel analysis — all keyed on <code>iso3c</code>:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># each country's share of a world total (within year, for a panel)</span></span>
+<span><span class="fu"><a href="reference/share_of_world.html">share_of_world</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>iso3c <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA"</span>, <span class="st">"CHN"</span>, <span class="st">"IND"</span><span class="op">)</span>, co2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">15</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>, <span class="va">co2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 3 × 3</span></span>
+<span><span class="co">#&gt;   iso3c   co2 co2_share</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt; &lt;dbl&gt;     &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 USA       5     0.217</span></span>
+<span><span class="co">#&gt; 2 CHN      15     0.652</span></span>
+<span><span class="co">#&gt; 3 IND       3     0.130</span></span>
+<span></span>
+<span><span class="co"># reduce-join several messy tables on the ISO spine at once</span></span>
+<span><span class="va">t1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>country <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Czechia"</span>, <span class="st">"South Korea"</span><span class="op">)</span>, gdp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">t2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>country <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Czech Republic"</span>, <span class="st">"Korea, Rep."</span><span class="op">)</span>, pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">51</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">t3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>country <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Czechia"</span>, <span class="st">"Korea"</span><span class="op">)</span>, area <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">79</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/country_join_all.html">country_join_all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">t1</span>, <span class="va">t2</span>, <span class="va">t3</span><span class="op">)</span>, by <span class="op">=</span> <span class="st">"country"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 7</span></span>
+<span><span class="co">#&gt;   country.x     gdp iso3c country.y        pop country  area</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 Czechia         1 CZE   Czech Republic    10 Czechia    79</span></span>
+<span><span class="co">#&gt; 2 South Korea     2 KOR   Korea, Rep.       51 Korea     100</span></span></code></pre></div>
+<p><code><a href="reference/repair_country_names.html">repair_country_names()</a></code> auto-fixes typos to the closest known country, <code>locate_country(lon, lat)</code> tags coordinates with the country that contains them, and <code><a href="reference/growth_rate.html">growth_rate()</a></code> / <code><a href="reference/index_to.html">index_to()</a></code> add panel metrics.</p>
 </div>
 <div class="section level2">
 <h2 id="offline-by-default">Offline by default<a class="anchor" aria-label="anchor" href="#offline-by-default"></a>
@@ -213,12 +285,13 @@
 <div class="section level2">
 <h2 id="learn-more">Learn more<a class="anchor" aria-label="anchor" href="#learn-more"></a>
 </h2>
-<p>See the vignettes — <em>Getting started</em>, <em>Joining your own data</em>, <em>Modern maps with sf &amp; projections</em>, and <em>Beyond the choropleth</em> — and the <a href="https://pursuitofdatascience.github.io/countryatlas/">reference site</a>.</p>
+<p>See the vignettes — <em>Getting started</em>, <em>Joining your own data</em>, <em>Modern maps with sf &amp; projections</em>, <em>Beyond the choropleth</em>, and <em>countryatlas and ggsql</em> — and the <a href="https://pursuitofdatascience.github.io/countryatlas/">reference site</a>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=countryatlas" class="external-link">View on CRAN</a></li>
 <li><a href="https://github.com/PursuitOfDataScience/countryatlas/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/PursuitOfDataScience/countryatlas/issues" class="external-link">Report a bug</a></li>
 </ul>

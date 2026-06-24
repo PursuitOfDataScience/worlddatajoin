@@ -48,8 +48,12 @@ world_map(
 
 - projection:
 
-  For the `sf` backend: `"equal_earth"` (default), `"robinson"`,
-  `"mollweide"`, `"natural_earth"` or `"plate_carree"`.
+  For the `sf` backend, any of the projections in
+  [`world_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_geometry.md):
+  `"equal_earth"` (default), `"robinson"`, `"mollweide"`,
+  `"natural_earth"`, `"plate_carree"`, `"mercator"`, `"winkel_tripel"`,
+  `"eckert4"`, `"gall_peters"`, `"orthographic"`,
+  `"azimuthal_equal_area"`, `"north_polar"` or `"south_polar"`.
 
 - palette:
 

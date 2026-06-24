@@ -4,6 +4,8 @@
 
 - [Beyond the
   choropleth](https://pursuitofdatascience.github.io/countryatlas/articles/beyond-the-choropleth.md):
+- [countryatlas and
+  ggsql](https://pursuitofdatascience.github.io/countryatlas/articles/countryatlas-and-ggsql.md):
 - [countryatlas: Joining World Data to Maps on the ISO
   Spine](https://pursuitofdatascience.github.io/countryatlas/articles/countryatlas.md):
 - [Getting

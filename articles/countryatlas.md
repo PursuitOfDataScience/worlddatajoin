@@ -377,7 +377,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] dplyr_1.2.1        ggplot2_4.0.3      countryatlas_1.0.0
+#> [1] dplyr_1.2.1        ggplot2_4.0.3      countryatlas_2.0.0
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] sass_0.4.10        utf8_1.2.6         generics_0.1.4     class_7.3-23      
@@ -385,13 +385,13 @@ sessionInfo()
 #>  [9] evaluate_1.0.5     grid_4.6.0         RColorBrewer_1.1-3 fastmap_1.2.0     
 #> [13] maps_3.4.3         jsonlite_2.0.0     e1071_1.7-17       viridisLite_0.4.3 
 #> [17] scales_1.4.0       stringdist_0.9.17  textshaping_1.0.5  jquerylib_0.1.4   
-#> [21] cli_3.6.6          rlang_1.2.0        withr_3.0.2        cachem_1.1.0      
+#> [21] cli_3.6.6          rlang_1.2.0        withr_3.0.3        cachem_1.1.0      
 #> [25] yaml_2.3.12        otel_0.2.0         tools_4.6.0        parallel_4.6.0    
 #> [29] memoise_2.0.1      vctrs_0.7.3        R6_2.6.1           proxy_0.4-29      
 #> [33] lifecycle_1.0.5    classInt_0.4-11    fs_2.1.0           htmlwidgets_1.6.4 
 #> [37] ragg_1.5.2         pkgconfig_2.0.3    desc_1.4.3         pkgdown_2.2.0     
 #> [41] pillar_1.11.1      bslib_0.11.0       gtable_0.3.6       glue_1.8.1        
-#> [45] systemfonts_1.3.2  xfun_0.58          tibble_3.3.1       tidyselect_1.2.1  
+#> [45] systemfonts_1.3.2  xfun_0.59          tibble_3.3.1       tidyselect_1.2.1  
 #> [49] knitr_1.51         farver_2.1.2       htmltools_0.5.9    rmarkdown_2.31    
 #> [53] labeling_0.4.3     compiler_4.6.0     S7_0.2.2
 ```

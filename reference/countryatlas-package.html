@@ -15,7 +15,7 @@ geometry (ggplot2::map_data() or Natural Earth sf), World Bank indicators
 
     <a class="navbar-brand me-2" href="../index.html">countryatlas</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,7 @@ geometry (ggplot2::map_data() or Natural Earth sf), World Bank indicators
     <li><a class="dropdown-item" href="../articles/joining-your-own-data.html">Joining your own data</a></li>
     <li><a class="dropdown-item" href="../articles/sf-and-projections.html">Modern maps with sf &amp; projections</a></li>
     <li><a class="dropdown-item" href="../articles/beyond-the-choropleth.html">Beyond the choropleth</a></li>
+    <li><a class="dropdown-item" href="../articles/countryatlas-and-ggsql.html">countryatlas and ggsql</a></li>
     <li><a class="dropdown-item" href="../articles/countryatlas.html">Full introduction (formal)</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -66,19 +67,21 @@ geometry (<code><a href="https://ggplot2.tidyverse.org/reference/map_data.html" 
     <h2 id="core-data-assembly">Core data assembly<a class="anchor" aria-label="anchor" href="#core-data-assembly"></a></h2>
 
 
-<p><code><a href="world_data.html">world_data()</a></code>, <code><a href="country_data.html">country_data()</a></code>, <code><a href="world_geometry.html">world_geometry()</a></code>.</p>
+<p><code><a href="world_data.html">world_data()</a></code>, <code><a href="country_data.html">country_data()</a></code>, <code><a href="world_geometry.html">world_geometry()</a></code>, <code><a href="locate_country.html">locate_country()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="the-join-engine">The join engine<a class="anchor" aria-label="anchor" href="#the-join-engine"></a></h2>
 
 
-<p><code><a href="standardize_country.html">standardize_country()</a></code>, <code><a href="join_world.html">join_world()</a></code>, <code><a href="attach_geometry.html">attach_geometry()</a></code>, <code><a href="country_join.html">country_join()</a></code>.</p>
+<p><code><a href="standardize_country.html">standardize_country()</a></code>, <code><a href="join_world.html">join_world()</a></code>, <code><a href="attach_geometry.html">attach_geometry()</a></code>, <code><a href="country_join.html">country_join()</a></code>,
+<code><a href="country_join_all.html">country_join_all()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="diagnostics">Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics"></a></h2>
 
 
-<p><code><a href="check_country_match.html">check_country_match()</a></code>, <code><a href="wdj_overrides.html">wdj_overrides()</a></code>, <code><a href="audit_coverage.html">audit_coverage()</a></code>.</p>
+<p><code><a href="check_country_match.html">check_country_match()</a></code>, <code><a href="repair_country_names.html">repair_country_names()</a></code>, <code><a href="wdj_overrides.html">country_overrides()</a></code>,
+<code><a href="audit_coverage.html">audit_coverage()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="reference-data">Reference data<a class="anchor" aria-label="anchor" href="#reference-data"></a></h2>
@@ -92,15 +95,23 @@ geometry (<code><a href="https://ggplot2.tidyverse.org/reference/map_data.html" 
     <h2 id="analysis-helpers">Analysis helpers<a class="anchor" aria-label="anchor" href="#analysis-helpers"></a></h2>
 
 
-<p><code><a href="per_capita.html">per_capita()</a></code>, <code><a href="aggregate_regions.html">aggregate_regions()</a></code>, <code><a href="rank_countries.html">rank_countries()</a></code>, <code><a href="complete_years.html">complete_years()</a></code>.</p>
+<p><code><a href="per_capita.html">per_capita()</a></code>, <code><a href="aggregate_regions.html">aggregate_regions()</a></code>, <code><a href="rank_countries.html">rank_countries()</a></code>, <code><a href="complete_years.html">complete_years()</a></code>,
+<code><a href="growth_rate.html">growth_rate()</a></code>, <code><a href="index_to.html">index_to()</a></code>, <code><a href="share_of_world.html">share_of_world()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="visualization">Visualization<a class="anchor" aria-label="anchor" href="#visualization"></a></h2>
 
 
-<p><code><a href="world_map.html">world_map()</a></code>, <code><a href="bubble_map.html">bubble_map()</a></code>, <code><a href="bivariate_map.html">bivariate_map()</a></code>, <code><a href="cartogram_map.html">cartogram_map()</a></code>,
-<code><a href="tile_map.html">tile_map()</a></code>, <code><a href="flow_map.html">flow_map()</a></code>, <code><a href="animate_world.html">animate_world()</a></code>, <code><a href="interactive_map.html">interactive_map()</a></code>,
-<code><a href="geom_country_labels.html">geom_country_labels()</a></code>, <code><a href="theme_world_map.html">theme_world_map()</a></code>.</p>
+<p><code><a href="world_map.html">world_map()</a></code>, <code><a href="globe_map.html">globe_map()</a></code>, <code><a href="spin_globe.html">spin_globe()</a></code>, <code><a href="facet_map.html">facet_map()</a></code>, <code><a href="bubble_map.html">bubble_map()</a></code>,
+<code><a href="bivariate_map.html">bivariate_map()</a></code>, <code><a href="cartogram_map.html">cartogram_map()</a></code>, <code><a href="tile_map.html">tile_map()</a></code>, <code><a href="flow_map.html">flow_map()</a></code>,
+<code><a href="animate_world.html">animate_world()</a></code>, <code><a href="interactive_map.html">interactive_map()</a></code>, <code><a href="geom_country_labels.html">geom_country_labels()</a></code>,
+<code><a href="theme_world_map.html">theme_world_map()</a></code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="database-rendering-ggsql-">Database rendering (ggsql)<a class="anchor" aria-label="anchor" href="#database-rendering-ggsql-"></a></h2>
+
+
+<p><code><a href="as_ggsql_source.html">as_ggsql_source()</a></code>, <code><a href="world_query.html">world_query()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -112,7 +123,8 @@ geometry (<code><a href="https://ggplot2.tidyverse.org/reference/map_data.html" 
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
     <p><strong>Maintainer</strong>: Youzhi Yu <a href="mailto:yuyouzhi666@icloud.com">yuyouzhi666@icloud.com</a></p>
-    </div>
+<p>Authors:</p><ul><li><p>Youzhi Yu <a href="mailto:yuyouzhi666@icloud.com">yuyouzhi666@icloud.com</a></p></li>
+</ul></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

@@ -23,9 +23,45 @@ world_data(2020, c(gdp = "NY.GDP.PCAP.KD"), geometry = "sf") |>
 [`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md)
 auto-detects the `sf` backend and applies the projection through
 [`ggplot2::coord_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html).
-Available projections include `"equal_earth"` (the default — equal-area
-and good-looking), `"robinson"`, `"mollweide"`, `"natural_earth"` and
-`"plate_carree"`.
+Available projections are `"equal_earth"` (the default — equal-area and
+good-looking), `"robinson"`, `"mollweide"`, `"natural_earth"`,
+`"plate_carree"`, `"mercator"`, `"winkel_tripel"`, `"eckert4"`,
+`"gall_peters"`, `"orthographic"`, `"azimuthal_equal_area"`,
+`"north_polar"` and `"south_polar"`.
+
+## The world as a globe
+
+[`globe_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/globe_map.md)
+draws an orthographic globe centred on `lon`/`lat`. The default `"sf"`
+backend gives the cleanest limb; the `"polygon"` backend below needs
+only `maps` + `mapproj` (no `sf`):
+
+``` r
+
+globe_map(world_snapshot$countries, continent, backend = "polygon",
+          style = "categorical", lon = 10, lat = 20)
+```
+
+![](sf-and-projections_files/figure-html/globe-1.png)
+
+``` r
+
+# With the sf backend (smoother limb, real great circles):
+world_data(2020, geometry = "sf") |>
+  globe_map(gdp_per_capita, lon = 10, lat = 30)
+```
+
+[`spin_globe()`](https://pursuitofdatascience.github.io/countryatlas/reference/spin_globe.md)
+turns that into a rotating animation — one
+[`globe_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/globe_map.md)
+frame per central longitude, assembled into a looping GIF with `gifski`
+(or `magick`):
+
+``` r
+
+spin_globe(world_snapshot$countries, continent, backend = "polygon",
+           style = "categorical", n_frames = 60)
+```
 
 ## Just the canvas
 
@@ -43,7 +79,7 @@ ggplot(africa) +
   theme_world_map()
 ```
 
-![](sf-and-projections_files/figure-html/unnamed-chunk-4-1.png)
+![](sf-and-projections_files/figure-html/unnamed-chunk-6-1.png)
 
 ## Recentring and the antimeridian
 

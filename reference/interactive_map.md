@@ -10,7 +10,7 @@ interactive_map(
   data,
   fill,
   tooltip = NULL,
-  engine = c("plotly", "ggiraph", "leaflet"),
+  engine = c("plotly", "ggiraph", "leaflet", "ggsql"),
   ...
 )
 ```
@@ -31,13 +31,16 @@ interactive_map(
 
 - engine:
 
-  `"plotly"` (default), `"ggiraph"` or `"leaflet"`.
+  `"plotly"` (default), `"ggiraph"`, `"leaflet"` or `"ggsql"`
+  (database-side rendering to a Vega-Lite widget; needs an `sf` frame).
 
 - ...:
 
   Passed to
   [`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md)
-  for the plotly/ggiraph engines.
+  for the plotly/ggiraph engines, or to
+  [`world_query()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_query.md)
+  for the `"ggsql"` engine.
 
 ## Value
 
@@ -48,5 +51,7 @@ An interactive widget.
 ``` r
 if (FALSE) { # \dontrun{
 world_data(2020) |> interactive_map(gdp_per_capita)
+world_data(2020, geometry = "sf") |>
+  interactive_map(gdp_per_capita, engine = "ggsql", transform = "log10")
 } # }
 ```

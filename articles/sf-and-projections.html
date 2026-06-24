@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">countryatlas</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,7 @@
     <li><a class="dropdown-item" href="../articles/joining-your-own-data.html">Joining your own data</a></li>
     <li><a class="dropdown-item" href="../articles/sf-and-projections.html">Modern maps with sf &amp; projections</a></li>
     <li><a class="dropdown-item" href="../articles/beyond-the-choropleth.html">Beyond the choropleth</a></li>
+    <li><a class="dropdown-item" href="../articles/countryatlas-and-ggsql.html">countryatlas and ggsql</a></li>
     <li><a class="dropdown-item" href="../articles/countryatlas.html">Full introduction (formal)</a></li>
   </ul>
 </li>
@@ -86,10 +87,36 @@ These features require the optional <code>sf</code> and
 <span>            title <span class="op">=</span> <span class="st">"GDP per capita (Equal Earth projection)"</span><span class="op">)</span></span></code></pre></div>
 <p><code><a href="../reference/world_map.html">world_map()</a></code> auto-detects the <code>sf</code> backend and
 applies the projection through <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">ggplot2::coord_sf()</a></code>.
-Available projections include <code>"equal_earth"</code> (the default —
+Available projections are <code>"equal_earth"</code> (the default —
 equal-area and good-looking), <code>"robinson"</code>,
-<code>"mollweide"</code>, <code>"natural_earth"</code> and
-<code>"plate_carree"</code>.</p>
+<code>"mollweide"</code>, <code>"natural_earth"</code>,
+<code>"plate_carree"</code>, <code>"mercator"</code>,
+<code>"winkel_tripel"</code>, <code>"eckert4"</code>,
+<code>"gall_peters"</code>, <code>"orthographic"</code>,
+<code>"azimuthal_equal_area"</code>, <code>"north_polar"</code> and
+<code>"south_polar"</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="the-world-as-a-globe">The world as a globe<a class="anchor" aria-label="anchor" href="#the-world-as-a-globe"></a>
+</h2>
+<p><code><a href="../reference/globe_map.html">globe_map()</a></code> draws an orthographic globe centred on
+<code>lon</code>/<code>lat</code>. The default <code>"sf"</code> backend
+gives the cleanest limb; the <code>"polygon"</code> backend below needs
+only <code>maps</code> + <code>mapproj</code> (no <code>sf</code>):</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/globe_map.html">globe_map</a></span><span class="op">(</span><span class="va">world_snapshot</span><span class="op">$</span><span class="va">countries</span>, <span class="va">continent</span>, backend <span class="op">=</span> <span class="st">"polygon"</span>,</span>
+<span>          style <span class="op">=</span> <span class="st">"categorical"</span>, lon <span class="op">=</span> <span class="fl">10</span>, lat <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></code></pre></div>
+<p><img src="sf-and-projections_files/figure-html/globe-1.png" class="r-plt" alt="" width="528" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># With the sf backend (smoother limb, real great circles):</span></span>
+<span><span class="fu"><a href="../reference/world_data.html">world_data</a></span><span class="op">(</span><span class="fl">2020</span>, geometry <span class="op">=</span> <span class="st">"sf"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/globe_map.html">globe_map</a></span><span class="op">(</span><span class="va">gdp_per_capita</span>, lon <span class="op">=</span> <span class="fl">10</span>, lat <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="../reference/spin_globe.html">spin_globe()</a></code> turns that into a rotating animation — one
+<code><a href="../reference/globe_map.html">globe_map()</a></code> frame per central longitude, assembled into a
+looping GIF with <code>gifski</code> (or <code>magick</code>):</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/spin_globe.html">spin_globe</a></span><span class="op">(</span><span class="va">world_snapshot</span><span class="op">$</span><span class="va">countries</span>, <span class="va">continent</span>, backend <span class="op">=</span> <span class="st">"polygon"</span>,</span>
+<span>           style <span class="op">=</span> <span class="st">"categorical"</span>, n_frames <span class="op">=</span> <span class="fl">60</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="just-the-canvas">Just the canvas<a class="anchor" aria-label="anchor" href="#just-the-canvas"></a>
@@ -98,13 +125,13 @@ equal-area and good-looking), <code>"robinson"</code>,
 antimeridian-safe geometry without any data — country polygons,
 label-ready centroids, coastlines, a graticule or an ocean
 rectangle:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">africa</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/world_geometry.html">world_geometry</a></span><span class="op">(</span><span class="st">"countries"</span>, geometry <span class="op">=</span> <span class="st">"sf"</span>, region <span class="op">=</span> <span class="st">"Africa"</span>,</span>
 <span>                         projection <span class="op">=</span> <span class="st">"equal_earth"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">africa</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"grey85"</span>, colour <span class="op">=</span> <span class="st">"grey40"</span>, linewidth <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_world_map.html">theme_world_map</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="sf-and-projections_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<p><img src="sf-and-projections_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
 <h2 id="recentring-and-the-antimeridian">Recentring and the antimeridian<a class="anchor" aria-label="anchor" href="#recentring-and-the-antimeridian"></a>
@@ -112,7 +139,7 @@ rectangle:</p>
 <p>A Pacific-centred world is one argument away; the <code>sf</code>
 pipeline runs <code><a href="https://r-spatial.github.io/sf/reference/st_break_antimeridian.html" class="external-link">sf::st_break_antimeridian()</a></code> before
 projecting, so nothing streaks across the frame:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/world_geometry.html">world_geometry</a></span><span class="op">(</span><span class="st">"countries"</span>, geometry <span class="op">=</span> <span class="st">"sf"</span>, recenter <span class="op">=</span> <span class="fl">150</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -130,7 +157,7 @@ for it.</p>
 <p>High-resolution geometry can be thinned for fast plotting with
 <code><a href="../reference/simplify_geometry.html">simplify_geometry()</a></code> (which uses <code>rmapshaper</code>
 when available).</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/world_geometry.html">world_geometry</a></span><span class="op">(</span>geometry <span class="op">=</span> <span class="st">"sf"</span>, scale <span class="op">=</span> <span class="st">"large"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/simplify_geometry.html">simplify_geometry</a></span><span class="op">(</span>keep <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></code></pre></div>
 </div>

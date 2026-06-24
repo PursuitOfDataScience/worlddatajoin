@@ -11,6 +11,8 @@ geometry.
   : Lightweight one-row-per-country table
 - [`world_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_geometry.md)
   : Geometry without the data
+- [`locate_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/locate_country.md)
+  : Tag coordinates with the country that contains them
 
 ## The join engine
 
@@ -24,6 +26,8 @@ The package’s mission, exposed for your own data.
   : Attach geometry to a country-level table
 - [`country_join()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join.md)
   : Reconcile and join two messy country tables
+- [`country_join_all()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join_all.md)
+  : Join many messy country tables on the ISO spine
 
 ## Diagnostics & data quality
 
@@ -31,7 +35,10 @@ Never lose a country silently.
 
 - [`check_country_match()`](https://pursuitofdatascience.github.io/countryatlas/reference/check_country_match.md)
   : Pre-flight country-match report
+- [`repair_country_names()`](https://pursuitofdatascience.github.io/countryatlas/reference/repair_country_names.md)
+  : Auto-repair country names to their closest known match
 - [`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)
+  [`country_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)
   : Curated country-name overrides (replaces the silent drop-list)
 - [`audit_coverage()`](https://pursuitofdatascience.github.io/countryatlas/reference/audit_coverage.md)
   : Coverage / missingness audit
@@ -59,6 +66,12 @@ Never lose a country silently.
   : Add rank, percentile and z-score
 - [`complete_years()`](https://pursuitofdatascience.github.io/countryatlas/reference/complete_years.md)
   : Fill or interpolate panel gaps
+- [`growth_rate()`](https://pursuitofdatascience.github.io/countryatlas/reference/growth_rate.md)
+  : Year-on-year (or compound) growth rate
+- [`index_to()`](https://pursuitofdatascience.github.io/countryatlas/reference/index_to.md)
+  : Rebase a series to an index (base year = 100)
+- [`share_of_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/share_of_world.md)
+  : Each country's share of the world total
 
 ## Visualization
 
@@ -66,6 +79,12 @@ A full vocabulary of projected, area-honest maps.
 
 - [`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md)
   : One-line choropleth, several honest styles
+- [`globe_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/globe_map.md)
+  : Orthographic globe choropleth
+- [`spin_globe()`](https://pursuitofdatascience.github.io/countryatlas/reference/spin_globe.md)
+  : Spin the globe
+- [`facet_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/facet_map.md)
+  : Small-multiple choropleths
 - [`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md)
   : Proportional-symbol (bubble) map
 - [`bivariate_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bivariate_map.md)
@@ -86,6 +105,15 @@ A full vocabulary of projected, area-honest maps.
   : A clean theme for world maps
 - [`simplify_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/simplify_geometry.md)
   : Simplify (thin) geometry for faster plotting
+
+## Database rendering (ggsql)
+
+Hand curated tables to ggsql for database-side spatial rendering.
+
+- [`as_ggsql_source()`](https://pursuitofdatascience.github.io/countryatlas/reference/as_ggsql_source.md)
+  : Export a countryatlas table as a ggsql source
+- [`world_query()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_query.md)
+  : Emit a ggsql spatial query for a country map
 
 ## Performance & caching
 

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">countryatlas</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,6 +23,7 @@
     <li><a class="dropdown-item" href="../articles/joining-your-own-data.html">Joining your own data</a></li>
     <li><a class="dropdown-item" href="../articles/sf-and-projections.html">Modern maps with sf &amp; projections</a></li>
     <li><a class="dropdown-item" href="../articles/beyond-the-choropleth.html">Beyond the choropleth</a></li>
+    <li><a class="dropdown-item" href="../articles/countryatlas-and-ggsql.html">countryatlas and ggsql</a></li>
     <li><a class="dropdown-item" href="../articles/countryatlas.html">Full introduction (formal)</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -69,6 +70,13 @@
 
         </dt>
         <dd>Geometry without the data</dd>
+
+        <dt>
+
+          <code><a href="locate_country.html">locate_country()</a></code>
+
+        </dt>
+        <dd>Tag coordinates with the country that contains them</dd>
       </dl></div><div class="section level2">
       <h2 id="the-join-engine">The join engine<a class="anchor" aria-label="anchor" href="#the-join-engine"></a></h2>
 
@@ -106,6 +114,13 @@
 
         </dt>
         <dd>Reconcile and join two messy country tables</dd>
+
+        <dt>
+
+          <code><a href="country_join_all.html">country_join_all()</a></code>
+
+        </dt>
+        <dd>Join many messy country tables on the ISO spine</dd>
       </dl></div><div class="section level2">
       <h2 id="diagnostics-data-quality">Diagnostics &amp; data quality<a class="anchor" aria-label="anchor" href="#diagnostics-data-quality"></a></h2>
 
@@ -125,7 +140,14 @@
 
         <dt>
 
-          <code><a href="wdj_overrides.html">wdj_overrides()</a></code>
+          <code><a href="repair_country_names.html">repair_country_names()</a></code>
+
+        </dt>
+        <dd>Auto-repair country names to their closest known match</dd>
+
+        <dt>
+
+          <code><a href="wdj_overrides.html">wdj_overrides()</a></code> <code><a href="wdj_overrides.html">country_overrides()</a></code>
 
         </dt>
         <dd>Curated country-name overrides (replaces the silent drop-list)</dd>
@@ -217,6 +239,27 @@
 
         </dt>
         <dd>Fill or interpolate panel gaps</dd>
+
+        <dt>
+
+          <code><a href="growth_rate.html">growth_rate()</a></code>
+
+        </dt>
+        <dd>Year-on-year (or compound) growth rate</dd>
+
+        <dt>
+
+          <code><a href="index_to.html">index_to()</a></code>
+
+        </dt>
+        <dd>Rebase a series to an index (base year = 100)</dd>
+
+        <dt>
+
+          <code><a href="share_of_world.html">share_of_world()</a></code>
+
+        </dt>
+        <dd>Each country's share of the world total</dd>
       </dl></div><div class="section level2">
       <h2 id="visualization">Visualization<a class="anchor" aria-label="anchor" href="#visualization"></a></h2>
 
@@ -233,6 +276,27 @@
 
         </dt>
         <dd>One-line choropleth, several honest styles</dd>
+
+        <dt>
+
+          <code><a href="globe_map.html">globe_map()</a></code>
+
+        </dt>
+        <dd>Orthographic globe choropleth</dd>
+
+        <dt>
+
+          <code><a href="spin_globe.html">spin_globe()</a></code>
+
+        </dt>
+        <dd>Spin the globe</dd>
+
+        <dt>
+
+          <code><a href="facet_map.html">facet_map()</a></code>
+
+        </dt>
+        <dd>Small-multiple choropleths</dd>
 
         <dt>
 
@@ -303,6 +367,29 @@
 
         </dt>
         <dd>Simplify (thin) geometry for faster plotting</dd>
+      </dl></div><div class="section level2">
+      <h2 id="database-rendering-ggsql-">Database rendering (ggsql)<a class="anchor" aria-label="anchor" href="#database-rendering-ggsql-"></a></h2>
+
+      <div class="section-desc"><p>Hand curated tables to ggsql for database-side spatial rendering.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="as_ggsql_source.html">as_ggsql_source()</a></code>
+
+        </dt>
+        <dd>Export a countryatlas table as a ggsql source</dd>
+
+        <dt>
+
+          <code><a href="world_query.html">world_query()</a></code>
+
+        </dt>
+        <dd>Emit a ggsql spatial query for a country map</dd>
       </dl></div><div class="section level2">
       <h2 id="performance-caching">Performance &amp; caching<a class="anchor" aria-label="anchor" href="#performance-caching"></a></h2>
 

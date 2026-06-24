@@ -9,7 +9,7 @@ R Markdown / Quarto. Engines are all optional Suggests."><meta property="og:imag
 
     <a class="navbar-brand me-2" href="../index.html">countryatlas</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,6 +25,7 @@ R Markdown / Quarto. Engines are all optional Suggests."><meta property="og:imag
     <li><a class="dropdown-item" href="../articles/joining-your-own-data.html">Joining your own data</a></li>
     <li><a class="dropdown-item" href="../articles/sf-and-projections.html">Modern maps with sf &amp; projections</a></li>
     <li><a class="dropdown-item" href="../articles/beyond-the-choropleth.html">Beyond the choropleth</a></li>
+    <li><a class="dropdown-item" href="../articles/countryatlas-and-ggsql.html">countryatlas and ggsql</a></li>
     <li><a class="dropdown-item" href="../articles/countryatlas.html">Full introduction (formal)</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -54,7 +55,7 @@ R Markdown / Quarto. Engines are all optional <code>Suggests</code>.</p>
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">fill</span>,</span>
 <span>  tooltip <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  engine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"plotly"</span>, <span class="st">"ggiraph"</span>, <span class="st">"leaflet"</span><span class="op">)</span>,</span>
+<span>  engine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"plotly"</span>, <span class="st">"ggiraph"</span>, <span class="st">"leaflet"</span>, <span class="st">"ggsql"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -76,11 +77,13 @@ R Markdown / Quarto. Engines are all optional <code>Suggests</code>.</p>
 
 
 <dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
-<dd><p><code>"plotly"</code> (default), <code>"ggiraph"</code> or <code>"leaflet"</code>.</p></dd>
+<dd><p><code>"plotly"</code> (default), <code>"ggiraph"</code>, <code>"leaflet"</code> or <code>"ggsql"</code>
+(database-side rendering to a Vega-Lite widget; needs an <code>sf</code> frame).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Passed to <code><a href="world_map.html">world_map()</a></code> for the plotly/ggiraph engines.</p></dd>
+<dd><p>Passed to <code><a href="world_map.html">world_map()</a></code> for the plotly/ggiraph engines, or to
+<code><a href="world_query.html">world_query()</a></code> for the <code>"ggsql"</code> engine.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -92,6 +95,8 @@ R Markdown / Quarto. Engines are all optional <code>Suggests</code>.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="world_data.html">world_data</a></span><span class="op">(</span><span class="fl">2020</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">interactive_map</span><span class="op">(</span><span class="va">gdp_per_capita</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="world_data.html">world_data</a></span><span class="op">(</span><span class="fl">2020</span>, geometry <span class="op">=</span> <span class="st">"sf"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">interactive_map</span><span class="op">(</span><span class="va">gdp_per_capita</span>, engine <span class="op">=</span> <span class="st">"ggsql"</span>, transform <span class="op">=</span> <span class="st">"log10"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

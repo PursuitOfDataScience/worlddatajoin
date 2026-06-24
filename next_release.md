@@ -1,778 +1,530 @@
-# countryatlas — Next Release Plan
+# countryatlas — next release planning (target: 2.0.0)
 
-> **Status:** design document for the next release **Current version:**
-> 0.1.0 (experimental) **Next version:** 1.0.0 — a single, comprehensive
-> release that takes the package from a one-function proof of concept to
-> a complete toolkit for joining world data to maps.
+Working document. Scope: (A) integrate **ggsql 0.4.1**, (B) brainstorm
+new features/functions, (C) **fix bugs found in 1.0.0** (the important
+part), and (D) housekeeping/deprecations.
+
+## Status (branch `v2.0.0-dev`, now merged to `main`)
+
+The `v2.0.0-dev` branch has been **merged into `main`** (fast-forward);
+1.0.0 is the version currently on CRAN, and 2.0.0 is the release being
+prepared next.
+
+**Implemented in 2.0.0** (see `NEWS.md`): ggsql bridge
+([`as_ggsql_source()`](https://pursuitofdatascience.github.io/countryatlas/reference/as_ggsql_source.md),
+[`world_query()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_query.md),
+`interactive_map(engine = "ggsql")`); all eight bug fixes in §3;
+projection expansion +
+[`globe_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/globe_map.md) +
+[`spin_globe()`](https://pursuitofdatascience.github.io/countryatlas/reference/spin_globe.md) +
+[`facet_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/facet_map.md);
+[`locate_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/locate_country.md),
+[`repair_country_names()`](https://pursuitofdatascience.github.io/countryatlas/reference/repair_country_names.md),
+[`country_join_all()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join_all.md),
+[`growth_rate()`](https://pursuitofdatascience.github.io/countryatlas/reference/growth_rate.md),
+[`index_to()`](https://pursuitofdatascience.github.io/countryatlas/reference/index_to.md),
+[`share_of_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/share_of_world.md),
+[`country_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md);
+and four new country groups (Mercosur, GCC, Nordic, Visegrád).
+Non-plotting tests pass; the viridis-based plotting tests run on CI (a
+`viridisLite` illegal-instruction crash on the dev node prevents running
+them locally).
+
+**Deferred to a later cycle** (need live-API testing or data curation,
+so not shipped blind): external data-source adapters — §2.1 (OWID /
+Eurostat / V-Dem); the historical / dissolved-entity crosswalk — §2.2;
+subnational `admin1` geometry — §2.3; the disputed-territory
+de-facto/de-jure policy — §2.6; and a `world_snapshot` year refresh
+(needs the World Bank API at build time).
+
+**Still open for 2.0.0** — additional features worth building *before*
+this release ships are collected in the new **§2.7** below; the rest of
+this document is the original plan, kept for reference.
 
 ------------------------------------------------------------------------
 
-## 1. The spirit we are expanding
+## 0. Carryover TODO (original note)
 
-`countryatlas` exists to kill one specific, recurring source of pain:
-**country names never line up across data sources.** `"US"`, `"U.S."`,
-`"United States"`, `"United States of America"`, and `"America"` are the
-same country, but a naïve `left_join()` treats them as five. The
-package’s answer is to make **ISO codes the universal join key** and to
-hand the user a single, ready-to-map tibble that already stitches
-together three otherwise-disjoint worlds:
-
-- **`ggplot2::map_data("world")`** — the geometry (where countries are),
-- **`WDI`** — World Bank indicators (what is true about them),
-- **`countrycode`** — the Rosetta Stone (ISO codes, continents, regions)
-  that makes the join possible at all.
-
-Today this is one function, `world_data(year)`. Everything below stays
-faithful to that mission — **reduce join friction, enrich the map, keep
-the happy path one call** — and pushes it as far as it can reasonably
-go: any data source on the ISO spine, any kind of map, with the rough
-edges (missing matches, bad projections, distorted areas, slow API
-calls) handled *for* the user instead of *by* the user.
-
-The design rule for every addition: *if it doesn’t make it easier to get
-country data onto a map (or make that map honest), it doesn’t belong
-here.*
+For the next release, we need to think about adding ggsql 0.4.1 to the
+package. For details, refer to
+<https://opensource.posit.co/blog/2026-06-23_ggsql_0_4_1/>.
 
 ------------------------------------------------------------------------
 
-## 2. Where the package stands today (honest assessment)
+## 1. Headline theme — make countryatlas the *data layer* for ggsql
 
+### What ggsql is (so the integration is grounded)
+
+`ggsql` is a CRAN package from posit-dev: *“A grammar of graphics for
+SQL.”* It lets you describe a plot **inside a SQL query** (clauses
+`VISUALISE` / `FROM` / `DRAW` / `SCALE` / `PROJECT` / `FACET` / `LABEL`
+/ `PLACE` / `MAPPING`, `SETTING`), and executes the whole pipeline as
+optimised SQL on a backend (DuckDB / SQLite today), returning a
+**Vega-Lite** widget. The R package is a thin binding over a Rust
+engine; it ships a **knitr engine** (```` ```{ggsql} ```` chunks) and
+Shiny integration, takes data in via **nanoarrow** (so it can read an R
+data frame or a live DBI/DuckDB connection), and has **no ggplot2/sf
+runtime dependency**. Imports: cli, htmltools, htmlwidgets, jsonlite,
+knitr, nanoarrow, R6, rlang, yaml; Suggests: V8, rsvg, quarto, shiny.
+
+### Why 0.4.1 specifically matters to us
+
+0.4.1 adds **spatial plotting** and it overlaps our entire reason for
+being:
+
+- `DRAW spatial` — a spatial layer that maps a **`geometry` aesthetic**
+  encoded as **WKB** (Well-Known Binary); auto-detects the geometry
+  column, or `MAPPING <col> AS geometry`.
+- a bundled **`ggsql:world`** dataset — Natural Earth 110m polygons +
+  country names + ISO codes + continent/subregion + income group +
+  population/GDP.
+- **`PROJECT TO <projection>`** — ~21 named projections (orthographic,
+  etc.).
+- in-layer **aggregation** (compute per-bin/per-group in SQL).
+
+`ggsql:world` is, essentially, a static, un-curated version of what
 [`world_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_data.md)
-does something genuinely useful, but it has hard limits and a few real
-bugs. The release fixes these rather than building on top of them.
+produces. That is the integration thesis: **countryatlas already does
+the hard part ggsql’s static table can’t — the ISO-spine reconciliation,
+the
+[`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)
+repairs, the WDI join, the curated reference data — and ggsql does the
+part we don’t — database push-down, no-runtime, web-ready Vega-Lite
+output.** Wire them together rather than compete.
 
-### 2.1 Functional limitations
+### Proposed surface (all gated behind `Suggests`)
 
-| Limitation | Impact |
-|----|----|
-| **One hardcoded indicator** (`NY.GDP.PCAP.KD`) | Can’t pull population, life expectancy, CO₂, etc. without leaving the package and hand-joining — the exact pain it set out to remove. |
-| **One year at a time** | No panel / time series, so no animation or faceting over time, though the data and [`countrycode::codelist_panel`](https://vincentarelbundock.github.io/countrycode/man/codelist_panel.html) make it natural. |
-| **One geometry backend** (`map_data("world")`) | Legacy `maps` polygons: low resolution, dated borders, no native ISO codes, antimeridian split (Russia/Fiji/NZ wrap around the frame). No projection — raw `long`/`lat` is an unprojected plate carrée that badly distorts area. |
-| **~99k polygon rows even for analysis** | WDI values duplicated across every polygon vertex; no lightweight one-row-per-country table to join, model, or rank on. |
-| **Silently drops 16 regions** | Kosovo, Micronesia, the Virgin Islands, Saint Martin, Bonaire/Saba/Sint Eustatius, the Canary Islands, etc. are filtered out rather than matched — they vanish from maps with no warning, though most match with a one-line override. |
-| **No join helper for the user’s own data** | The headline use case — “I have a frame keyed on messy names, get it on a map” — must still be done by hand. The standardization machinery exists internally but is never exposed. |
-| **No diagnostics** | A failed match becomes a silent `NA` and an empty patch on the map, with no report of what failed or why. |
-| **Repeated plotting boilerplate** | The README writes `ggplot(aes(long, lat, group, fill)) + geom_polygon() + theme_minimal()` three times. A choropleth helper is begging to exist. |
+1.  **`as_ggsql_source(data, con = NULL, name = "countryatlas_world", format = c("duckdb","parquet","arrow"))`**
+    Export a countryatlas spatial table (override-corrected geometry +
+    WDI indicators + ISO spine) as a ggsql-ready source: register an
+    **Arrow**/ nanoarrow table, write a **DuckDB** table, or a
+    **Parquet** file, with geometry **WKB-encoded**
+    (`sf::st_as_binary(x, EWKB = FALSE)`). This is the killer combo —
+    users run `DRAW spatial` against *their* curated, WDI-joined data
+    instead of the static `ggsql:world`.
 
-### 2.2 Bugs / smells to fix in passing
+2.  **`world_query(fill, ..., source = "countryatlas_world", style, projection, title)`**
+    A **query emitter**: take roughly the same arguments as
+    [`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md)
+    and return a ggsql query string, e.g.
 
-- **`gdp_per_capita_2015` is a misnomer.** It’s named for the
-  indicator’s base year (constant 2015 US\$), but holds the *requested*
-  year’s value — `world_data(1990)` returns a column called
-  `gdp_per_capita_2015` containing 1990 figures.
-- **`extra = TRUE`** triggers a large WDI download (region, capital,
-  lat/long, lending) that is then mostly `select()`ed away.
-- **No input validation** on `year`.
-- **Blanket `@import` of five packages** pollutes the namespace;
-  `@importFrom` is correct.
-- **`LazyData: true` with no `data/`** → `R CMD check` NOTE.
-- **`\dontrun{}` examples** never run, so they aren’t tested and can
-  rot.
-- **No tests, vignette, or pkgdown site.**
-- **Stale CI** (`r-lib/actions/*@v1`, `actions/checkout@v2`) and old
-  `RoxygenNote 7.1.2`.
+        VISUALISE gdp_per_capita AS fill
+        FROM countryatlas_world
+        DRAW spatial
+        PROJECT TO equal_earth
+        SCALE fill TO viridis VIA log10
+        LABEL title => 'GDP per capita, 2022'
 
-------------------------------------------------------------------------
+    Pure string builder (zero deps); pairs with (3) for one-call
+    rendering.
 
-## 3. Design principles
+3.  **`ggsql_map(data, fill, ..., render = TRUE)`** (or
+    `world_map(..., engine = "ggsql")`) Convenience:
+    [`as_ggsql_source()`](https://pursuitofdatascience.github.io/countryatlas/reference/as_ggsql_source.md) +
+    [`world_query()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_query.md) +
+    hand off to
+    [`ggsql::ggsql()`](https://r.ggsql.org/reference/ggsql-package.html)
+    / the knitr engine when `render = TRUE`. Returns the Vega-Lite
+    widget. Decision to make: **separate verb vs. `engine=` arg on the
+    existing
+    [`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md)/[`interactive_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/interactive_map.md)**
+    (recommend a new `interactive_map(engine = "ggsql")` — it slots
+    beside the existing plotly/ggiraph/leaflet engines and keeps the
+    spatial-WKB path in one place).
 
-1.  **The happy path stays one call.** `world_data(2020)` keeps working
-    and keeps returning a map-ready tibble. New power is opt-in.
-2.  **ISO code is the spine.** Every function speaks `iso3c`/`iso2c`
-    internally and exposes it, so anything the package produces joins to
-    anything else it produces — *and* to the user’s data.
-3.  **Lose no country silently.** Dropping is replaced by
-    matching-with-overrides plus an explicit, inspectable report of
-    whatever truly can’t be matched.
-4.  **Honest maps by default.** Sensible projection, equal-area options,
-    binned scales, and area-bias remedies (cartograms) so the default
-    map doesn’t mislead.
-5.  **Lean core, rich optional.** Heavy deps (`sf`, `rnaturalearth*`,
-    `cartogram`, `leaflet`, …) live in `Suggests`, gated by
-    [`rlang::check_installed()`](https://rlang.r-lib.org/reference/is_installed.html).
-    Base install stays as light as today.
-6.  **Tidy in, tidy out.** Tibbles, pipeable verbs, predictable
-    `snake_case` columns.
-7.  **Offline-capable.** A bundled snapshot lets every example, test,
-    and vignette run without the World Bank API.
+4.  **WKB helper** — `attach_geometry(..., format = "wkb")` or a small
+    `geometry_to_wkb()` so the sf backend can emit the column ggsql
+    needs.
 
-------------------------------------------------------------------------
+5.  **Vignette + Quarto recipe** — *“countryatlas → ggsql”*: prep a
+    DuckDB table with countryatlas, chart it in a ```` ```{ggsql} ````
+    chunk; show the push-down win (only aggregates leave the warehouse).
 
-## 4. The release at a glance
+6.  **Deps**: add `ggsql`, `duckdb`, `DBI`, `nanoarrow` to **Suggests**,
+    gated by
+    [`rlang::check_installed()`](https://rlang.r-lib.org/reference/is_installed.html)
+    — consistent with the “heavy deps stay optional” philosophy already
+    in place for sf/leaflet/etc.
 
-A single 1.0.0 release organized into eight capability areas. Together
-they turn “enrich one map with one indicator for one year” into “**get
-any country data, from anywhere, onto any kind of honest map — in one or
-two calls.**”
-
-| Area | What it adds |
-|----|----|
-| **A. Core data assembly** | Generalized [`world_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_data.md); lightweight [`country_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_data.md); standalone [`world_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_geometry.md). |
-| **B. The join engine** | [`standardize_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/standardize_country.md), [`join_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/join_world.md), [`attach_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/attach_geometry.md), [`country_join()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join.md) — the package’s mission, exposed for *your* data. |
-| **C. Diagnostics & quality** | [`check_country_match()`](https://pursuitofdatascience.github.io/countryatlas/reference/check_country_match.md), [`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md), [`audit_coverage()`](https://pursuitofdatascience.github.io/countryatlas/reference/audit_coverage.md). |
-| **D. Built-in reference data** | [`convert_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/convert_country.md), [`country_codes()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_codes.md), `country_meta`, [`country_groups()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_groups.md), `common_indicators`, [`wdi_search()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdi_search.md). |
-| **E. Analysis helpers** | [`per_capita()`](https://pursuitofdatascience.github.io/countryatlas/reference/per_capita.md), [`aggregate_regions()`](https://pursuitofdatascience.github.io/countryatlas/reference/aggregate_regions.md), [`rank_countries()`](https://pursuitofdatascience.github.io/countryatlas/reference/rank_countries.md), [`complete_years()`](https://pursuitofdatascience.github.io/countryatlas/reference/complete_years.md). |
-| **F. Visualization** | [`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md) (continuous/binned/quantile/categorical), [`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md), [`bivariate_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bivariate_map.md), [`cartogram_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/cartogram_map.md), [`tile_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/tile_map.md), [`flow_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/flow_map.md), [`animate_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/animate_world.md), [`interactive_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/interactive_map.md), [`geom_country_labels()`](https://pursuitofdatascience.github.io/countryatlas/reference/geom_country_labels.md), [`theme_world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/theme_world_map.md). |
-| **G. Geometry utilities** | Projections, region/bbox subsetting, recentering & antimeridian fix, centroids, simplification. |
-| **H. Performance & offline** | Memoised + on-disk WDI cache; bundled `world_snapshot`. |
+Open question for the author: do we want ggsql as a **render engine**
+(countryatlas owns the spec, ggsql draws it) or only as an **export
+target** (we hand off a clean source and let users write their own SQL)?
+Recommend shipping the export target + query emitter first (low risk,
+high value), and the render engine as a follow-up once the ggsql spatial
+API stabilises (it’s 0.4.x / pre-1.0).
 
 ------------------------------------------------------------------------
 
-## 5. Feature catalog
+## 2. New features & functions (brainstorm, prioritised)
 
-Each item: motivation, signature(s), a short example, and the dependency
-capability it leans on.
+### 2.1 Data sources beyond WDI ★ high value
 
-### Area A — Core data assembly
+The package is built on the ISO spine but only fetches the **World
+Bank**. The spine makes adding sources cheap. Proposed pluggable
+fetchers, all returning the same `iso3c`(+`year`) tidy shape so they
+drop straight into
+[`country_join()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join.md): -
+`add_indicator(data, source = c("owid","eurostat","oecd","undata","penn"), ...)`
+or per-source `fetch_owid()`, `fetch_eurostat()`, `fetch_vdem()`. - Our
+World in Data and V-Dem are especially natural (we already expose V-Dem
+/ COW / Polity codes via
+[`convert_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/convert_country.md)).
 
-#### `world_data()` — generalized, backward-compatible
+### 2.2 Join & reconciliation ★ high value
 
-``` r
+- **`repair_country_names(x, threshold = 0.1)`** — promote
+  [`check_country_match()`](https://pursuitofdatascience.github.io/countryatlas/reference/check_country_match.md)
+  from *suggest* to *auto-apply* high-confidence string-distance fixes,
+  with a report of what it changed. The missing “act on it” half of the
+  diagnostic.
+- **Historical / dissolved entities** — a curated crosswalk so “USSR”,
+  “Yugoslavia”, “Czechoslovakia”, “Sudan (pre-2011)” resolve to
+  successor states (one→many, dated).
+  `check_country_match("Yugoslavia")` already flags this gap; ship the
+  table, e.g. `historical_codes` + `dissolve_country()`.
+- **`country_join_all(list_of_tables, by = ...)`** — reduce-join many
+  messy tables on the ISO spine in one call.
 
-world_data(
-  year,
-  indicator = c(gdp_per_capita = "NY.GDP.PCAP.KD"),  # named => clean column names
-  geometry  = c("polygon", "sf", "none"),
-  scale     = c("small", "medium", "large"),         # sf backend resolution
-  region    = NULL,                                  # subset: "Africa", "EU", bbox, iso vector
-  classify  = c("income", "continent", "region"),
-  overrides = wdj_overrides(),
-  latest    = FALSE,
-  cache     = TRUE,
-  language  = "en"
-)
-```
+### 2.3 Geometry & projections
 
-- **`indicator`** takes one or many WDI codes. A **named** vector drives
-  column naming (WDI’s own auto-rename), retiring the
-  `gdp_per_capita_2015` misnomer:
-  `c(gdp = "NY.GDP.PCAP.KD", pop = "SP.POP.TOTL")` → columns `gdp`,
-  `pop`.
-- **`year`** may be scalar (`2020`) or a range (`2000:2020`) → a panel
-  keyed on `iso3c` + `year`, reconciled against `codelist_panel` so
-  codes survive border changes.
-- **`geometry`**: `"polygon"` reproduces today’s output (default ⇒
-  backward compatible); `"sf"` returns an `sf` object via
-  [`rnaturalearth::ne_countries()`](https://docs.ropensci.org/rnaturalearth/reference/ne_countries.html)
-  for `geom_sf()` + real projections; `"none"` skips geometry.
-- **`region`** subsets to a continent/group/bounding box/ISO vector and
-  picks a sensible default projection for it.
-- **`latest`** uses WDI’s `latest` to grab the most recent non-`NA`
-  value per country.
+- **Expand the projection set** to match ggsql (~21). Current
+  `wdj_crs()` offers 5; add Winkel Tripel, Eckert IV, Gall–Peters,
+  azimuthal/**orthographic** (globe), polar. Enables a
+  [`globe_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/globe_map.md).
+  *(Also fixes the `plate_carree` bug — see §3.4.)*
+- **Subnational geometry** — `world_geometry(level = "admin1")` via
+  [`rnaturalearth::ne_states()`](https://docs.ropensci.org/rnaturalearth/reference/ne_states.html)
+  for state/province maps on the same spine.
+- **`locate_country(lon, lat)`** — point-in-polygon tagging of arbitrary
+  coordinates to `iso3c` (handy for joining point data to the map).
+- **`cache_geometry(scale)`** — pre-download/persist NE geometry
+  (parallels the existing WDI on-disk cache) so the sf backend has an
+  offline story too.
 
-``` r
+### 2.4 Visualization
 
-world_data(2020)                                   # unchanged old behavior
-world_data(2020,
-           indicator = c(life_exp = "SP.DYN.LE00.IN", co2 = "EN.ATM.CO2E.PC"),
-           geometry  = "sf", region = "Africa")
-```
+- **[`globe_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/globe_map.md)**
+  (orthographic) once the projection lands.
+- **[`facet_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/facet_map.md)**
+  — small-multiple choropleths (one panel per group/year) without
+  hand-rolling `facet_wrap()`.
+- **Hex/`statebins`-style** standalone, and
+  `cartogram_map(type = "dorling")` promoted to a first-class
+  `dorling_map()`.
+- **Palette polish** — colourblind-safe sequential/diverging presets;
+  comma/SI-formatted binned legends (binned currently shows raw breaks).
 
-#### `country_data()` — the lightweight, one-row-per-country table
+### 2.5 Analysis helpers
 
-``` r
+- [`growth_rate()`](https://pursuitofdatascience.github.io/countryatlas/reference/growth_rate.md)
+  / `cagr()`, `index_to(base_year = ..., to = 100)` (rebase a series),
+  [`share_of_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/share_of_world.md),
+  panel
+  [`lag()`](https://rdrr.io/r/stats/lag.html)/[`diff()`](https://rdrr.io/r/base/diff.html)
+  helpers.
+- `correlate_indicators()` for quick cross-indicator scatter/▢ on the
+  spine.
 
-country_data(year, indicator = NULL, latest = FALSE, panel = FALSE, cache = TRUE)
-```
+### 2.6 Reference data
 
-The analysis counterpart: **no polygons**, one tidy row per country
-(`iso3c`, `iso2c`, `country`, `continent`, `region`, `income`, requested
-indicators). What you actually want to
-`join`/`mutate`/`summarise`/`rank` on. Geometry is attached only at draw
-time
-([`attach_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/attach_geometry.md)).
+- More groups in `country_groups_tbl`: African Union, Mercosur, GCC,
+  Arab League, SADC, Nordic Council, Visegrád (V4), D-10.
+- **Point-in-time versions** of membership (current table is a single
+  snapshot as of 2024-01-01) — e.g. EU pre/post-Brexit — so panel joins
+  are honest.
+- A documented **disputed-territory policy** (Taiwan, W. Sahara,
+  Palestine, Kosovo): a `de_facto`/`de_jure` option rather than silent
+  backend defaults.
 
-#### `world_geometry()` — geometry without the data
+### 2.7 Additional features to add for 2.0.0 (new brainstorm)
 
-``` r
+Beyond §2.1–2.6, the following are fresh candidates worth building into
+the 2.0.0 release. They all hang off the existing ISO spine + sf/WDI
+plumbing, so each is self-contained. Tagged ★ high value / ◐ medium / ◦
+nice-to-have.
 
-world_geometry(
-  what       = c("countries", "centroids", "coastline", "borders", "graticule", "ocean"),
-  geometry   = c("polygon", "sf"),
-  scale      = "small",
-  region     = NULL,
-  projection = "equal_earth",
-  recenter   = NULL          # central meridian, e.g. 150 for a Pacific-centered map
-)
-```
+**More sources & richer joins** - ◐ **Currency / real-terms helpers** —
+`deflate()` (constant vs current prices via a GDP-deflator/CPI series)
+and `to_ppp()` / `to_usd()`. Country economic data is almost always
+wanted in real or PPP terms; doing it on the spine kills a whole class
+of silent unit mistakes. - ◐ **Population-weighted aggregation** — a
+`weight =` / `weighted = TRUE` path on
+[`aggregate_regions()`](https://pursuitofdatascience.github.io/countryatlas/reference/aggregate_regions.md)
+so regional means/medians weight by population or GDP instead of by
+country count. - ◦ **Multilingual country names** —
+`convert_country(to = "name_fr"/"name_es"/…)` via countrycode’s language
+tables, for localized labels and joining non-English source data.
 
-Sometimes you just want the canvas: country polygons, label-ready
-**centroids**, coastlines, internal borders, a graticule, or an ocean
-rectangle — already projected, region-subset, and antimeridian-safe. The
-building block the plotting functions sit on, exposed for power users.
+**Geometry & spatial structure** - ★ **Country adjacency / borders
+graph** — `country_borders()` returning a tidy neighbour list (and/or an
+`igraph`), with `neighbors("FRA")` and `distance_between(a, b)`. Unlocks
+contiguity analysis and “no two neighbours share a colour” map
+niceties. - ◐ **Spatial autocorrelation** — Moran’s I / LISA on the
+world spine using the adjacency above (gated `spdep` Suggests); a common
+ask for choropleth users. - ◐ **Multiple Natural Earth scales** — expose
+`scale = c("110m","50m","10m")` consistently across
+[`world_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_geometry.md)
+and the maps, persisted by `cache_geometry()`. - ◦ **Inset maps** — an
+`inset = TRUE` helper breaking out small/dense regions (Europe, the
+Caribbean, Pacific SIDS) so they’re actually legible.
 
-> *Leans on:* WDI multi/named indicators, `latest`, `codelist_panel`;
-> [`rnaturalearth::ne_countries()`](https://docs.ropensci.org/rnaturalearth/reference/ne_countries.html)
-> (scales 110m/50m/10m) + `sf`.
+**Visualization** - ★ **`dorling_map()`** — promote the Dorling
+cartogram to a first-class verb; add contiguous / non-contiguous
+cartograms with sane defaults (extends §2.4). - ★
+**`bivariate_legend()`** — finish the
+[`bivariate_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bivariate_map.md)
+story with a standalone legend, more palettes, and binning controls. - ◐
+**`spike_map()`** and a `statebins`-style standalone tile map beyond the
+US-oriented
+[`tile_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/tile_map.md). -
+◐ **Animated transitions** — `animate_world(transition = "tween")`
+between years (gganimate), and
+**[`spin_globe()`](https://pursuitofdatascience.github.io/countryatlas/reference/spin_globe.md)
+→ MP4** output (not just GIF). - ◦ **Interactive WebGL globe** — an
+`rgl`/`three.js` globe complementing the static
+[`globe_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/globe_map.md)
+/
+[`spin_globe()`](https://pursuitofdatascience.github.io/countryatlas/reference/spin_globe.md).
 
-------------------------------------------------------------------------
+**Analysis helpers** - ★ **`correlate_indicators()`** — quick
+cross-indicator correlation/scatter on the spine (listed in §2.5 but not
+yet shipped). - ◐ **Convergence diagnostics** — `beta_convergence()` /
+`sigma_convergence()`, pairing naturally with the shipped
+[`growth_rate()`](https://pursuitofdatascience.github.io/countryatlas/reference/growth_rate.md)
+/
+[`index_to()`](https://pursuitofdatascience.github.io/countryatlas/reference/index_to.md). -
+◐ **Inequality measures** — `gini()`, `theil()`, and a between/within
+decomposition across countries (population-weighted). - ◐ **Panel
+utilities** — `build_panel()`, `lag_by_country()`, `diff_by_country()`,
+and `interpolate_missing()` (linear/LOCF) so panels join cleanly across
+patchy source coverage.
 
-### Area B — The join engine (the heart of the package)
-
-The mission, finally exposed for the **user’s** data — not just the
-package’s internals.
-
-#### `standardize_country()` — add ISO codes & classifications to any data
-
-``` r
-
-standardize_country(
-  data, country_col,
-  origin       = "country.name",   # how to read country_col
-  add          = c("iso3c", "iso2c", "continent", "region"),
-  custom_match = NULL, warn = TRUE
-)
-```
-
-``` r
-
-my_df %>% standardize_country(nation)   # nation = "U.S.", "S. Korea", ... → joinable
-```
-
-#### `join_world()` — one call: “my data → on a map”
-
-``` r
-
-join_world(data, country_col = NULL, origin = "country.name",
-           geometry = c("polygon", "sf", "none"), scale = "small", warn = TRUE)
-```
-
-Auto-detects the country column, standardizes it, attaches geometry,
-returns a plot-ready frame. The function that fulfills the README’s
-promise for the reader’s own data.
-
-``` r
-
-unicef_rates %>% join_world(country) %>% world_map(fill = vaccination_pct)
-```
-
-#### `attach_geometry()` — bolt geometry onto a country-level table
-
-``` r
-
-attach_geometry(data, by = "iso3c", geometry = c("polygon", "sf"), scale = "small")
-```
-
-The bridge between
-[`country_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_data.md)
-(light) and plotting.
-
-#### `country_join()` — reconcile and join two messy country tables
-
-``` r
-
-country_join(x, y, by_x, by_y, type = c("left", "inner", "full"))
-```
-
-The generic two-table version of the package’s whole reason for being:
-join *any* two data frames that each key on country names/codes, by
-reconciling both sides to ISO first. (Two datasets with
-`"Czech Republic"` vs `"Czechia"`, `"South Korea"` vs `"Korea, Rep."`
-just work.)
-
-> *Leans on:* `countrycode()` / `countryname()` matching, `custom_match`
-> overrides; `rnaturalearth` / `map_data` geometry.
-
-------------------------------------------------------------------------
-
-### Area C — Diagnostics & data quality (never lose a country silently)
-
-#### `check_country_match()`
-
-``` r
-
-check_country_match(x, origin = "country.name", suggest = TRUE)
-```
-
-A pre-flight report: `input`, `iso3c`, `matched` (lgl), and a
-`suggestion` (closest known name by string distance) for misses.
-Surfaced automatically by `join_world(warn = TRUE)`.
-
-``` r
-
-check_country_match(c("USA", "Cote d'Ivoire", "Yugoslavia", "Wakanda"))
-#> input          iso3c matched suggestion
-#> USA            USA   TRUE    NA
-#> Cote d'Ivoire  CIV   TRUE    NA
-#> Yugoslavia     NA    FALSE   "Serbia / use codelist_panel"
-#> Wakanda        NA    FALSE   NA
-```
-
-#### `wdj_overrides()` — the curated override table (replaces the drop-list)
-
-A shipped, documented `custom_match` for entities `map_data("world")`
-and Natural Earth get wrong or leave codeless: **Kosovo → `XKX`**,
-Micronesia → `FSM`, Virgin Islands, Saint Martin → `MAF`,
-Bonaire/Saba/Sint Eustatius → `BES`, Canary Islands → `ESP`,
-Madeira/Azores → `PRT`, Barbuda → `ATG`, Grenadines → `VCT`, Ascension →
-`SHN`, … Instead of *deleting* the 16 regions the current code drops, we
-**match** them. Extensible: `wdj_overrides(c(Somaliland = "SOM"))`.
-
-> Also papers over a known Natural Earth gotcha: `ne_countries()`’s
-> `iso_a3` is `-99`/`NA` for France, Norway, Kosovo, etc. The package
-> falls back to `countrycode` on `admin`/`sovereignt` (or `iso_a3_eh`)
-> so these never silently disappear.
-
-#### `audit_coverage()` — what’s missing, before you trust the map
-
-``` r
-
-audit_coverage(data, indicator = NULL, by = c("region", "income", "continent"))
-```
-
-Reports unmatched countries, `NA` rates per indicator, and which World
-Bank regions/income groups are under-covered — so a half-empty map is
-caught before it’s published, not after.
-
-> *Leans on:* `countrycode` matching internals +
-> `codelist`/`codelist_panel`; base string distance.
+**ggsql, Shiny & reporting** - ◐ **Broaden the ggsql render engine** —
+extend
+[`world_query()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_query.md)
+/ `interactive_map(engine = "ggsql")` from spatial choropleths to
+bubble/binned layers and more `SCALE`/`FACET` verbs as the ggsql spatial
+API stabilises. - ◐ **Shiny module** — `worldMapInput()` /
+`worldMapServer()` so a reconciled choropleth drops into an app in two
+lines (ggplot / leaflet / ggsql engine). - ◦ **`gt` / report helpers** —
+`country_factsheet()` and a `gt`-formatted `world_table()` for
+one-country or top-N summaries.
 
 ------------------------------------------------------------------------
 
-### Area D — Built-in reference data & code translation
+## 3. Bugs found in 1.0.0 (fix in 2.0.0)
 
-So users never leave the package to find a code, a grouping, or a
-metadata field.
+Found by static review and then **reproduced on R 4.4.1** (`maps` +
+`countrycode`; `sf`/`WDI` weren’t installed, so the two sf-only items
+are static-analysis only). Ordered by impact. Evidence is quoted inline.
 
-#### `convert_country()` — friendly `countrycode` wrapper
+### 3.1 ★★★ `world_map()` quantile/jenks breaks are vertex-weighted, not country-weighted
 
-``` r
+`R/visualization.R:92-100` (with `compute_breaks()` at `:33-45`).
+**Confirmed (R 4.4.1).**
 
-convert_country(x, to = "iso3c", from = "country.name")
-```
+For the **polygon backend**, `data` is one row *per boundary vertex*, so
+`vals <- data[[fill_name]]` repeats each country’s value once per vertex
+(tens to thousands of times).
+`compute_breaks(vals, "quantile"/"jenks", n_bins)` therefore computes
+quantiles over **vertices**, weighting each country by its geometric
+complexity. A jagged country (Canada, Norway, Indonesia, the UK with its
+islands) dominates the breakpoints; the “quantile” map no longer has
+roughly equal countries per colour — the central promise of a quantile
+choropleth. (`sf` backend is one row per country, so it’s unaffected;
+`binned` is range-based so also unaffected.
+[`interactive_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/interactive_map.md)/[`animate_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/animate_world.md)
+inherit the bug via
+[`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md).)
 
-The full ~40 `countrycode` schemes with discoverable shortcuts,
-including the high-value ones surfaced as first-class:
+**Evidence:** with `map_data("world")` (vertex counts range 6 … 11,573 —
+Canada alone is 11,573 vertices), a 5-bin quantile choropleth on a
+synthetic skewed indicator put **62 / 60 / 28 / 69 / 32** countries in
+the five colour bins; country-weighted breaks put **51 / 50 / 50 / 50 /
+50**. The “equal countries per colour” guarantee is broken.
 
-- `to = "flag"` → flag emoji (`unicode.symbol`) for labels/tables,
-- `to = "continent" | "region" | "region23"`,
-- `to = "currency"` / `iso4217c`, `to = "tld"` (`cctld`),
-  `to = "calling_code"`,
-- research schemes: `cown`/`cowc` (Correlates of War), `p4n`/`p5n`
-  (Polity), `gwn` (Gleditsch-Ward), `vdem`, `imf`, `fao`, `fips`,
-  `gaul`.
-
-``` r
-
-convert_country(c("Japan", "Brazil"), to = "flag")     #> "🇯🇵" "🇧🇷"
-convert_country("Germany",           to = "currency")  #> "EUR"
-```
-
-#### `country_codes()` — the codelist as a tidy tibble
-
-``` r
-
-country_codes(codes = NULL)   # all schemes, or a chosen subset, one row per country
-```
-
-The whole
-[`countrycode::codelist`](https://vincentarelbundock.github.io/countrycode/man/codelist.html)
-reshaped tidy and pipeable — a lookup you can
-[`filter()`](https://rdrr.io/r/stats/filter.html)/`join()` directly.
-
-#### `country_meta` *(bundled dataset)* — static attributes in one place
-
-One row per country with the facts people constantly need and currently
-scrape together by hand: `iso3c`, `iso2c`, `country`, `continent`,
-`region`, `un_region`, `capital`, `capital_lat`, `capital_lon`,
-`centroid_lat`, `centroid_lon`, `area_km2`, `currency`, `tld`,
-`calling_code`, `official_languages`, `landlocked`, `is_island`, `flag`
-(emoji). Assembled from
-[`countrycode::codelist`](https://vincentarelbundock.github.io/countrycode/man/codelist.html) +
-WDI `extra` + Natural Earth geometry.
-
-#### `country_groups()` — membership predicates / table
+**Fix:** compute breaks on one value per country, then cut the full
+vector:
 
 ``` r
 
-country_groups(group = c("EU", "OECD", "G7", "G20", "BRICS", "ASEAN",
-                         "EFTA", "Commonwealth", "OPEC", "EuroZone", "NATO"))
-in_group(x, "EU")   # logical
+key  <- if ("iso3c" %in% names(data)) "iso3c" else "group"
+uvals <- dplyr::distinct(data, .data[[key]], .keep_all = TRUE)[[fill_name]]
+br <- compute_breaks(uvals, style, n_bins)
+data[[".wdj_bin"]] <- cut(vals, br, include.lowest = TRUE, dig.lab = 4)
 ```
 
-Answers the constant question “is this country in the EU / OECD / G20?”
-— a curated, dated, documented membership table (point-in-time
-membership is genuinely fiddly, so it’s shipped and maintained, not
-guessed).
+### 3.2 ★★★ `bubble_map(backend = "sf")` plots bubbles in projected metres on a degrees map
 
-#### `common_indicators` *(bundled)* + `wdi_search()`
+`R/visualization.R:187-211`. High confidence (static — `sf` not
+installed here, but the code path is unambiguous).
+
+When `backend = "sf"`, centroids come from
+`world_geometry("centroids", geometry = "sf", projection = ...)` →
+coordinates in **projected metres** (e.g. ±1.7e7). But the base layer is
+always
+`geom_polygon(world_geometry("countries", geometry = "polygon"), aes(long, lat))` +
+`coord_quickmap()` — i.e. **degrees** (±180). The bubbles render far
+outside the map. So the `backend = "sf"` and `projection` arguments are
+effectively broken (the polygon path “works” only because it ignores
+`projection` entirely and stays in degrees).
+
+**Fix:** draw the base map in the same space as the centroids — either
+use the sf base map with `coord_sf()` when `backend = "sf"`, or compute
+centroids in lon/lat and let `coord_sf(crs = ...)` do the projection.
+
+### 3.3 ★★ Duplicate polygon centroids fan out `bubble_map()` and `flow_map()`
+
+`R/geometry.R:219-227` (`polygon_centroids()`), consumed at
+`R/visualization.R:193` and `:361-372`. **Confirmed (R 4.4.1):**
+`world_geometry("centroids", geometry = "polygon")` returns **\>1 row
+for 10 iso3c codes** — BES and PRT have **3** each (Bonaire/Saba/Sint
+Eustatius; Portugal/Azores/Madeira), ATG/ESP/IND/KNA/SGS/SHN/TTO/VCT
+have 2. A 1-row table of `c("PRT","ESP")` joined to these centroids
+becomes **3** and **2** rows.
+
+`polygon_centroids()` does `group_by(iso3c, region)` where `region` is
+the *map_data country-name* column. Because
+[`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)
+deliberately maps several names to one ISO code (Azores+Madeira→PRT,
+Canary Islands→ESP, Bonaire+Saba+Sint Eustatius→BES, …), the result has
+**multiple centroid rows per `iso3c`**. Downstream
+`left_join(data, cent, by = "iso3c")` then **fans out**:
+[`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md)
+draws several full-size bubbles for those countries (each encoding the
+whole national total), and
+[`flow_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/flow_map.md)
+draws duplicate arcs.
+
+**Fix:** return one centroid per `iso3c` (e.g. the largest-ring
+centroid, as `data-raw/build_datasets.R:129-143` already computes — or
+just reuse `country_meta`’s `centroid_lon/lat`), and/or
+`distinct(iso3c)` before the join.
+
+### 3.4 ★★ `plate_carree` builds an incoherent PROJ string
+
+`R/geometry.R:11-19`. **Confirmed (R 4.4.1):** `wdj_crs("plate_carree")`
+returns `+proj=longlat +lon_0=0 +datum=WGS84 +units=m +no_defs` — a
+**geographic** CRS (degrees) tagged with metres. `st_transform()` to
+this just *un*-projects, and `+lon_0=` recentering doesn’t behave like a
+real plate carrée. Plate carrée is equirectangular = `+proj=eqc`.
+
+**Fix:** `plate_carree = "+proj=eqc +lat_ts=0"` (and let the shared
+`+units=m` apply correctly). Roll this in with the projection expansion
+in §2.3.
+
+### 3.5 ★★ `geom_country_labels()` centroid breaks for antimeridian/multi-part countries
+
+`R/visualization.R:551-564`. **Confirmed (R 4.4.1)** — worse than
+expected.
+
+Labels are placed at `mean(range(long))`, `mean(range(lat))` over
+**all** of a country’s vertices, so any country crossing the
+antimeridian lands its label in the wrong ocean. Measured bounding-box
+centroids: **USA → lon 0.8** (Alaska’s Aleutians cross 180°, dragging it
+into the Atlantic off Africa), **Fiji → lon 0.2**, **New Zealand → lon
+0.8**. (`data-raw` already uses a better largest-ring centroid; the
+runtime path doesn’t.) Same root cause as the crude centroid in 3.3.
+
+**Fix:** reuse `country_meta` centroids or the largest-polygon approach;
+share one centroid implementation across `polygon_centroids()`, the
+labels layer, and
+[`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md)/[`flow_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/flow_map.md).
+
+### 3.6 ◦ Dead no-op in `aggregate_regions()`
+
+`R/analysis.R:81-83` (confirmed by inspection):
 
 ``` r
 
-common_indicators            # curated tibble: friendly name <-> WDI code
-wdi_search(pattern, cache = TRUE)   # tidy wrapper on WDIsearch()
+if (length(by) > 1L) { if ("year" %in% names(data)) by <- by }  # by <- by does nothing
 ```
 
-So `indicator = common_indicators$population` beats memorizing
-`SP.POP.TOTL`, and discovering a new code is one pipeable call. Curated
-set covers population, GDP (constant & current, total & per-capita),
-life expectancy, CO₂, internet/urban share, fertility, poverty, Gini,
-unemployment, schooling, etc.
+Harmless but confusing — remove. Low confidence it was meant to do
+something; the `missing_by` check below already validates grouping
+columns.
 
-> *Leans on:* `countrycode` (`codelist`, `unicode.symbol`, currency,
-> cctld); `WDI` (`WDIsearch`, `extra` capital/coords); Natural Earth
-> (centroids/area).
+### 3.7 ◦ `convert_country()` overrides only apply when `to == "iso3c"`
+
+`R/reference.R:56-66` (gate at `:61`). **Confirmed (R 4.4.1).**
+
+The override gate sets `custom_match` only for `to == "iso3c"`, so
+override-only entities (names `countrycode` doesn’t recognise natively)
+return `NA` for every *derived* destination. Measured:
+`convert_country("Canary Islands", to = "iso3c")` → **ESP**, but
+`convert_country("Canary Islands", to = "continent")` → **NA** (same for
+`"Azores"` → PRT / NA).
+[`standardize_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/standardize_country.md)
+gets both right (**Europe**) because it routes through `iso3c` first.
+(Note: many names *are* recognised natively —
+`convert_country("Kosovo", to = "flag")` works — so the gate only bites
+for override-only names, which is exactly why it’s easy to miss.)
+
+**Fix:** resolve to `iso3c` (with overrides) first, then convert
+`iso3c → dest`.
+
+### 3.8 ◦ Naming drift after the `worlddatajoin → countryatlas` rename
+
+The user-facing
+**[`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)**
+export and the `wdj_coverage` S3 class still carry the old prefix;
+internals are a mix of `wdj_*` and `countryatlas_*`. Not a bug, but a
+polish item: add a
+[`country_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)
+alias (+ keep
+[`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)
+as a soft-deprecated alias) so the public API matches the name.
 
 ------------------------------------------------------------------------
 
-### Area E — Analysis helpers (make the *analysis* friction-free too)
+## 4. Housekeeping / deprecations
 
-Small, in-spirit transforms that otherwise force a detour out of the
-package mid-pipeline.
-
-| Function | What it does |
-|----|----|
-| `per_capita(data, value, pop = NULL)` | Normalize an indicator by population (auto-pulls `SP.POP.TOTL` if `pop` absent). Removes the “is this map just a population map?” footgun. |
-| `aggregate_regions(data, value, by = "region", fun = "sum", weight = NULL)` | Roll countries up to region/continent/income/income×region/custom group, with population-weighted means when `weight` is given. |
-| `rank_countries(data, value, within = NULL)` | Add `rank`, `percentile`, and `z_score`, optionally within region/year — for “top 10” tables and labeling. |
-| `complete_years(data, years, method = c("none","locf","linear"))` | Fill gaps in a panel (carry-forward or linear interpolation) so animations don’t flicker on missing years. |
-
-``` r
-
-country_data(2020, c(co2 = "EN.ATM.CO2E.KT")) %>%
-  per_capita(co2) %>%
-  rank_countries(co2_per_capita, within = region)
-```
+- **Resolve the `gdp_per_capita_2015` shim** (`R/world_data.R:104-109`).
+  1.0.0 promised a *one-cycle* alias; 2.0.0 is that cycle — drop it (or
+  flip the default and warn). The `next_release` note that triggered
+  this review.
+- **Refresh `world_snapshot`** — `data-raw/build_datasets.R:18` pins
+  `SNAPSHOT_YEAR <- 2022L`; bump to the latest year with good WDI
+  coverage and rebuild the bundled `.rda`s.
+- **Bump the membership date** if any group changed since 2024-01-01,
+  and note it in `NEWS.md`.
+- Add the new optional deps to `Suggests` and a single “Optional
+  features” table in the README so the ggsql/duckdb path is
+  discoverable.
 
 ------------------------------------------------------------------------
 
-### Area F — Visualization (retire the boilerplate; make honest maps easy)
+## 5. Suggested cut for 2.0.0 (recommendation)
 
-The README hand-draws three choropleths. Encapsulate that — and then go
-well beyond a single map type, because “world data on a map” has many
-honest forms.
-
-#### `world_map()` — one-line choropleth, several styles
-
-``` r
-
-world_map(
-  data, fill,
-  style      = c("continuous", "binned", "quantile", "jenks", "categorical"),
-  projection = c("equal_earth", "robinson", "mollweide", "natural_earth", "plate_carree"),
-  palette    = NULL, n_bins = 5, borders = TRUE,
-  title = NULL, legend = NULL, na_label = "No data"
-)
-```
-
-Auto-detects polygon (`geom_polygon`) vs `sf` (`geom_sf`), applies a map
-theme, and — for `sf` — a real projection via `coord_sf()`.
-**Binned/quantile/jenks** styles (via `classInt`) are offered because a
-continuous fill on a skewed indicator hides almost all the variation;
-binning is the honest default for choropleths.
-
-``` r
-
-world_data(2020, c(gdp = "NY.GDP.PCAP.KD"), geometry = "sf") %>%
-  world_map(gdp, style = "quantile", projection = "equal_earth",
-            title = "GDP per capita, 2020")
-```
-
-#### `bubble_map()` — proportional-symbol map
-
-``` r
-
-bubble_map(data, size, color = NULL, projection = "equal_earth")
-```
-
-Plots sized circles at country **centroids** — the right idiom for
-*totals* (population, total emissions, total GDP), which a choropleth
-misrepresents because big values hide in small countries and vice-versa.
-
-#### `bivariate_map()` — two variables at once
-
-``` r
-
-bivariate_map(data, fill_x, fill_y, palette = "GrPink", projection = "equal_earth")
-```
-
-A 2-D bivariate choropleth (via `biscale`) with a built-in 2-D legend —
-e.g., GDP per capita × life expectancy in one map.
-
-#### `cartogram_map()` — area-honest choropleth
-
-``` r
-
-cartogram_map(data, weight, type = c("contiguous", "dorling", "noncontiguous"), fill = NULL)
-```
-
-Resizes countries by `weight` (population, GDP, …) via `cartogram`,
-defeating the “big empty countries dominate the eye” bias that plagues
-world choropleths. Dorling (circles) and contiguous variants both
-supported.
-
-#### `tile_map()` — equal-area tile grid
-
-``` r
-
-tile_map(data, fill, grid = "world_countries_grid1")
-```
-
-A statebins-style equal-area **tile grid** of the world (one square per
-country) so tiny states are actually visible — built on `geofacet`’s
-`world_countries_grid1` (and `facet_geo()` for small multiples).
-
-#### `flow_map()` — origin–destination connections
-
-``` r
-
-flow_map(data, from, to, weight = NULL, projection = "equal_earth")
-```
-
-Draws great-circle arcs between country pairs from an OD table (trade,
-migration, flights, remittances) — resolving both endpoints to centroids
-automatically. A distinctive, squarely in-spirit “join world data to a
-map” capability that nothing in the base stack offers cheaply.
-
-#### `animate_world()` — choropleth over time
-
-``` r
-
-animate_world(data, fill, time = year, projection = "equal_earth")
-```
-
-Given a panel from `world_data(2000:2020, …)`, animate the choropleth
-over `year` via `gganimate` (or fall back to a faceted small-multiple
-when it isn’t installed). The natural payoff of panel support and a
-great README centerpiece.
-
-#### `interactive_map()` — hover/zoom
-
-``` r
-
-interactive_map(data, fill, tooltip = NULL, engine = c("leaflet", "ggiraph", "plotly"))
-```
-
-A web-ready interactive choropleth with flag-emoji tooltips and zoom,
-for dashboards and R Markdown / Quarto. Optional engines, all
-`Suggests`.
-
-#### `geom_country_labels()` & `theme_world_map()`
-
-``` r
-
-geom_country_labels(aes(label = iso3c), repel = TRUE, flag = FALSE)  # centroid labels, optional flags
-theme_world_map()                                                    # the exported standalone theme
-```
-
-Centroid-anchored labels (names, ISO codes, or flag emoji) with
-`ggrepel` collision avoidance — using
-[`sf::st_point_on_surface()`](https://r-spatial.github.io/sf/reference/geos_unary.html)
-so labels land *inside* their country — plus the map theme as a reusable
-export.
-
-> **Antimeridian:** the `sf`/projected path runs
-> [`sf::st_break_antimeridian()`](https://r-spatial.github.io/sf/reference/st_break_antimeridian.html)
-> before projecting, so Russia/Fiji/NZ stop streaking across the frame.
->
-> *Leans on:* `ggplot2` + `sf`/`coord_sf`; `classInt` (bins), `biscale`
-> (bivariate), `cartogram`, `geofacet`, `ggrepel`, `gganimate`,
-> `leaflet`/`ggiraph`/`plotly` — all `Suggests`.
+1.  **All of §3** (bug fixes) — these are correctness issues in
+    core/visual paths.
+2.  **ggsql export target +
+    [`world_query()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_query.md)
+    emitter** (§1.1–1.2, 1.4) + vignette.
+3.  **Projection expansion +
+    [`globe_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/globe_map.md)**
+    (§2.3/2.4) — small, high-visibility.
+4.  **One or two §2.7 additions** that are self-contained and
+    high-visibility — `dorling_map()` and/or `country_borders()` are the
+    strongest candidates.
+5.  Defer the broader data-source adapters (§2.1) and historical
+    crosswalk (§2.2) to a later cycle unless there’s appetite; they’re
+    larger and want their own design.
 
 ------------------------------------------------------------------------
 
-### Area G — Geometry utilities
+## References
 
-Shared plumbing under the plotting layer, exposed so power users can
-compose their own maps:
-
-- **Projections** — Equal Earth (default; equal-area and good-looking),
-  Robinson, Mollweide, Natural Earth, plate carrée, via
-  `coord_sf(crs = …)`.
-- **Region & bbox subsetting** —
-  `region = "Africa" | "EU" | c("USA","CAN","MEX") | bbox`, with a
-  default projection chosen to suit the region.
-- **Recentering / antimeridian** — `recenter = 150` for a
-  Pacific-centered world; `st_break_antimeridian()` so nothing wraps.
-- **Centroids** — label-safe via `st_point_on_surface()`; surfaced for
-  [`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md)/labels
-  and on `country_meta`.
-- **Simplification** — optional
-  [`rmapshaper::ms_simplify()`](http://andyteucher.ca/rmapshaper/reference/ms_simplify.md)
-  to thin high-resolution geometry for fast plotting/web.
-
-------------------------------------------------------------------------
-
-### Area H — Performance & offline
-
-- **Memoised + on-disk WDI cache.** Wrap WDI fetches in `memoise` keyed
-  on indicator/year/args, with an optional persistent cache under
-  `tools::R_user_dir("countryatlas", "cache")`, so re-runs and re-knits
-  hit the network once (or never). `cache = FALSE` opts out.
-- **Bundled `world_snapshot`.** A small lazy-loaded dataset — a curated
-  indicator set for one recent year, as both a country-level tibble and
-  low-res `sf` — so examples **actually run** (drop the blanket
-  `\dontrun{}`), and tests/vignettes work **offline** and
-  deterministically. Also fixes the dangling `LazyData: true`.
-
-------------------------------------------------------------------------
-
-## 6. Bundled datasets
-
-| Dataset | Contents | Purpose |
-|----|----|----|
-| `world_snapshot` | One recent year, curated indicators, country-level + low-res `sf` | Offline examples/tests/vignette; instant first run. |
-| `country_meta` | Static per-country attributes (capital, centroid, area, currency, tld, calling code, languages, landlocked/island, flag) | The “everything about a country” lookup. |
-| `common_indicators` | Friendly-name ↔︎ WDI-code catalog | Discoverable indicators. |
-| `country_groups_tbl` | Point-in-time membership (EU/OECD/G7/G20/BRICS/…) | Membership predicates. |
-| `world_tiles` | Equal-area tile-grid layout | [`tile_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/tile_map.md). |
-
-------------------------------------------------------------------------
-
-## 7. Engineering & infrastructure
-
-- **Namespace hygiene** — replace blanket `@import` with targeted
-  `@importFrom`.
-- **Fix `gdp_per_capita_2015`** — names come from the `indicator`
-  vector; a deprecation shim warns if the old name is referenced.
-- **Input validation** — friendly `cli` /
-  [`rlang::abort()`](https://rlang.r-lib.org/reference/abort.html)
-  errors for bad years, unknown codes, missing country columns, absent
-  `Suggests` packages.
-- **Tests** — a `testthat` (3e) suite: matching incl. the override
-  table, column-name correctness, panel shape, polygon↔︎sf parity,
-  graceful behavior when `Suggests` are absent. Network calls mocked
-  (`httptest`/`vcr`) or routed through `world_snapshot` so tests are
-  offline and deterministic.
-- **Vignettes** — *Getting started*; *Joining your own data*; *Modern
-  maps with sf & projections*; *Beyond the choropleth* (bubble /
-  bivariate / cartogram / tile / flow).
-- **pkgdown site** with reference + vignettes, deployed to GitHub Pages.
-- **CI refresh** — `r-lib/actions/*@v2`, `actions/checkout@v4`; add
-  `test-coverage` (covr/Codecov) and a `pkgdown` deploy workflow
-  alongside `R-CMD-check`.
-- **`NEWS.md`** documenting every change from 0.1.0.
-- **Lifecycle** — graduate the badge from *experimental* → *stable*.
-- **CRAN readiness** — offline tests + check-clean namespace + bundled
-  data make a CRAN submission realistic (today it can’t even be checked
-  without network).
-- **Housekeeping** — regenerate docs with current roxygen2; keep
-  `.Rbuildignore` covering `next_release.md`, `pkgdown/`, etc.; leave no
-  build/cache artifacts.
-
-------------------------------------------------------------------------
-
-## 8. Dependencies (tiered)
-
-| Package | Tier | Why |
-|----|----|----|
-| `WDI`, `countrycode`, `dplyr`, `tibble`, `ggplot2` | **Imports** (existing) | Core engine. |
-| `rlang` | **Imports** (new) | Tidy-eval for `fill`/`country_col`, `check_installed()` gates, structured errors. |
-| `tidyr` | **Imports** (new) | Panel reshape, [`complete_years()`](https://pursuitofdatascience.github.io/countryatlas/reference/complete_years.md). |
-| `memoise` | **Imports** (new, tiny) | WDI caching. |
-| `cli` | **Imports** (new, light) | Friendly messages / diagnostics. |
-| `sf`, `rnaturalearth` (+ `rnaturalearthdata`) | **Suggests** (new) | `sf` backend, projections, centroids, antimeridian. |
-| `classInt` | **Suggests** | Binned/quantile/jenks choropleth breaks. |
-| `cartogram` | **Suggests** | [`cartogram_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/cartogram_map.md). |
-| `biscale` | **Suggests** | [`bivariate_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bivariate_map.md). |
-| `geofacet` | **Suggests** | [`tile_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/tile_map.md) / `facet_geo()`. |
-| `ggrepel` | **Suggests** | [`geom_country_labels()`](https://pursuitofdatascience.github.io/countryatlas/reference/geom_country_labels.md). |
-| `gganimate` | **Suggests** | [`animate_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/animate_world.md). |
-| `leaflet` / `ggiraph` / `plotly` | **Suggests** | [`interactive_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/interactive_map.md) engines. |
-| `rmapshaper`, `scales`, `stringdist` | **Suggests** | Geometry simplification; legend formatting; match suggestions. |
-
-Everything heavy/modern is **Suggested and gated** — the base install
-stays as light as it is today (principle \#5).
-
-------------------------------------------------------------------------
-
-## 9. Backward compatibility
-
-- `world_data(year)` keeps its exact current default output (polygon
-  backend, GDP-per-capita column). The only visible change is the column
-  *name* (`gdp_per_capita_2015` → `gdp_per_capita`), shipped with a
-  one-cycle deprecation shim.
-- All new behavior is additive: new arguments with backward-compatible
-  defaults, plus new exported functions.
-- The 16 currently-dropped regions will start **appearing** on maps now
-  that they’re matched — a deliberate, `NEWS.md`-documented improvement
-  so anyone diffing map output understands why coverage grew.
-
-------------------------------------------------------------------------
-
-## 10. Risks & scope discipline
-
-- **World Bank API reliability / rate limits** — mitigated by caching +
-  the bundled snapshot; the package degrades gracefully offline.
-- **`sf` install friction** (GDAL/GEOS/PROJ) — kept in `Suggests` with
-  `check_installed()`, so non-spatial users never pay it.
-- **Natural Earth ISO gaps** (`iso_a3 == -99`) — handled by the override
-  table + countrycode fallback, guarded by a regression test so a
-  Natural Earth update can’t silently re-break France/Norway.
-- **Panel code stability** (Yugoslavia, USSR, Sudan/South Sudan,
-  Czechoslovakia) — lean on `codelist_panel`; document the genuinely
-  ambiguous cases rather than paper over them.
-- **Group-membership drift** — EU/OECD/etc. membership changes over
-  time; the shipped table is point-in-time and dated, with a documented
-  maintenance policy.
-- **Scope discipline** — to keep the package’s spirit intact, the
-  following stay explicitly **out of scope**: subnational/admin-1
-  geometry (states/provinces), non-country geographies, and becoming a
-  general GIS or general charting library. The line is “country data →
-  map.” `tile_map`/`bubble_map`/`flow_map`/`cartogram_map` all stay on
-  the country side of that line.
-
-------------------------------------------------------------------------
-
-## 11. Full inventory (at a glance)
-
-**Functions**
-
-| Function | Area | Purpose |
-|----|----|----|
-| [`world_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_data.md) *(generalized)* | A | Map-ready enriched tibble; multi-indicator, panel, polygon/sf/none, region subset. |
-| [`country_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_data.md) | A | Lightweight one-row-per-country attribute table. |
-| [`world_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_geometry.md) | A | Projected, region-subset geometry (countries/centroids/coastline/borders/graticule/ocean). |
-| [`standardize_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/standardize_country.md) | B | Add ISO codes + classifications to any data frame. |
-| [`join_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/join_world.md) | B | One call: user data → standardized → on a map. |
-| [`attach_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/attach_geometry.md) | B | Bolt polygon/sf geometry onto a country-level table. |
-| [`country_join()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join.md) | B | Reconcile and join two messy country tables by ISO. |
-| [`check_country_match()`](https://pursuitofdatascience.github.io/countryatlas/reference/check_country_match.md) | C | Pre-flight matched/unmatched report + suggestions. |
-| [`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md) | C | Curated `custom_match` table (replaces the drop-list). |
-| [`audit_coverage()`](https://pursuitofdatascience.github.io/countryatlas/reference/audit_coverage.md) | C | Missingness / coverage report before you trust the map. |
-| [`convert_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/convert_country.md) | D | Friendly `countrycode` wrapper (ISO, flags, currency, tld, research codes). |
-| [`country_codes()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_codes.md) | D | Tidy `codelist` lookup. |
-| [`country_groups()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_groups.md) / [`in_group()`](https://pursuitofdatascience.github.io/countryatlas/reference/in_group.md) | D | EU/OECD/G7/G20/BRICS/… membership. |
-| [`wdi_search()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdi_search.md) | D | Tidy WDI indicator search. |
-| [`per_capita()`](https://pursuitofdatascience.github.io/countryatlas/reference/per_capita.md) | E | Population-normalize an indicator. |
-| [`aggregate_regions()`](https://pursuitofdatascience.github.io/countryatlas/reference/aggregate_regions.md) | E | Roll up to region/income/continent (weighted). |
-| [`rank_countries()`](https://pursuitofdatascience.github.io/countryatlas/reference/rank_countries.md) | E | Add rank / percentile / z-score. |
-| [`complete_years()`](https://pursuitofdatascience.github.io/countryatlas/reference/complete_years.md) | E | Fill/interpolate panel gaps. |
-| [`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md) | F | Choropleth — continuous/binned/quantile/jenks/categorical, projected. |
-| [`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md) | F | Proportional-symbol map at centroids. |
-| [`bivariate_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bivariate_map.md) | F | Two-variable bivariate choropleth + 2-D legend. |
-| [`cartogram_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/cartogram_map.md) | F | Area-honest cartogram (contiguous/Dorling/non-contiguous). |
-| [`tile_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/tile_map.md) | F | Equal-area world tile grid. |
-| [`flow_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/flow_map.md) | F | Great-circle origin–destination arcs. |
-| [`animate_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/animate_world.md) | F | Choropleth animated over a year panel. |
-| [`interactive_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/interactive_map.md) | F | Leaflet/ggiraph/plotly interactive choropleth. |
-| [`geom_country_labels()`](https://pursuitofdatascience.github.io/countryatlas/reference/geom_country_labels.md) | F | Centroid labels (names/ISO/flags) with repel. |
-| [`theme_world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/theme_world_map.md) | F | Standalone map theme. |
-
-**Bundled data:** `world_snapshot`, `country_meta`, `common_indicators`,
-`country_groups_tbl`, `world_tiles`.
-
-------------------------------------------------------------------------
-
-### One-paragraph summary
-
-The 1.0.0 release keeps `countryatlas`’s soul — *ISO codes as the
-universal join key, one call to a map-ready table* — and pushes it to
-its full potential in a single release. It generalizes the core to **any
-indicator, any year span, and a modern `sf` backend**; it finally
-**exposes the join machinery for the user’s own data**
-([`join_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/join_world.md),
-[`standardize_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/standardize_country.md),
-[`country_join()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join.md))
-with **honest diagnostics**
-([`check_country_match()`](https://pursuitofdatascience.github.io/countryatlas/reference/check_country_match.md),
-[`audit_coverage()`](https://pursuitofdatascience.github.io/countryatlas/reference/audit_coverage.md))
-instead of silent drops; it ships the **reference data** people
-repeatedly hand-assemble (metadata, group memberships, an indicator
-catalog, flags & currencies); it adds **analysis helpers** (per-capita,
-regional roll-ups, ranking) so the pipeline never has to leave the
-package; and it turns one hand-drawn choropleth into a **full map
-vocabulary** — binned/quantile choropleths, proportional-symbol,
-bivariate, cartogram, tile-grid, flow, animated, and interactive — all
-projected and area-honest by default. Same spirit, an order of magnitude
-more useful.
+- ggsql 0.4.1 (spatial) —
+  <https://opensource.posit.co/blog/2026-06-23_ggsql_0_4_1/>
+- ggsql alpha announcement —
+  <https://opensource.posit.co/blog/2026-04-20_ggsql_alpha_release/>
+- ggsql source — <https://github.com/posit-dev/ggsql>
+- ggsql on CRAN —
+  <https://cran.r-project.org/web/packages/ggsql/index.html>
+- ggsql syntax reference — <https://ggsql.org/syntax/>
+- Our World in Data API — <https://docs.owid.io/>
+- V-Dem dataset — <https://www.v-dem.net/data/the-v-dem-dataset/>
+- Natural Earth subnational
+  ([`rnaturalearth::ne_states()`](https://docs.ropensci.org/rnaturalearth/reference/ne_states.html))
+  — <https://www.naturalearthdata.com/>

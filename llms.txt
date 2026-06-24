@@ -19,6 +19,34 @@ tibble that already stitches together three otherwise disjoint worlds:
 The happy path is one call: `world_data(2020)`. Everything else is
 opt-in.
 
+## New in 2.0.0
+
+- **Render maps in the database** with [ggsql](https://ggsql.org):
+  [`as_ggsql_source()`](https://pursuitofdatascience.github.io/countryatlas/reference/as_ggsql_source.md),
+  [`world_query()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_query.md),
+  `interactive_map(engine = "ggsql")`.
+- **More map types**: an orthographic globe
+  ([`globe_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/globe_map.md)),
+  small multiples
+  ([`facet_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/facet_map.md)),
+  and 8 more projections (Winkel tripel, orthographic, Gall–Peters, …).
+- **Point data onto the spine**:
+  [`locate_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/locate_country.md)
+  (point-in-polygon).
+- **Cleaner joins**:
+  [`repair_country_names()`](https://pursuitofdatascience.github.io/countryatlas/reference/repair_country_names.md)
+  auto-fixes typos;
+  [`country_join_all()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join_all.md)
+  reduce-joins many tables at once.
+- **More analysis**:
+  [`growth_rate()`](https://pursuitofdatascience.github.io/countryatlas/reference/growth_rate.md),
+  [`index_to()`](https://pursuitofdatascience.github.io/countryatlas/reference/index_to.md),
+  [`share_of_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/share_of_world.md).
+- **More country groups**: Mercosur, GCC, Nordic, Visegrád.
+- **Correctness fixes** that change map output (quantile binning,
+  centroids, label placement, projections, override-only lookups) — full
+  [changelog](https://pursuitofdatascience.github.io/countryatlas/NEWS.md).
+
 ## Installation
 
 ``` r
@@ -196,10 +224,34 @@ equal-area tile grids
 ([`tile_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/tile_map.md)),
 great-circle flows
 ([`flow_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/flow_map.md)),
+an orthographic globe
+([`globe_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/globe_map.md)),
+small multiples
+([`facet_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/facet_map.md)),
 animation
 ([`animate_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/animate_world.md))
 and interactivity
 ([`interactive_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/interactive_map.md)).
+
+The world as a globe, not a rectangle — with the `"polygon"` backend
+(only `maps` + `mapproj`, no `sf`) you can draw it and even **spin** it:
+
+``` r
+
+globe_map(world_snapshot$countries, continent, backend = "polygon",
+          style = "categorical", lon = 10, lat = 20)
+```
+
+![](reference/figures/README-globe-1.png)
+
+``` r
+
+# assemble a rotating GIF (one full turn; needs gifski or magick)
+spin_globe(world_snapshot$countries, continent, backend = "polygon",
+           style = "categorical")
+```
+
+![](reference/figures/README-globe-spin.gif)
 
 ``` r
 
@@ -207,6 +259,70 @@ bubble_map(world_snapshot$countries, population)
 ```
 
 ![](reference/figures/README-readme-bubble-1.png)
+
+## Render in the database with ggsql
+
+[ggsql](https://ggsql.org) draws plots *in the database* (DuckDB) and
+returns a Vega-Lite widget — no ggplot2 or `sf` runtime needed.
+countryatlas does the part ggsql’s static world can’t (ISO
+reconciliation, overrides, the WDI join); ggsql does the part
+countryatlas doesn’t (push-down + web-ready output).
+[`world_query()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_query.md)
+emits the spatial query (no dependencies):
+
+``` r
+
+world_query(gdp_per_capita, palette = "magma", transform = "log10",
+            title = "GDP per capita")
+#> VISUALISE gdp_per_capita AS fill
+#> FROM countryatlas_world
+#> DRAW spatial
+#> PROJECT TO equal_earth
+#> SCALE fill TO magma VIA log10
+#> LABEL title => 'GDP per capita'
+```
+
+…and
+[`as_ggsql_source()`](https://pursuitofdatascience.github.io/countryatlas/reference/as_ggsql_source.md)
+/ `interactive_map(engine = "ggsql")` register your curated table and
+render it in the database. See the *countryatlas and ggsql* vignette.
+
+## More ways in, more to compute
+
+Get point data onto the spine, repair messy names, reduce-join many
+tables, and run panel analysis — all keyed on `iso3c`:
+
+``` r
+
+# each country's share of a world total (within year, for a panel)
+share_of_world(data.frame(iso3c = c("USA", "CHN", "IND"), co2 = c(5, 15, 3)), co2)
+#> # A tibble: 3 × 3
+#>   iso3c   co2 co2_share
+#>   <chr> <dbl>     <dbl>
+#> 1 USA       5     0.217
+#> 2 CHN      15     0.652
+#> 3 IND       3     0.130
+
+# reduce-join several messy tables on the ISO spine at once
+t1 <- data.frame(country = c("Czechia", "South Korea"), gdp = c(1, 2))
+t2 <- data.frame(country = c("Czech Republic", "Korea, Rep."), pop = c(10, 51))
+t3 <- data.frame(country = c("Czechia", "Korea"), area = c(79, 100))
+country_join_all(list(t1, t2, t3), by = "country")
+#> # A tibble: 2 × 7
+#>   country.x     gdp iso3c country.y        pop country  area
+#>   <chr>       <dbl> <chr> <chr>          <dbl> <chr>   <dbl>
+#> 1 Czechia         1 CZE   Czech Republic    10 Czechia    79
+#> 2 South Korea     2 KOR   Korea, Rep.       51 Korea     100
+```
+
+[`repair_country_names()`](https://pursuitofdatascience.github.io/countryatlas/reference/repair_country_names.md)
+auto-fixes typos to the closest known country,
+`locate_country(lon, lat)` tags coordinates with the country that
+contains them, and
+[`growth_rate()`](https://pursuitofdatascience.github.io/countryatlas/reference/growth_rate.md)
+/
+[`index_to()`](https://pursuitofdatascience.github.io/countryatlas/reference/index_to.md)
+add panel metrics.
 
 ## Offline by default
 
@@ -217,8 +333,9 @@ the World Bank API.
 ## Learn more
 
 See the vignettes — *Getting started*, *Joining your own data*, *Modern
-maps with sf & projections*, and *Beyond the choropleth* — and the
-[reference site](https://pursuitofdatascience.github.io/countryatlas/).
+maps with sf & projections*, *Beyond the choropleth*, and *countryatlas
+and ggsql* — and the [reference
+site](https://pursuitofdatascience.github.io/countryatlas/).
 
 # Package index
 
@@ -233,6 +350,8 @@ geometry.
   : Lightweight one-row-per-country table
 - [`world_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_geometry.md)
   : Geometry without the data
+- [`locate_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/locate_country.md)
+  : Tag coordinates with the country that contains them
 
 ## The join engine
 
@@ -246,6 +365,8 @@ The package’s mission, exposed for your own data.
   : Attach geometry to a country-level table
 - [`country_join()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join.md)
   : Reconcile and join two messy country tables
+- [`country_join_all()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join_all.md)
+  : Join many messy country tables on the ISO spine
 
 ## Diagnostics & data quality
 
@@ -253,7 +374,10 @@ Never lose a country silently.
 
 - [`check_country_match()`](https://pursuitofdatascience.github.io/countryatlas/reference/check_country_match.md)
   : Pre-flight country-match report
+- [`repair_country_names()`](https://pursuitofdatascience.github.io/countryatlas/reference/repair_country_names.md)
+  : Auto-repair country names to their closest known match
 - [`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)
+  [`country_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)
   : Curated country-name overrides (replaces the silent drop-list)
 - [`audit_coverage()`](https://pursuitofdatascience.github.io/countryatlas/reference/audit_coverage.md)
   : Coverage / missingness audit
@@ -281,6 +405,12 @@ Never lose a country silently.
   : Add rank, percentile and z-score
 - [`complete_years()`](https://pursuitofdatascience.github.io/countryatlas/reference/complete_years.md)
   : Fill or interpolate panel gaps
+- [`growth_rate()`](https://pursuitofdatascience.github.io/countryatlas/reference/growth_rate.md)
+  : Year-on-year (or compound) growth rate
+- [`index_to()`](https://pursuitofdatascience.github.io/countryatlas/reference/index_to.md)
+  : Rebase a series to an index (base year = 100)
+- [`share_of_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/share_of_world.md)
+  : Each country's share of the world total
 
 ## Visualization
 
@@ -288,6 +418,12 @@ A full vocabulary of projected, area-honest maps.
 
 - [`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md)
   : One-line choropleth, several honest styles
+- [`globe_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/globe_map.md)
+  : Orthographic globe choropleth
+- [`spin_globe()`](https://pursuitofdatascience.github.io/countryatlas/reference/spin_globe.md)
+  : Spin the globe
+- [`facet_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/facet_map.md)
+  : Small-multiple choropleths
 - [`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md)
   : Proportional-symbol (bubble) map
 - [`bivariate_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bivariate_map.md)
@@ -308,6 +444,15 @@ A full vocabulary of projected, area-honest maps.
   : A clean theme for world maps
 - [`simplify_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/simplify_geometry.md)
   : Simplify (thin) geometry for faster plotting
+
+## Database rendering (ggsql)
+
+Hand curated tables to ggsql for database-side spatial rendering.
+
+- [`as_ggsql_source()`](https://pursuitofdatascience.github.io/countryatlas/reference/as_ggsql_source.md)
+  : Export a countryatlas table as a ggsql source
+- [`world_query()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_query.md)
+  : Emit a ggsql spatial query for a country map
 
 ## Performance & caching
 
@@ -340,6 +485,8 @@ A full vocabulary of projected, area-honest maps.
 
 - [Beyond the
   choropleth](https://pursuitofdatascience.github.io/countryatlas/articles/beyond-the-choropleth.md):
+- [countryatlas and
+  ggsql](https://pursuitofdatascience.github.io/countryatlas/articles/countryatlas-and-ggsql.md):
 - [countryatlas: Joining World Data to Maps on the ISO
   Spine](https://pursuitofdatascience.github.io/countryatlas/articles/countryatlas.md):
 - [Getting

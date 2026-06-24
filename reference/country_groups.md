@@ -18,7 +18,8 @@ country_groups(group = NULL)
 
   One or more group names: any of `"EU"`, `"OECD"`, `"G7"`, `"G20"`,
   `"BRICS"`, `"ASEAN"`, `"EFTA"`, `"Commonwealth"`, `"OPEC"`,
-  `"EuroZone"`, `"NATO"`. If `NULL`, the whole table is returned.
+  `"EuroZone"`, `"NATO"`, `"Mercosur"`, `"GCC"`, `"Nordic"`,
+  `"Visegrad"`. If `NULL`, the whole table is returned.
 
 ## Value
 

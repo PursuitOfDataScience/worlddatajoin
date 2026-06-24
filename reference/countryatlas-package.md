@@ -20,19 +20,22 @@ Everything else is opt-in.
 
 [`world_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_data.md),
 [`country_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_data.md),
-[`world_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_geometry.md).
+[`world_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_geometry.md),
+[`locate_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/locate_country.md).
 
 ## The join engine
 
 [`standardize_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/standardize_country.md),
 [`join_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/join_world.md),
 [`attach_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/attach_geometry.md),
-[`country_join()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join.md).
+[`country_join()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join.md),
+[`country_join_all()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join_all.md).
 
 ## Diagnostics
 
 [`check_country_match()`](https://pursuitofdatascience.github.io/countryatlas/reference/check_country_match.md),
-[`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md),
+[`repair_country_names()`](https://pursuitofdatascience.github.io/countryatlas/reference/repair_country_names.md),
+[`country_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md),
 [`audit_coverage()`](https://pursuitofdatascience.github.io/countryatlas/reference/audit_coverage.md).
 
 ## Reference data
@@ -54,11 +57,17 @@ and the datasets
 [`per_capita()`](https://pursuitofdatascience.github.io/countryatlas/reference/per_capita.md),
 [`aggregate_regions()`](https://pursuitofdatascience.github.io/countryatlas/reference/aggregate_regions.md),
 [`rank_countries()`](https://pursuitofdatascience.github.io/countryatlas/reference/rank_countries.md),
-[`complete_years()`](https://pursuitofdatascience.github.io/countryatlas/reference/complete_years.md).
+[`complete_years()`](https://pursuitofdatascience.github.io/countryatlas/reference/complete_years.md),
+[`growth_rate()`](https://pursuitofdatascience.github.io/countryatlas/reference/growth_rate.md),
+[`index_to()`](https://pursuitofdatascience.github.io/countryatlas/reference/index_to.md),
+[`share_of_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/share_of_world.md).
 
 ## Visualization
 
 [`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md),
+[`globe_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/globe_map.md),
+[`spin_globe()`](https://pursuitofdatascience.github.io/countryatlas/reference/spin_globe.md),
+[`facet_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/facet_map.md),
 [`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md),
 [`bivariate_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bivariate_map.md),
 [`cartogram_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/cartogram_map.md),
@@ -68,6 +77,11 @@ and the datasets
 [`interactive_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/interactive_map.md),
 [`geom_country_labels()`](https://pursuitofdatascience.github.io/countryatlas/reference/geom_country_labels.md),
 [`theme_world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/theme_world_map.md).
+
+## Database rendering (ggsql)
+
+[`as_ggsql_source()`](https://pursuitofdatascience.github.io/countryatlas/reference/as_ggsql_source.md),
+[`world_query()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_query.md).
 
 ## See also
 
@@ -83,3 +97,7 @@ Useful links:
 ## Author
 
 **Maintainer**: Youzhi Yu <yuyouzhi666@icloud.com>
+
+Authors:
+
+- Youzhi Yu <yuyouzhi666@icloud.com>

@@ -4,24 +4,29 @@ Working document. Scope: (A) integrate **ggsql 0.4.1**, (B) brainstorm new
 features/functions, (C) **fix bugs found in 1.0.0** (the important part), and
 (D) housekeeping/deprecations.
 
-## Status (branch `v2.0.0-dev`)
+## Status (branch `v2.0.0-dev`, now merged to `main`)
+
+The `v2.0.0-dev` branch has been **merged into `main`** (fast-forward); 1.0.0 is
+the version currently on CRAN, and 2.0.0 is the release being prepared next.
 
 **Implemented in 2.0.0** (see `NEWS.md`): ggsql bridge (`as_ggsql_source()`,
 `world_query()`, `interactive_map(engine = "ggsql")`); all eight bug fixes in §3;
-projection expansion + `globe_map()` + `facet_map()`; `locate_country()`,
-`repair_country_names()`, `country_join_all()`, `growth_rate()`, `index_to()`,
-`share_of_world()`, `country_overrides()`; and four new country groups
-(Mercosur, GCC, Nordic, Visegrád). Non-plotting tests pass (96/96); the
-viridis-based plotting tests run on CI (a `viridisLite` illegal-instruction
-crash on the dev node prevents running them locally).
+projection expansion + `globe_map()` + `spin_globe()` + `facet_map()`;
+`locate_country()`, `repair_country_names()`, `country_join_all()`,
+`growth_rate()`, `index_to()`, `share_of_world()`, `country_overrides()`; and
+four new country groups (Mercosur, GCC, Nordic, Visegrád). Non-plotting tests
+pass; the viridis-based plotting tests run on CI (a `viridisLite`
+illegal-instruction crash on the dev node prevents running them locally).
 
-**Deferred to 2.1.0** (need live-API testing or data curation, so not shipped
-blind): external data-source adapters — §2.1 (OWID / Eurostat / V-Dem); the
-historical / dissolved-entity crosswalk — §2.2; subnational `admin1` geometry —
-§2.3; the disputed-territory de-facto/de-jure policy — §2.6; and a
+**Deferred to a later cycle** (need live-API testing or data curation, so not
+shipped blind): external data-source adapters — §2.1 (OWID / Eurostat / V-Dem);
+the historical / dissolved-entity crosswalk — §2.2; subnational `admin1`
+geometry — §2.3; the disputed-territory de-facto/de-jure policy — §2.6; and a
 `world_snapshot` year refresh (needs the World Bank API at build time).
 
-The rest of this document is the original plan, kept for reference.
+**Still open for 2.0.0** — additional features worth building *before* this
+release ships are collected in the new **§2.7** below; the rest of this document
+is the original plan, kept for reference.
 
 ---
 
@@ -176,6 +181,69 @@ same `iso3c`(+`year`) tidy shape so they drop straight into `country_join()`:
 - A documented **disputed-territory policy** (Taiwan, W. Sahara, Palestine,
   Kosovo): a `de_facto`/`de_jure` option rather than silent backend defaults.
 
+### 2.7 Additional features to add for 2.0.0 (new brainstorm)
+
+Beyond §2.1–2.6, the following are fresh candidates worth building into the
+2.0.0 release. They all hang off the existing ISO spine + sf/WDI plumbing, so
+each is self-contained. Tagged ★ high value / ◐ medium / ◦ nice-to-have.
+
+**More sources & richer joins**
+- ◐ **Currency / real-terms helpers** — `deflate()` (constant vs current prices
+  via a GDP-deflator/CPI series) and `to_ppp()` / `to_usd()`. Country economic
+  data is almost always wanted in real or PPP terms; doing it on the spine kills
+  a whole class of silent unit mistakes.
+- ◐ **Population-weighted aggregation** — a `weight = ` / `weighted = TRUE` path
+  on `aggregate_regions()` so regional means/medians weight by population or GDP
+  instead of by country count.
+- ◦ **Multilingual country names** — `convert_country(to = "name_fr"/"name_es"/…)`
+  via countrycode's language tables, for localized labels and joining
+  non-English source data.
+
+**Geometry & spatial structure**
+- ★ **Country adjacency / borders graph** — `country_borders()` returning a tidy
+  neighbour list (and/or an `igraph`), with `neighbors("FRA")` and
+  `distance_between(a, b)`. Unlocks contiguity analysis and "no two neighbours
+  share a colour" map niceties.
+- ◐ **Spatial autocorrelation** — Moran's I / LISA on the world spine using the
+  adjacency above (gated `spdep` Suggests); a common ask for choropleth users.
+- ◐ **Multiple Natural Earth scales** — expose `scale = c("110m","50m","10m")`
+  consistently across `world_geometry()` and the maps, persisted by
+  `cache_geometry()`.
+- ◦ **Inset maps** — an `inset = TRUE` helper breaking out small/dense regions
+  (Europe, the Caribbean, Pacific SIDS) so they're actually legible.
+
+**Visualization**
+- ★ **`dorling_map()`** — promote the Dorling cartogram to a first-class verb;
+  add contiguous / non-contiguous cartograms with sane defaults (extends §2.4).
+- ★ **`bivariate_legend()`** — finish the `bivariate_map()` story with a
+  standalone legend, more palettes, and binning controls.
+- ◐ **`spike_map()`** and a `statebins`-style standalone tile map beyond the
+  US-oriented `tile_map()`.
+- ◐ **Animated transitions** — `animate_world(transition = "tween")` between
+  years (gganimate), and **`spin_globe()` → MP4** output (not just GIF).
+- ◦ **Interactive WebGL globe** — an `rgl`/`three.js` globe complementing the
+  static `globe_map()` / `spin_globe()`.
+
+**Analysis helpers**
+- ★ **`correlate_indicators()`** — quick cross-indicator correlation/scatter on
+  the spine (listed in §2.5 but not yet shipped).
+- ◐ **Convergence diagnostics** — `beta_convergence()` / `sigma_convergence()`,
+  pairing naturally with the shipped `growth_rate()` / `index_to()`.
+- ◐ **Inequality measures** — `gini()`, `theil()`, and a between/within
+  decomposition across countries (population-weighted).
+- ◐ **Panel utilities** — `build_panel()`, `lag_by_country()`,
+  `diff_by_country()`, and `interpolate_missing()` (linear/LOCF) so panels join
+  cleanly across patchy source coverage.
+
+**ggsql, Shiny & reporting**
+- ◐ **Broaden the ggsql render engine** — extend `world_query()` /
+  `interactive_map(engine = "ggsql")` from spatial choropleths to bubble/binned
+  layers and more `SCALE`/`FACET` verbs as the ggsql spatial API stabilises.
+- ◐ **Shiny module** — `worldMapInput()` / `worldMapServer()` so a reconciled
+  choropleth drops into an app in two lines (ggplot / leaflet / ggsql engine).
+- ◦ **`gt` / report helpers** — `country_factsheet()` and a `gt`-formatted
+  `world_table()` for one-country or top-N summaries.
+
 ---
 
 ## 3. Bugs found in 1.0.0 (fix in 2.0.0)
@@ -327,8 +395,11 @@ Not a bug, but a polish item: add a `country_overrides()` alias (+ keep
 1. **All of §3** (bug fixes) — these are correctness issues in core/visual paths.
 2. **ggsql export target + `world_query()` emitter** (§1.1–1.2, 1.4) + vignette.
 3. **Projection expansion + `globe_map()`** (§2.3/2.4) — small, high-visibility.
-4. Defer the broader data-source adapters (§2.1) and historical crosswalk (§2.2)
-   to 2.1.0 unless there's appetite; they're larger and want their own design.
+4. **One or two §2.7 additions** that are self-contained and high-visibility —
+   `dorling_map()` and/or `country_borders()` are the strongest candidates.
+5. Defer the broader data-source adapters (§2.1) and historical crosswalk (§2.2)
+   to a later cycle unless there's appetite; they're larger and want their own
+   design.
 
 ---
 
@@ -339,3 +410,6 @@ Not a bug, but a polish item: add a `country_overrides()` alias (+ keep
 - ggsql source — <https://github.com/posit-dev/ggsql>
 - ggsql on CRAN — <https://cran.r-project.org/web/packages/ggsql/index.html>
 - ggsql syntax reference — <https://ggsql.org/syntax/>
+- Our World in Data API — <https://docs.owid.io/>
+- V-Dem dataset — <https://www.v-dem.net/data/the-v-dem-dataset/>
+- Natural Earth subnational (`rnaturalearth::ne_states()`) — <https://www.naturalearthdata.com/>

@@ -14,7 +14,8 @@ locate_country(
   lat = NULL,
   points = NULL,
   scale = "small",
-  add = "country"
+  add = "country",
+  tolerance_km = 25
 )
 ```
 
@@ -38,6 +39,15 @@ locate_country(
   Extra attributes to return alongside `iso3c` (any
   [`convert_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/convert_country.md)
   destination, e.g. `"country"`, `"continent"`).
+
+- tolerance_km:
+
+  Snap an unmatched point to the nearest country when it lies within
+  this many kilometres of one (default `25`). Coarse (110m) coastlines
+  place some genuinely-onshore coastal points just outside their country
+  (New York sits ~0.5 km beyond the simplified US coast); this rescues
+  them while leaving open-ocean points `NA` (the nearest land is
+  hundreds of km away). Set `0` for a strict point-in-polygon lookup.
 
 ## Value
 

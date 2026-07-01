@@ -62,7 +62,8 @@ spine so it can be joined, aggregated and mapped like everything else.</p>
 <span>  lat <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  points <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  scale <span class="op">=</span> <span class="st">"small"</span>,</span>
-<span>  add <span class="op">=</span> <span class="st">"country"</span></span>
+<span>  add <span class="op">=</span> <span class="st">"country"</span>,</span>
+<span>  tolerance_km <span class="op">=</span> <span class="fl">25</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -86,6 +87,15 @@ ignored if <code>points</code> is supplied).</p></dd>
 <dt id="arg-add">add<a class="anchor" aria-label="anchor" href="#arg-add"></a></dt>
 <dd><p>Extra attributes to return alongside <code>iso3c</code> (any
 <code><a href="convert_country.html">convert_country()</a></code> destination, e.g. <code>"country"</code>, <code>"continent"</code>).</p></dd>
+
+
+<dt id="arg-tolerance-km">tolerance_km<a class="anchor" aria-label="anchor" href="#arg-tolerance-km"></a></dt>
+<dd><p>Snap an unmatched point to the nearest country when it
+lies within this many kilometres of one (default <code>25</code>). Coarse (110m)
+coastlines place some genuinely-onshore coastal points just outside their
+country (New York sits ~0.5 km beyond the simplified US coast); this
+rescues them while leaving open-ocean points <code>NA</code> (the nearest land is
+hundreds of km away). Set <code>0</code> for a strict point-in-polygon lookup.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -15,7 +15,8 @@ attach_geometry(
   scale = "small",
   region = NULL,
   projection = "equal_earth",
-  recenter = NULL
+  recenter = NULL,
+  overrides = wdj_overrides()
 )
 ```
 
@@ -45,6 +46,15 @@ attach_geometry(
 - projection, recenter:
 
   Projection options for the `sf` backend.
+
+- overrides:
+
+  Name -\> iso3c overrides applied when matching the geometry backend's
+  country names (default
+  [`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)).
+  Pass a custom set built with
+  [`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)
+  to add your own.
 
 ## Value
 

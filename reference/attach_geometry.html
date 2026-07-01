@@ -61,7 +61,8 @@ and plotting: bolts polygon or <code>sf</code> geometry onto your data, keyed on
 <span>  scale <span class="op">=</span> <span class="st">"small"</span>,</span>
 <span>  region <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  projection <span class="op">=</span> <span class="st">"equal_earth"</span>,</span>
-<span>  recenter <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  recenter <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  overrides <span class="op">=</span> <span class="fu"><a href="wdj_overrides.html">wdj_overrides</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -91,6 +92,12 @@ and plotting: bolts polygon or <code>sf</code> geometry onto your data, keyed on
 
 <dt id="arg-projection-recenter">projection, recenter<a class="anchor" aria-label="anchor" href="#arg-projection-recenter"></a></dt>
 <dd><p>Projection options for the <code>sf</code> backend.</p></dd>
+
+
+<dt id="arg-overrides">overrides<a class="anchor" aria-label="anchor" href="#arg-overrides"></a></dt>
+<dd><p>Name -&gt; iso3c overrides applied when matching the geometry
+backend's country names (default <code><a href="wdj_overrides.html">wdj_overrides()</a></code>). Pass a custom set
+built with <code><a href="wdj_overrides.html">wdj_overrides()</a></code> to add your own.</p></dd>
 
 </dl></div>
     <div class="section level2">

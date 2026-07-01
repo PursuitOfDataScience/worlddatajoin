@@ -138,6 +138,14 @@ see different maps or values.
   by every engine (pre-dating 2.0.0). The `"ggiraph"` and `"leaflet"`
   engines now use the supplied `tooltip` column, defaulting to `fill` as
   before when omitted.
+- `world_data(overrides = )` (and `attach_geometry(overrides = )`)
+  accepted a custom name -\> iso3c override set but silently ignored it
+  (pre-dating 2.0.0) – the geometry backend always matched with the
+  default
+  [`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md).
+  The override set now flows through to both the polygon and `sf`
+  matchers, so a custom mapping actually changes which polygons a
+  country claims.
 
 ### Housekeeping
 

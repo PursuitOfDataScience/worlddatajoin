@@ -11,7 +11,8 @@ attach_geometry(
   scale = "small",
   region = NULL,
   projection = "equal_earth",
-  recenter = NULL
+  recenter = NULL,
+  overrides = wdj_overrides()
 )
 }
 \arguments{
@@ -26,6 +27,10 @@ attach_geometry(
 \item{region}{Optional region subset (see \code{\link[=world_geometry]{world_geometry()}}).}
 
 \item{projection, recenter}{Projection options for the \code{sf} backend.}
+
+\item{overrides}{Name -> iso3c overrides applied when matching the geometry
+backend's country names (default \code{\link[=wdj_overrides]{wdj_overrides()}}). Pass a custom set
+built with \code{\link[=wdj_overrides]{wdj_overrides()}} to add your own.}
 }
 \value{
 For \code{"polygon"}, a tibble with \code{long}/\code{lat}/\code{group} plus your

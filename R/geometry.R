@@ -69,12 +69,12 @@ resolve_region <- function(region) {
 
 # Build map_data("world") as a tibble with iso3c/iso2c attached via overrides.
 # Memoised because map_data is deterministic and not free to rebuild.
-build_world_polygons <- function() {
+build_world_polygons <- function(overrides = wdj_overrides()) {
   need_pkg("maps", "for the polygon geometry backend")
   md <- ggplot2::map_data("world")
   md <- tibble::as_tibble(md)
   iso3c <- wdj_to_iso3c(md$region, origin = "country.name",
-                        custom_match = wdj_overrides())
+                        custom_match = overrides)
   md$iso3c <- iso3c
   md$iso2c <- suppressWarnings(
     countrycode::countrycode(iso3c, "iso3c", "iso2c", warn = FALSE)
@@ -85,8 +85,8 @@ build_world_polygons <- function() {
 
 world_polygons <- memoise::memoise(build_world_polygons)
 
-get_world_polygons <- function(region = NULL) {
-  md <- world_polygons()
+get_world_polygons <- function(region = NULL, overrides = wdj_overrides()) {
+  md <- world_polygons(overrides)
   iso <- resolve_region(region)
   if (is.null(iso)) return(md)
   if (inherits(iso, "wdj_bbox")) {
@@ -99,7 +99,7 @@ get_world_polygons <- function(region = NULL) {
 
 # --- sf backend (rnaturalearth) -----------------------------------------------
 
-build_world_sf <- function(scale = "small") {
+build_world_sf <- function(scale = "small", overrides = wdj_overrides()) {
   need_pkg(c("sf", "rnaturalearth", "rnaturalearthdata"),
            "for the sf geometry backend")
   ne <- rnaturalearth::ne_countries(scale = ne_scale(scale), returnclass = "sf")
@@ -111,7 +111,7 @@ build_world_sf <- function(scale = "small") {
   needs <- is.na(iso3c)
   if (any(needs)) {
     iso3c[needs] <- wdj_to_iso3c(fallback_name[needs], origin = "country.name",
-                                 custom_match = wdj_overrides())
+                                 custom_match = overrides)
   }
   ne$iso3c <- iso3c
   ne$iso2c <- suppressWarnings(
@@ -129,13 +129,19 @@ build_world_sf <- function(scale = "small") {
 
 get_world_sf <- function(scale = "small", region = NULL,
                          projection = "equal_earth", recenter = NULL,
-                         project = TRUE) {
+                         project = TRUE, overrides = wdj_overrides()) {
   need_pkg("sf", "for the sf geometry backend")
-  key <- paste0("scale_", scale)
-  if (is.null(.world_sf_cache[[key]])) {
-    .world_sf_cache[[key]] <- build_world_sf(scale)
+  # Cache the default-overrides geometry (the common case); a custom override
+  # set rebuilds uncached so the caller's overrides actually take effect.
+  if (identical(overrides, wdj_overrides())) {
+    key <- paste0("scale_", scale)
+    if (is.null(.world_sf_cache[[key]])) {
+      .world_sf_cache[[key]] <- build_world_sf(scale, overrides)
+    }
+    ne <- .world_sf_cache[[key]]
+  } else {
+    ne <- build_world_sf(scale, overrides)
   }
-  ne <- .world_sf_cache[[key]]
 
   iso <- resolve_region(region)
   if (!is.null(iso)) {
@@ -294,6 +300,9 @@ sf_centroids <- function(x) {
 #' @param scale Natural Earth resolution for the `sf` backend.
 #' @param region Optional region subset (see [world_geometry()]).
 #' @param projection,recenter Projection options for the `sf` backend.
+#' @param overrides Name -> iso3c overrides applied when matching the geometry
+#'   backend's country names (default [wdj_overrides()]). Pass a custom set
+#'   built with [wdj_overrides()] to add your own.
 #'
 #' @return For `"polygon"`, a tibble with `long`/`lat`/`group` plus your
 #'   columns. For `"sf"`, an `sf` object.
@@ -311,7 +320,8 @@ attach_geometry <- function(data,
                             scale = "small",
                             region = NULL,
                             projection = "equal_earth",
-                            recenter = NULL) {
+                            recenter = NULL,
+                            overrides = wdj_overrides()) {
   geometry <- match.arg(geometry)
   if (!by %in% names(data)) {
     wdj_abort("{.arg data} must contain the join column {.val {by}}.")
@@ -319,7 +329,7 @@ attach_geometry <- function(data,
   data <- tibble::as_tibble(data)
 
   if (geometry == "polygon") {
-    poly <- get_world_polygons(region)
+    poly <- get_world_polygons(region, overrides = overrides)
     # geometry on the left preserves all polygon rows; values fill in.
     drop <- setdiff(intersect(names(poly), names(data)), by)
     poly <- poly[, setdiff(names(poly), drop), drop = FALSE]
@@ -327,7 +337,7 @@ attach_geometry <- function(data,
     return(out)
   }
 
-  geom <- get_world_sf(scale, region, projection, recenter)
+  geom <- get_world_sf(scale, region, projection, recenter, overrides = overrides)
   drop <- setdiff(intersect(names(geom), names(data)), by)
   geom <- geom[, setdiff(names(geom), drop), drop = FALSE]
   dplyr::left_join(geom, data, by = by)

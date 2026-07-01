@@ -113,7 +113,8 @@ world_data <- function(year,
   }
 
   attach_geometry(countries, by = "iso3c", geometry = geometry, scale = scale,
-                  region = region, projection = projection, recenter = recenter)
+                  region = region, projection = projection, recenter = recenter,
+                  overrides = overrides)
 }
 
 #' Lightweight one-row-per-country table

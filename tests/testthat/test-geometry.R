@@ -109,3 +109,23 @@ test_that("polygon_centroids returns one centroid per iso3c", {
   expect_equal(nrow(dplyr::filter(cent, .data$iso3c == "ESP")), 1)
   expect_equal(nrow(dplyr::filter(cent, .data$iso3c == "BES")), 1)
 })
+
+test_that("attach_geometry threads custom overrides into geometry matching", {
+  # Regression: world_data(overrides=) / attach_geometry(overrides=) were
+  # accepted but silently ignored -- the geometry backend always matched with
+  # the default override set. A custom set must now actually take effect.
+  skip_if_not_installed("maps")
+  poly <- attach_geometry(
+    data.frame(iso3c = "ZZ1", value = 42),
+    geometry = "polygon",
+    overrides = wdj_overrides(c(Greenland = "ZZ1"))
+  )
+  # Greenland's polygons carry the custom code and join to the value...
+  expect_true(any(poly$iso3c == "ZZ1" & poly$value == 42, na.rm = TRUE))
+  # ...and are no longer matched to the default GRL.
+  expect_false(any(poly$iso3c == "GRL", na.rm = TRUE))
+  # The default path is unaffected (separate cache key): Greenland -> GRL.
+  poly_def <- attach_geometry(data.frame(iso3c = "GRL", value = 7),
+                              geometry = "polygon")
+  expect_true(any(poly_def$iso3c == "GRL", na.rm = TRUE))
+})

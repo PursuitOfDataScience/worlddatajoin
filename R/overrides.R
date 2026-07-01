@@ -25,10 +25,15 @@
 #' wdj_overrides(c(Somaliland = "SOM"))
 wdj_overrides <- function(extra = NULL) {
   # Soft-deprecated in 2.0.0; prefer country_overrides().
-  cli::cli_inform(
-    c("i" = "{.fn wdj_overrides} is soft-deprecated; use {.fn country_overrides} instead."),
-    .frequency = "once", .frequency_id = "wdj_overrides-deprecated"
-  )
+  # Only message in interactive sessions — this function is called as a default
+  # argument by most of the public API (world_data, standardize_country, …) so
+  # firing in non-interactive runs contaminates CI/test/pkgdown output.
+  if (interactive()) {
+    cli::cli_inform(
+      c("i" = "{.fn wdj_overrides} is soft-deprecated; use {.fn country_overrides} instead."),
+      .frequency = "once", .frequency_id = "wdj_overrides-deprecated"
+    )
+  }
   base <- c(
     # map_data("world") spellings the legacy code used to drop.
     "Ascension Island" = "SHN",

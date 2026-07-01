@@ -104,32 +104,12 @@ subsetting.
 ``` r
 # \donttest{
 world_data(2020)
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=1': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=2': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=3': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=4': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=5': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=6': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=7': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=8': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=9': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=10': HTTP status was '502 Bad Gateway'
-#> Warning: Could not fetch indicator "NY.GDP.PCAP.KD" from the World Bank API.
-#> ✖ The following indicators could not be downloaded: NY.GDP.PCAP.KD.
-#> 
-#> Please make sure that you are running the latest version of the `WDI` package,
-#>   and that the arguments you are using in the `WDI()` function are valid.
-#> 
-#> Sometimes, downloads will suddenly stop working, even if nothing has changed in
-#>   the R code of the WDI package. ("The same WDI package version worked
-#>   yesterday!") In those cases, the problem is almost certainly related to the
-#>   World Bank servers or to your internet connection.
-#> 
-#> You can check if the World Bank web API is currently serving the indicator(s)
-#>   of interest by typing a URL of this form in your web browser:
-#> 
-#> https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=:&per_page=32500&page=1
-#> # A tibble: 99,338 × 11
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=6': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=7': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=8': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=9': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=10': Timeout of 60 seconds was reached
+#> # A tibble: 99,338 × 12
 #>     long   lat group order subregion iso3c iso2c country continent region income
 #>    <dbl> <dbl> <dbl> <int> <chr>     <chr> <chr> <chr>   <chr>     <chr>  <fct> 
 #>  1 -69.9  12.5     1     1 NA        ABW   AW    Aruba   Americas  Latin… High …
@@ -143,17 +123,18 @@ world_data(2020)
 #>  9 -69.9  12.5     1     9 NA        ABW   AW    Aruba   Americas  Latin… High …
 #> 10 -69.9  12.5     1    10 NA        ABW   AW    Aruba   Americas  Latin… High …
 #> # ℹ 99,328 more rows
+#> # ℹ 1 more variable: gdp_per_capita <dbl>
 world_data(2020, indicator = c(life_exp = "SP.DYN.LE00.IN"),
            geometry = "none")
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=1': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=2': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=3': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=4': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=5': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=6': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=7': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=1': HTTP status was '503 Service Unavailable'
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=2': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=3': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=4': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=5': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=6': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=7': Timeout of 60 seconds was reached
 #> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=8': HTTP status was '502 Bad Gateway'
-#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=9': HTTP status was '502 Bad Gateway'
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=9': Timeout of 60 seconds was reached
 #> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=10': HTTP status was '502 Bad Gateway'
 #> Warning: Could not fetch indicator "SP.DYN.LE00.IN" from the World Bank API.
 #> ✖ The following indicators could not be downloaded: SP.DYN.LE00.IN.

@@ -59,8 +59,6 @@ df <- data.frame(iso3c = c("USA", "CAN"), value = c(1, 2))
 if (requireNamespace("maps", quietly = TRUE)) {
   attach_geometry(df, geometry = "polygon")
 }
-#> ℹ `wdj_overrides()` is soft-deprecated; use `country_overrides()` instead.
-#> This message is displayed once per session.
 #> # A tibble: 99,338 × 9
 #>     long   lat group order region subregion iso3c iso2c value
 #>    <dbl> <dbl> <dbl> <int> <chr>  <chr>     <chr> <chr> <dbl>

@@ -356,6 +356,12 @@ attach_geometry <- function(data,
 #' @param scale Natural Earth resolution for the lookup geometry.
 #' @param add Extra attributes to return alongside `iso3c` (any
 #'   [convert_country()] destination, e.g. `"country"`, `"continent"`).
+#' @param tolerance_km Snap an unmatched point to the nearest country when it
+#'   lies within this many kilometres of one (default `25`). Coarse (110m)
+#'   coastlines place some genuinely-onshore coastal points just outside their
+#'   country (New York sits ~0.5 km beyond the simplified US coast); this
+#'   rescues them while leaving open-ocean points `NA` (the nearest land is
+#'   hundreds of km away). Set `0` for a strict point-in-polygon lookup.
 #'
 #' @return A tibble with one row per point: `iso3c` plus any `add` columns
 #'   (`NA` for points that fall in no country, e.g. open ocean).
@@ -365,7 +371,8 @@ attach_geometry <- function(data,
 #' locate_country(lon = c(2.35, -74.0), lat = c(48.85, 40.7))  # Paris, NYC
 #' }
 locate_country <- function(lon = NULL, lat = NULL, points = NULL,
-                           scale = "small", add = "country") {
+                           scale = "small", add = "country",
+                           tolerance_km = 25) {
   need_pkg("sf", "for locate_country()")
   geom <- get_world_sf(scale = scale, project = FALSE)        # lon/lat (EPSG:4326)
   if (is.null(points)) {
@@ -384,11 +391,26 @@ locate_country <- function(lon = NULL, lat = NULL, points = NULL,
   # country_borders() does; quietly_sf() also swallows the s2 toggle's stderr note.
   use_s2 <- sf::sf_use_s2()
   on.exit(quietly_sf(sf::sf_use_s2(use_s2)), add = TRUE)
-  hit <- quietly_sf(suppressWarnings({
+  idx <- quietly_sf(suppressWarnings({
     sf::sf_use_s2(FALSE)
-    sf::st_intersects(points, geom)
+    hit <- sf::st_intersects(points, geom)
+    idx <- vapply(hit, function(h) if (length(h)) h[[1]] else NA_integer_, integer(1))
+    # A coarse coastline (110m) can place a genuinely-onshore point just outside
+    # its country (New York is ~0.5 km beyond the simplified US coast). Snap an
+    # unmatched point to the nearest country when it is within tolerance_km; open
+    # ocean stays NA because the nearest land is hundreds of km away.
+    miss <- which(is.na(idx))
+    if (length(miss) && tolerance_km > 0) {
+      near <- sf::st_nearest_feature(points[miss, ], geom)
+      link <- sf::st_nearest_points(points[miss, ], geom[near, ], by_element = TRUE)
+      dkm <- vapply(seq_along(near), function(i) {
+        m <- sf::st_coordinates(link[i])
+        haversine_km(m[1, 1], m[1, 2], m[2, 1], m[2, 2])
+      }, numeric(1))
+      idx[miss] <- ifelse(dkm <= tolerance_km, near, NA_integer_)
+    }
+    idx
   }))
-  idx <- vapply(hit, function(h) if (length(h)) h[[1]] else NA_integer_, integer(1))
   iso3c <- geom$iso3c[idx]
   out <- tibble::tibble(iso3c = iso3c)
   for (a in setdiff(add, "iso3c")) {

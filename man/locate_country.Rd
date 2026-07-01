@@ -9,7 +9,8 @@ locate_country(
   lat = NULL,
   points = NULL,
   scale = "small",
-  add = "country"
+  add = "country",
+  tolerance_km = 25
 )
 }
 \arguments{
@@ -22,6 +23,13 @@ ignored if \code{points} is supplied).}
 
 \item{add}{Extra attributes to return alongside \code{iso3c} (any
 \code{\link[=convert_country]{convert_country()}} destination, e.g. \code{"country"}, \code{"continent"}).}
+
+\item{tolerance_km}{Snap an unmatched point to the nearest country when it
+lies within this many kilometres of one (default \code{25}). Coarse (110m)
+coastlines place some genuinely-onshore coastal points just outside their
+country (New York sits ~0.5 km beyond the simplified US coast); this
+rescues them while leaving open-ocean points \code{NA} (the nearest land is
+hundreds of km away). Set \code{0} for a strict point-in-polygon lookup.}
 }
 \value{
 A tibble with one row per point: \code{iso3c} plus any \code{add} columns

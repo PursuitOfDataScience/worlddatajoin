@@ -59,6 +59,17 @@ test_that("locate_country errors on mismatched lon/lat lengths", {
   expect_error(locate_country(lon = 1:2, lat = 1), class = "countryatlas_error")
 })
 
+test_that("locate_country snaps coastal points but leaves open ocean NA", {
+  skip_if_not_installed("sf")
+  skip_if_not_installed("rnaturalearth")
+  # New York sits ~0.5 km outside the coarse 110m US coastline: the default
+  # tolerance snaps it to the US, strict mode (tolerance_km = 0) does not.
+  expect_equal(locate_country(lon = -74.0, lat = 40.7)$iso3c, "USA")
+  expect_true(is.na(locate_country(lon = -74.0, lat = 40.7, tolerance_km = 0)$iso3c))
+  # Open ocean is hundreds of km from land, so it stays NA even with snapping.
+  expect_true(is.na(locate_country(lon = -30, lat = -30)$iso3c))
+})
+
 test_that("country_borders returns a tidy edge list", {
   skip_if_not_installed("sf")
   skip_if_not_installed("rnaturalearth")

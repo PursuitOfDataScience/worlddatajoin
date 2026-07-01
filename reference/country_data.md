@@ -70,6 +70,15 @@ A tibble, one row per country (or per country-year for a panel).
 ``` r
 # \donttest{
 country_data(2020, c(co2 = "EN.ATM.CO2E.KT"))
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/EN.ATM.CO2E.KT?format=json&date=2020:2020&per_page=32500&page=2': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/EN.ATM.CO2E.KT?format=json&date=2020:2020&per_page=32500&page=3': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/EN.ATM.CO2E.KT?format=json&date=2020:2020&per_page=32500&page=4': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/EN.ATM.CO2E.KT?format=json&date=2020:2020&per_page=32500&page=5': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/EN.ATM.CO2E.KT?format=json&date=2020:2020&per_page=32500&page=6': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/EN.ATM.CO2E.KT?format=json&date=2020:2020&per_page=32500&page=7': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/EN.ATM.CO2E.KT?format=json&date=2020:2020&per_page=32500&page=8': Timeout of 60 seconds was reached
+#> Warning: URL 'https://api.worldbank.org/v2/en/country/all/indicator/EN.ATM.CO2E.KT?format=json&date=2020:2020&per_page=32500&page=9': Timeout of 60 seconds was reached
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/EN.ATM.CO2E.KT?format=json&date=2020:2020&per_page=32500&page=10': HTTP status was '502 Bad Gateway'
 #> Warning: Could not fetch indicator "EN.ATM.CO2E.KT" from the World Bank API.
 #> ✖ The following indicators could not be downloaded: EN.ATM.CO2E.KT.
 #> 

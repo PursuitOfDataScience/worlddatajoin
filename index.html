@@ -95,6 +95,10 @@
 <li>
 <strong>More country groups</strong>: Mercosur, GCC, Nordic, Visegrád.</li>
 <li>
+<strong>Spatial structure</strong>: <code><a href="reference/country_borders.html">country_borders()</a></code> / <code><a href="reference/neighbors.html">neighbors()</a></code> (who borders whom) and <code><a href="reference/distance_between.html">distance_between()</a></code> (great-circle distance, no <code>sf</code> needed).</li>
+<li>
+<strong><code><a href="reference/dorling_map.html">dorling_map()</a></code></strong>: the Dorling cartogram as a first-class verb.</li>
+<li>
 <strong>Correctness fixes</strong> that change map output (quantile binning, centroids, label placement, projections, override-only lookups) — full <a href="NEWS.html">changelog</a>.</li>
 </ul>
 </div>
@@ -105,10 +109,112 @@
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"PursuitOfDataScience/countryatlas"</span><span class="op">)</span></span></code></pre></div>
 <p>The base install is light. Heavy spatial extras (<code>sf</code>, <code>rnaturalearth</code>, <code>cartogram</code>, <code>biscale</code>, <code>geofacet</code>, <code>gganimate</code>, <code>leaflet</code>, …) live in <code>Suggests</code> and are only needed for the features that use them.</p>
+<div class="section level3">
+<h3 id="optional-features-at-a-glance">Optional features at a glance<a class="anchor" aria-label="anchor" href="#optional-features-at-a-glance"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Feature / verb</th>
+<th>Optional packages required</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+<code><a href="reference/world_map.html">world_map()</a></code> polygon backend</td>
+<td><code>maps</code></td>
+</tr>
+<tr>
+<td>
+<code><a href="reference/world_map.html">world_map()</a></code> sf backend, <code>world_geometry(sf)</code>
+</td>
+<td>
+<code>sf</code>, <code>rnaturalearth</code>, <code>rnaturalearthdata</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>globe_map(backend = "polygon")</code>, <code><a href="reference/spin_globe.html">spin_globe()</a></code>
+</td>
+<td>
+<code>maps</code>, <code>mapproj</code>
+</td>
+</tr>
+<tr>
+<td><code><a href="reference/bivariate_map.html">bivariate_map()</a></code></td>
+<td>
+<code>biscale</code>, <code>sf</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href="reference/cartogram_map.html">cartogram_map()</a></code>, <code><a href="reference/dorling_map.html">dorling_map()</a></code>
+</td>
+<td>
+<code>cartogram</code>, <code>sf</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href="reference/country_borders.html">country_borders()</a></code>, <code><a href="reference/neighbors.html">neighbors()</a></code>
+</td>
+<td><code>sf</code></td>
+</tr>
+<tr>
+<td>
+<code><a href="reference/animate_world.html">animate_world()</a></code> (animated GIF)</td>
+<td>
+<code>gganimate</code> (+ <code>gifski</code> or <code>magick</code>)</td>
+</tr>
+<tr>
+<td><code>interactive_map(engine = "plotly")</code></td>
+<td><code>plotly</code></td>
+</tr>
+<tr>
+<td><code>interactive_map(engine = "ggiraph")</code></td>
+<td><code>ggiraph</code></td>
+</tr>
+<tr>
+<td><code>interactive_map(engine = "leaflet")</code></td>
+<td>
+<code>leaflet</code>, <code>sf</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>interactive_map(engine = "ggsql")</code>, <code><a href="reference/as_ggsql_source.html">as_ggsql_source()</a></code>
+</td>
+<td>
+<code>ggsql</code>, <code>duckdb</code>, <code>DBI</code>, <code>nanoarrow</code>, <code>sf</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><a href="reference/tile_map.html">tile_map()</a></code> with <code>geofacet</code>-style small multiples</td>
+<td><code>geofacet</code></td>
+</tr>
+<tr>
+<td>
+<code><a href="reference/simplify_geometry.html">simplify_geometry()</a></code> with <code>rmapshaper</code>
+</td>
+<td><code>rmapshaper</code></td>
+</tr>
+<tr>
+<td>
+<code><a href="reference/repair_country_names.html">repair_country_names()</a></code> / <code><a href="reference/check_country_match.html">check_country_match()</a></code> with <code>stringdist</code>
+</td>
+<td><code>stringdist</code></td>
+</tr>
+</tbody>
+</table>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pursuitofdatascience.github.io/countryatlas/">countryatlas</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="one-call-to-a-map-ready-tibble">One call to a map-ready tibble<a class="anchor" aria-label="anchor" href="#one-call-to-a-map-ready-tibble"></a>
@@ -130,7 +236,7 @@
 <span><span class="co">#&gt;  9 -69.9  12.5     1     9 &lt;NA&gt;      ABW   AW    Aruba   Americas  Latin… High …</span></span>
 <span><span class="co">#&gt; 10 -69.9  12.5     1    10 &lt;NA&gt;      ABW   AW    Aruba   Americas  Latin… High …</span></span>
 <span><span class="co">#&gt; # ℹ 99,328 more rows</span></span>
-<span><span class="co">#&gt; # ℹ 2 more variables: gdp_per_capita &lt;dbl&gt;, gdp_per_capita_2015 &lt;dbl&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; # ℹ 1 more variable: gdp_per_capita &lt;dbl&gt;</span></span></code></pre></div>
 <p><code><a href="reference/world_data.html">world_data()</a></code> returns the map geometry, the requested World Bank indicator(s), income and continent — already keyed on <code>iso3c</code>/<code>iso2c</code>. Draw a choropleth with the built-in <code><a href="reference/world_map.html">world_map()</a></code> helper (no more hand-rolled <code><a href="https://ggplot2.tidyverse.org/reference/geom_polygon.html" class="external-link">geom_polygon()</a></code> boilerplate):</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/world_map.html">world_map</a></span><span class="op">(</span><span class="va">data_2020</span>, <span class="va">gdp_per_capita</span>, style <span class="op">=</span> <span class="st">"quantile"</span>,</span>
@@ -221,7 +327,7 @@
 <div class="section level2">
 <h2 id="a-whole-vocabulary-of-honest-maps">A whole vocabulary of honest maps<a class="anchor" aria-label="anchor" href="#a-whole-vocabulary-of-honest-maps"></a>
 </h2>
-<p>Beyond the choropleth: proportional-symbol (<code><a href="reference/bubble_map.html">bubble_map()</a></code>), bivariate (<code><a href="reference/bivariate_map.html">bivariate_map()</a></code>), area-honest cartograms (<code><a href="reference/cartogram_map.html">cartogram_map()</a></code>), equal-area tile grids (<code><a href="reference/tile_map.html">tile_map()</a></code>), great-circle flows (<code><a href="reference/flow_map.html">flow_map()</a></code>), an orthographic globe (<code><a href="reference/globe_map.html">globe_map()</a></code>), small multiples (<code><a href="reference/facet_map.html">facet_map()</a></code>), animation (<code><a href="reference/animate_world.html">animate_world()</a></code>) and interactivity (<code><a href="reference/interactive_map.html">interactive_map()</a></code>).</p>
+<p>Beyond the choropleth: proportional-symbol (<code><a href="reference/bubble_map.html">bubble_map()</a></code>), bivariate (<code><a href="reference/bivariate_map.html">bivariate_map()</a></code>), area-honest cartograms (<code><a href="reference/cartogram_map.html">cartogram_map()</a></code>, including a first-class <code><a href="reference/dorling_map.html">dorling_map()</a></code>), equal-area tile grids (<code><a href="reference/tile_map.html">tile_map()</a></code>), great-circle flows (<code><a href="reference/flow_map.html">flow_map()</a></code>), an orthographic globe (<code><a href="reference/globe_map.html">globe_map()</a></code>), small multiples (<code><a href="reference/facet_map.html">facet_map()</a></code>), animation (<code><a href="reference/animate_world.html">animate_world()</a></code>) and interactivity (<code><a href="reference/interactive_map.html">interactive_map()</a></code>).</p>
 <p>The world as a globe, not a rectangle — with the <code>"polygon"</code> backend (only <code>maps</code> + <code>mapproj</code>, no <code>sf</code>) you can draw it and even <strong>spin</strong> it:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/globe_map.html">globe_map</a></span><span class="op">(</span><span class="va">world_snapshot</span><span class="op">$</span><span class="va">countries</span>, <span class="va">continent</span>, backend <span class="op">=</span> <span class="st">"polygon"</span>,</span>
@@ -274,8 +380,12 @@
 <span><span class="co">#&gt;   country.x     gdp iso3c country.y        pop country  area</span></span>
 <span><span class="co">#&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt; 1 Czechia         1 CZE   Czech Republic    10 Czechia    79</span></span>
-<span><span class="co">#&gt; 2 South Korea     2 KOR   Korea, Rep.       51 Korea     100</span></span></code></pre></div>
-<p><code><a href="reference/repair_country_names.html">repair_country_names()</a></code> auto-fixes typos to the closest known country, <code>locate_country(lon, lat)</code> tags coordinates with the country that contains them, and <code><a href="reference/growth_rate.html">growth_rate()</a></code> / <code><a href="reference/index_to.html">index_to()</a></code> add panel metrics.</p>
+<span><span class="co">#&gt; 2 South Korea     2 KOR   Korea, Rep.       51 Korea     100</span></span>
+<span></span>
+<span><span class="co"># great-circle distance between two countries' centroids (no sf needed)</span></span>
+<span><span class="fu"><a href="reference/distance_between.html">distance_between</a></span><span class="op">(</span><span class="st">"France"</span>, <span class="st">"Germany"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 802.3524</span></span></code></pre></div>
+<p><code><a href="reference/repair_country_names.html">repair_country_names()</a></code> auto-fixes typos to the closest known country, <code>locate_country(lon, lat)</code> tags coordinates with the country that contains them, <code><a href="reference/neighbors.html">neighbors()</a></code> / <code><a href="reference/country_borders.html">country_borders()</a></code> answer “who shares a border with whom”, and <code><a href="reference/growth_rate.html">growth_rate()</a></code> / <code><a href="reference/index_to.html">index_to()</a></code> add panel metrics.</p>
 </div>
 <div class="section level2">
 <h2 id="offline-by-default">Offline by default<a class="anchor" aria-label="anchor" href="#offline-by-default"></a>

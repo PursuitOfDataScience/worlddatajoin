@@ -210,7 +210,7 @@ World in Data and V-Dem are especially natural (we already expose V-Dem
   hand-rolling `facet_wrap()`.
 - **Hex/`statebins`-style** standalone, and
   `cartogram_map(type = "dorling")` promoted to a first-class
-  `dorling_map()`.
+  [`dorling_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/dorling_map.md).
 - **Palette polish** — colourblind-safe sequential/diverging presets;
   comma/SI-formatted binned legends (binned currently shows raw breaks).
 
@@ -256,21 +256,24 @@ country count. - ◦ **Multilingual country names** —
 tables, for localized labels and joining non-English source data.
 
 **Geometry & spatial structure** - ★ **Country adjacency / borders
-graph** — `country_borders()` returning a tidy neighbour list (and/or an
-`igraph`), with `neighbors("FRA")` and `distance_between(a, b)`. Unlocks
-contiguity analysis and “no two neighbours share a colour” map
-niceties. - ◐ **Spatial autocorrelation** — Moran’s I / LISA on the
-world spine using the adjacency above (gated `spdep` Suggests); a common
-ask for choropleth users. - ◐ **Multiple Natural Earth scales** — expose
+graph** —
+[`country_borders()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_borders.md)
+returning a tidy neighbour list (and/or an `igraph`), with
+`neighbors("FRA")` and `distance_between(a, b)`. Unlocks contiguity
+analysis and “no two neighbours share a colour” map niceties. - ◐
+**Spatial autocorrelation** — Moran’s I / LISA on the world spine using
+the adjacency above (gated `spdep` Suggests); a common ask for
+choropleth users. - ◐ **Multiple Natural Earth scales** — expose
 `scale = c("110m","50m","10m")` consistently across
 [`world_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_geometry.md)
 and the maps, persisted by `cache_geometry()`. - ◦ **Inset maps** — an
 `inset = TRUE` helper breaking out small/dense regions (Europe, the
 Caribbean, Pacific SIDS) so they’re actually legible.
 
-**Visualization** - ★ **`dorling_map()`** — promote the Dorling
-cartogram to a first-class verb; add contiguous / non-contiguous
-cartograms with sane defaults (extends §2.4). - ★
+**Visualization** - ★
+**[`dorling_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/dorling_map.md)**
+— promote the Dorling cartogram to a first-class verb; add contiguous /
+non-contiguous cartograms with sane defaults (extends §2.4). - ★
 **`bivariate_legend()`** — finish the
 [`bivariate_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bivariate_map.md)
 story with a standalone legend, more palettes, and binning controls. - ◐
@@ -505,8 +508,11 @@ as a soft-deprecated alias) so the public API matches the name.
     [`globe_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/globe_map.md)**
     (§2.3/2.4) — small, high-visibility.
 4.  **One or two §2.7 additions** that are self-contained and
-    high-visibility — `dorling_map()` and/or `country_borders()` are the
-    strongest candidates.
+    high-visibility —
+    [`dorling_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/dorling_map.md)
+    and/or
+    [`country_borders()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_borders.md)
+    are the strongest candidates.
 5.  Defer the broader data-source adapters (§2.1) and historical
     crosswalk (§2.2) to a later cycle unless there’s appetite; they’re
     larger and want their own design.

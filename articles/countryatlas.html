@@ -66,7 +66,7 @@
 <p>Youzhi Yu
 <span style="font-size: 0.8em;">University of Chicago</span></p>
             
-            <h4 data-toc-skip class="date">June 24, 2026</h4>
+            <h4 data-toc-skip class="date">July 1, 2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/PursuitOfDataScience/countryatlas/blob/main/vignettes/countryatlas.Rmd" class="external-link"><code>vignettes/countryatlas.Rmd</code></a></small>
       <div class="d-none name"><code>countryatlas.Rmd</code></div>
@@ -134,10 +134,10 @@ set of indicators for one recent year.</p>
 <span><span class="co">#&gt; $ continent       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Asia"<span style="color: #949494;">, </span>"Europe"<span style="color: #949494;">, </span>"Africa"<span style="color: #949494;">, </span>"Oceania"<span style="color: #949494;">, </span>"Europe"<span style="color: #949494;">, </span>"Afri…</span></span>
 <span><span class="co">#&gt; $ region          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "South Asia"<span style="color: #949494;">, </span>"Europe &amp; Central Asia"<span style="color: #949494;">, </span>"Middle East &amp; …</span></span>
 <span><span class="co">#&gt; $ income          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> Low income<span style="color: #949494;">, </span>Upper middle income<span style="color: #949494;">, </span>Upper middle income<span style="color: #949494;">, </span>…</span></span>
-<span><span class="co">#&gt; $ gdp_per_capita  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 377.6656<span style="color: #949494;">, </span>5867.6510<span style="color: #949494;">, </span>4544.4669<span style="color: #949494;">, </span>13709.0975<span style="color: #949494;">, </span>39780.4153…</span></span>
-<span><span class="co">#&gt; $ population      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 40578842<span style="color: #949494;">, </span>2451636<span style="color: #949494;">, </span>45477389<span style="color: #949494;">, </span>48342<span style="color: #949494;">, </span>79705<span style="color: #949494;">, </span>35635029<span style="color: #949494;">, </span>9…</span></span>
-<span><span class="co">#&gt; $ life_expectancy <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 65.61700<span style="color: #949494;">, </span>78.76900<span style="color: #949494;">, </span>76.12900<span style="color: #949494;">, </span>72.75200<span style="color: #949494;">, </span>84.01600<span style="color: #949494;">, </span>64.2…</span></span>
-<span><span class="co">#&gt; $ co2_per_capita  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.278420956<span style="color: #949494;">, </span>1.845257616<span style="color: #949494;">, </span>4.160058529<span style="color: #949494;">, </span>0.002068595<span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span>…</span></span></code></pre></div>
+<span><span class="co">#&gt; $ gdp_per_capita  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span>6549.234<span style="color: #949494;">, </span>4765.729<span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span>41034.527<span style="color: #949494;">, </span>2845.478<span style="color: #949494;">, </span>18350…</span></span>
+<span><span class="co">#&gt; $ population      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 42647492<span style="color: #949494;">, </span>2377128<span style="color: #949494;">, </span>46814308<span style="color: #949494;">, </span>46765<span style="color: #949494;">, </span>81938<span style="color: #949494;">, </span>37885849<span style="color: #949494;">, </span>9…</span></span>
+<span><span class="co">#&gt; $ life_expectancy <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 66.28900<span style="color: #949494;">, </span>79.77600<span style="color: #949494;">, </span>76.47500<span style="color: #949494;">, </span>72.99200<span style="color: #949494;">, </span>84.18800<span style="color: #949494;">, </span>64.8…</span></span>
+<span><span class="co">#&gt; $ co2_per_capita  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.282980298<span style="color: #949494;">, </span>1.785221494<span style="color: #949494;">, </span>3.980800058<span style="color: #949494;">, </span>0.002138351<span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span>…</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="core-data-assembly">Core data assembly<a class="anchor" aria-label="anchor" href="#core-data-assembly"></a>
@@ -287,7 +287,7 @@ before a half-empty map is published.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 4</span></span></span>
 <span><span class="co">#&gt;   indicator           n n_missing na_rate</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> gdp_per_capita    215         9  0.041<span style="text-decoration: underline;">9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> gdp_per_capita    215        24  0.112 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> population        215         0  0     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> life_expectancy   215         0  0     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> co2_per_capita    215        12  0.055<span style="text-decoration: underline;">8</span></span></span></code></pre></div>
@@ -349,25 +349,25 @@ package mid-pipeline:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
 <span><span class="co">#&gt;   country     gdp_per_capita  rank percentile</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Bermuda            <span style="text-decoration: underline;">109</span>643.     2      0.995</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Ireland             <span style="text-decoration: underline;">97</span>794.     4      0.985</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Luxembourg         <span style="text-decoration: underline;">107</span>467.     3      0.990</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Monaco             <span style="text-decoration: underline;">214</span>360.     1      1    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Switzerland         <span style="text-decoration: underline;">90</span>605.     5      0.980</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Bermuda            <span style="text-decoration: underline;">122</span>118.     2      0.995</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Ireland             <span style="text-decoration: underline;">94</span>475.     4      0.984</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Luxembourg         <span style="text-decoration: underline;">104</span>147.     3      0.989</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Monaco             <span style="text-decoration: underline;">247</span>170.     1      1    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Switzerland         <span style="text-decoration: underline;">90</span>067.     5      0.979</span></span></code></pre></div>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">snapshot</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/aggregate_regions.html">aggregate_regions</a></span><span class="op">(</span><span class="va">population</span>, by <span class="op">=</span> <span class="st">"region"</span>, fun <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 2</span></span></span>
 <span><span class="co">#&gt;   region                     population</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> East Asia &amp; Pacific        <span style="text-decoration: underline;">2</span>356<span style="text-decoration: underline;">430</span>840</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Europe &amp; Central Asia       922<span style="text-decoration: underline;">299</span>160</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Latin America &amp; Caribbean   649<span style="text-decoration: underline;">887</span>983</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Middle East &amp; North Africa  498<span style="text-decoration: underline;">069</span>857</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> North America               373<span style="text-decoration: underline;">018</span>004</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> South Asia                 <span style="text-decoration: underline;">1</span>932<span style="text-decoration: underline;">289</span>074</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> Sub-Saharan Africa         <span style="text-decoration: underline;">1</span>229<span style="text-decoration: underline;">208</span>573</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> <span style="color: #BB0000;">NA</span>                            3<span style="text-decoration: underline;">220</span>137</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> East Asia &amp; Pacific        <span style="text-decoration: underline;">2</span>364<span style="text-decoration: underline;">906</span>595</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Europe &amp; Central Asia       926<span style="text-decoration: underline;">500</span>729</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Latin America &amp; Caribbean   658<span style="text-decoration: underline;">983</span>093</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Middle East &amp; North Africa  519<span style="text-decoration: underline;">229</span>480</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> North America               381<span style="text-decoration: underline;">464</span>223</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> South Asia                 <span style="text-decoration: underline;">1</span>971<span style="text-decoration: underline;">301</span>188</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> Sub-Saharan Africa         <span style="text-decoration: underline;">1</span>291<span style="text-decoration: underline;">044</span>964</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> <span style="color: #BB0000;">NA</span>                            3<span style="text-decoration: underline;">203</span>295</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="performance-and-offline-use">Performance and offline use<a class="anchor" aria-label="anchor" href="#performance-and-offline-use"></a>
@@ -393,7 +393,7 @@ vocabulary of projected, area-honest maps.</p>
 </h2>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R version 4.6.0 (2026-04-24)</span></span>
+<span><span class="co">#&gt; R version 4.6.1 (2026-06-24)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
 <span><span class="co">#&gt; Running under: Ubuntu 24.04.4 LTS</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -419,18 +419,18 @@ vocabulary of projected, area-honest maps.</p>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;  [1] sass_0.4.10        utf8_1.2.6         generics_0.1.4     class_7.3-23      </span></span>
 <span><span class="co">#&gt;  [5] KernSmooth_2.23-26 digest_0.6.39      magrittr_2.0.5     countrycode_1.8.0 </span></span>
-<span><span class="co">#&gt;  [9] evaluate_1.0.5     grid_4.6.0         RColorBrewer_1.1-3 fastmap_1.2.0     </span></span>
+<span><span class="co">#&gt;  [9] evaluate_1.0.5     grid_4.6.1         RColorBrewer_1.1-3 fastmap_1.2.0     </span></span>
 <span><span class="co">#&gt; [13] maps_3.4.3         jsonlite_2.0.0     e1071_1.7-17       viridisLite_0.4.3 </span></span>
 <span><span class="co">#&gt; [17] scales_1.4.0       stringdist_0.9.17  textshaping_1.0.5  jquerylib_0.1.4   </span></span>
 <span><span class="co">#&gt; [21] cli_3.6.6          rlang_1.2.0        withr_3.0.3        cachem_1.1.0      </span></span>
-<span><span class="co">#&gt; [25] yaml_2.3.12        otel_0.2.0         tools_4.6.0        parallel_4.6.0    </span></span>
+<span><span class="co">#&gt; [25] yaml_2.3.12        otel_0.2.0         tools_4.6.1        parallel_4.6.1    </span></span>
 <span><span class="co">#&gt; [29] memoise_2.0.1      vctrs_0.7.3        R6_2.6.1           proxy_0.4-29      </span></span>
 <span><span class="co">#&gt; [33] lifecycle_1.0.5    classInt_0.4-11    fs_2.1.0           htmlwidgets_1.6.4 </span></span>
 <span><span class="co">#&gt; [37] ragg_1.5.2         pkgconfig_2.0.3    desc_1.4.3         pkgdown_2.2.0     </span></span>
 <span><span class="co">#&gt; [41] pillar_1.11.1      bslib_0.11.0       gtable_0.3.6       glue_1.8.1        </span></span>
 <span><span class="co">#&gt; [45] systemfonts_1.3.2  xfun_0.59          tibble_3.3.1       tidyselect_1.2.1  </span></span>
 <span><span class="co">#&gt; [49] knitr_1.51         farver_2.1.2       htmltools_0.5.9    rmarkdown_2.31    </span></span>
-<span><span class="co">#&gt; [53] labeling_0.4.3     compiler_4.6.0     S7_0.2.2</span></span></code></pre></div>
+<span><span class="co">#&gt; [53] labeling_0.4.3     compiler_4.6.1     S7_0.2.2</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -44,7 +44,7 @@ audit_coverage(countryatlas::world_snapshot$countries)
 #> # A tibble: 4 × 4
 #>   indicator           n n_missing na_rate
 #>   <chr>           <int>     <int>   <dbl>
-#> 1 gdp_per_capita    215         9  0.0419
+#> 1 gdp_per_capita    215        24  0.112 
 #> 2 population        215         0  0     
 #> 3 life_expectancy   215         0  0     
 #> 4 co2_per_capita    215        12  0.0558
@@ -53,12 +53,12 @@ audit_coverage(countryatlas::world_snapshot$countries)
 #> # A tibble: 8 × 3
 #>   region                     n_countries na_rate
 #>   <chr>                            <int>   <dbl>
-#> 1 East Asia & Pacific                 37  0.0541
-#> 2 Latin America & Caribbean           41  0.0488
-#> 3 Middle East & North Africa          21  0.0476
-#> 4 Sub-Saharan Africa                  48  0.0417
-#> 5 Europe & Central Asia               56  0.0357
-#> 6 North America                        3  0     
-#> 7 South Asia                           8  0     
+#> 1 South Asia                           8  0.25  
+#> 2 East Asia & Pacific                 37  0.216 
+#> 3 Middle East & North Africa          21  0.143 
+#> 4 Latin America & Caribbean           41  0.0976
+#> 5 Europe & Central Asia               56  0.0893
+#> 6 Sub-Saharan Africa                  48  0.0417
+#> 7 North America                        3  0     
 #> 8 NA                                   1  0     
 ```

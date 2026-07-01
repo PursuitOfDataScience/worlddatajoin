@@ -104,7 +104,32 @@ subsetting.
 ``` r
 # \donttest{
 world_data(2020)
-#> # A tibble: 99,338 × 13
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=1': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=2': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=3': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=4': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=5': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=6': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=7': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=8': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=9': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=2020:2020&per_page=32500&page=10': HTTP status was '502 Bad Gateway'
+#> Warning: Could not fetch indicator "NY.GDP.PCAP.KD" from the World Bank API.
+#> ✖ The following indicators could not be downloaded: NY.GDP.PCAP.KD.
+#> 
+#> Please make sure that you are running the latest version of the `WDI` package,
+#>   and that the arguments you are using in the `WDI()` function are valid.
+#> 
+#> Sometimes, downloads will suddenly stop working, even if nothing has changed in
+#>   the R code of the WDI package. ("The same WDI package version worked
+#>   yesterday!") In those cases, the problem is almost certainly related to the
+#>   World Bank servers or to your internet connection.
+#> 
+#> You can check if the World Bank web API is currently serving the indicator(s)
+#>   of interest by typing a URL of this form in your web browser:
+#> 
+#> https://api.worldbank.org/v2/en/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=:&per_page=32500&page=1
+#> # A tibble: 99,338 × 11
 #>     long   lat group order subregion iso3c iso2c country continent region income
 #>    <dbl> <dbl> <dbl> <int> <chr>     <chr> <chr> <chr>   <chr>     <chr>  <fct> 
 #>  1 -69.9  12.5     1     1 NA        ABW   AW    Aruba   Americas  Latin… High …
@@ -118,22 +143,46 @@ world_data(2020)
 #>  9 -69.9  12.5     1     9 NA        ABW   AW    Aruba   Americas  Latin… High …
 #> 10 -69.9  12.5     1    10 NA        ABW   AW    Aruba   Americas  Latin… High …
 #> # ℹ 99,328 more rows
-#> # ℹ 2 more variables: gdp_per_capita <dbl>, gdp_per_capita_2015 <dbl>
 world_data(2020, indicator = c(life_exp = "SP.DYN.LE00.IN"),
            geometry = "none")
-#> # A tibble: 216 × 7
-#>    iso3c iso2c country             continent region              income life_exp
-#>    <chr> <chr> <chr>               <chr>     <chr>               <fct>     <dbl>
-#>  1 AFG   AF    Afghanistan         Asia      Middle East, North… Low i…     61.5
-#>  2 ALB   AL    Albania             Europe    Europe & Central A… Upper…     77.8
-#>  3 DZA   DZ    Algeria             Africa    Middle East, North… Upper…     73.3
-#>  4 ASM   AS    American Samoa      Oceania   East Asia & Pacific High …     72.7
-#>  5 AND   AD    Andorra             Europe    Europe & Central A… High …     79.4
-#>  6 AGO   AO    Angola              Africa    Sub-Saharan Africa  Lower…     63.1
-#>  7 ATG   AG    Antigua and Barbuda Americas  Latin America & Ca… High …     77.2
-#>  8 ARG   AR    Argentina           Americas  Latin America & Ca… Upper…     75.9
-#>  9 ARM   AM    Armenia             Asia      Europe & Central A… Upper…     73.4
-#> 10 ABW   AW    Aruba               Americas  Latin America & Ca… High …     75.4
-#> # ℹ 206 more rows
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=1': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=2': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=3': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=4': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=5': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=6': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=7': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=8': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=9': HTTP status was '502 Bad Gateway'
+#> Warning: cannot open URL 'https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=2020:2020&per_page=32500&page=10': HTTP status was '502 Bad Gateway'
+#> Warning: Could not fetch indicator "SP.DYN.LE00.IN" from the World Bank API.
+#> ✖ The following indicators could not be downloaded: SP.DYN.LE00.IN.
+#> 
+#> Please make sure that you are running the latest version of the `WDI` package,
+#>   and that the arguments you are using in the `WDI()` function are valid.
+#> 
+#> Sometimes, downloads will suddenly stop working, even if nothing has changed in
+#>   the R code of the WDI package. ("The same WDI package version worked
+#>   yesterday!") In those cases, the problem is almost certainly related to the
+#>   World Bank servers or to your internet connection.
+#> 
+#> You can check if the World Bank web API is currently serving the indicator(s)
+#>   of interest by typing a URL of this form in your web browser:
+#> 
+#> https://api.worldbank.org/v2/en/country/all/indicator/SP.DYN.LE00.IN?format=json&date=:&per_page=32500&page=1
+#> # A tibble: 249 × 6
+#>    iso3c iso2c country           continent  region                        income
+#>    <chr> <chr> <chr>             <chr>      <chr>                         <fct> 
+#>  1 AFG   AF    Afghanistan       Asia       Middle East, North Africa, A… Low i…
+#>  2 ALB   AL    Albania           Europe     Europe & Central Asia         Upper…
+#>  3 DZA   DZ    Algeria           Africa     Middle East, North Africa, A… Upper…
+#>  4 ASM   AS    American Samoa    Oceania    East Asia & Pacific           High …
+#>  5 AND   AD    Andorra           Europe     Europe & Central Asia         High …
+#>  6 AGO   AO    Angola            Africa     Sub-Saharan Africa            Lower…
+#>  7 AIA   AI    Anguilla          Americas   NA                            NA    
+#>  8 ATA   AQ    Antarctica        Antarctica NA                            NA    
+#>  9 ATG   AG    Antigua & Barbuda Americas   Latin America & Caribbean     High …
+#> 10 ARG   AR    Argentina         Americas   Latin America & Caribbean     Upper…
+#> # ℹ 239 more rows
 # }
 ```

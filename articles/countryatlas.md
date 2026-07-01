@@ -53,10 +53,10 @@ dplyr::glimpse(snapshot)
 #> $ continent       <chr> "Asia", "Europe", "Africa", "Oceania", "Europe", "Afri…
 #> $ region          <chr> "South Asia", "Europe & Central Asia", "Middle East & …
 #> $ income          <fct> Low income, Upper middle income, Upper middle income, …
-#> $ gdp_per_capita  <dbl> 377.6656, 5867.6510, 4544.4669, 13709.0975, 39780.4153…
-#> $ population      <dbl> 40578842, 2451636, 45477389, 48342, 79705, 35635029, 9…
-#> $ life_expectancy <dbl> 65.61700, 78.76900, 76.12900, 72.75200, 84.01600, 64.2…
-#> $ co2_per_capita  <dbl> 0.278420956, 1.845257616, 4.160058529, 0.002068595, NA…
+#> $ gdp_per_capita  <dbl> NA, 6549.234, 4765.729, NA, 41034.527, 2845.478, 18350…
+#> $ population      <dbl> 42647492, 2377128, 46814308, 46765, 81938, 37885849, 9…
+#> $ life_expectancy <dbl> 66.28900, 79.77600, 76.47500, 72.99200, 84.18800, 64.8…
+#> $ co2_per_capita  <dbl> 0.282980298, 1.785221494, 3.980800058, 0.002138351, NA…
 ```
 
 ## Core data assembly
@@ -235,7 +235,7 @@ audit_coverage(snapshot)$na_rates
 #> # A tibble: 4 × 4
 #>   indicator           n n_missing na_rate
 #>   <chr>           <int>     <int>   <dbl>
-#> 1 gdp_per_capita    215         9  0.0419
+#> 1 gdp_per_capita    215        24  0.112 
 #> 2 population        215         0  0     
 #> 3 life_expectancy   215         0  0     
 #> 4 co2_per_capita    215        12  0.0558
@@ -310,11 +310,11 @@ snapshot |>
 #> # A tibble: 5 × 4
 #>   country     gdp_per_capita  rank percentile
 #>   <chr>                <dbl> <int>      <dbl>
-#> 1 Bermuda            109643.     2      0.995
-#> 2 Ireland             97794.     4      0.985
-#> 3 Luxembourg         107467.     3      0.990
-#> 4 Monaco             214360.     1      1    
-#> 5 Switzerland         90605.     5      0.980
+#> 1 Bermuda            122118.     2      0.995
+#> 2 Ireland             94475.     4      0.984
+#> 3 Luxembourg         104147.     3      0.989
+#> 4 Monaco             247170.     1      1    
+#> 5 Switzerland         90067.     5      0.979
 ```
 
 ``` r
@@ -324,14 +324,14 @@ snapshot |>
 #> # A tibble: 8 × 2
 #>   region                     population
 #>   <chr>                           <dbl>
-#> 1 East Asia & Pacific        2356430840
-#> 2 Europe & Central Asia       922299160
-#> 3 Latin America & Caribbean   649887983
-#> 4 Middle East & North Africa  498069857
-#> 5 North America               373018004
-#> 6 South Asia                 1932289074
-#> 7 Sub-Saharan Africa         1229208573
-#> 8 NA                            3220137
+#> 1 East Asia & Pacific        2364906595
+#> 2 Europe & Central Asia       926500729
+#> 3 Latin America & Caribbean   658983093
+#> 4 Middle East & North Africa  519229480
+#> 5 North America               381464223
+#> 6 South Asia                 1971301188
+#> 7 Sub-Saharan Africa         1291044964
+#> 8 NA                            3203295
 ```
 
 ## Performance and offline use
@@ -356,7 +356,7 @@ area-honest maps.
 ``` r
 
 sessionInfo()
-#> R version 4.6.0 (2026-04-24)
+#> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.4 LTS
 #> 
@@ -382,16 +382,16 @@ sessionInfo()
 #> loaded via a namespace (and not attached):
 #>  [1] sass_0.4.10        utf8_1.2.6         generics_0.1.4     class_7.3-23      
 #>  [5] KernSmooth_2.23-26 digest_0.6.39      magrittr_2.0.5     countrycode_1.8.0 
-#>  [9] evaluate_1.0.5     grid_4.6.0         RColorBrewer_1.1-3 fastmap_1.2.0     
+#>  [9] evaluate_1.0.5     grid_4.6.1         RColorBrewer_1.1-3 fastmap_1.2.0     
 #> [13] maps_3.4.3         jsonlite_2.0.0     e1071_1.7-17       viridisLite_0.4.3 
 #> [17] scales_1.4.0       stringdist_0.9.17  textshaping_1.0.5  jquerylib_0.1.4   
 #> [21] cli_3.6.6          rlang_1.2.0        withr_3.0.3        cachem_1.1.0      
-#> [25] yaml_2.3.12        otel_0.2.0         tools_4.6.0        parallel_4.6.0    
+#> [25] yaml_2.3.12        otel_0.2.0         tools_4.6.1        parallel_4.6.1    
 #> [29] memoise_2.0.1      vctrs_0.7.3        R6_2.6.1           proxy_0.4-29      
 #> [33] lifecycle_1.0.5    classInt_0.4-11    fs_2.1.0           htmlwidgets_1.6.4 
 #> [37] ragg_1.5.2         pkgconfig_2.0.3    desc_1.4.3         pkgdown_2.2.0     
 #> [41] pillar_1.11.1      bslib_0.11.0       gtable_0.3.6       glue_1.8.1        
 #> [45] systemfonts_1.3.2  xfun_0.59          tibble_3.3.1       tidyselect_1.2.1  
 #> [49] knitr_1.51         farver_2.1.2       htmltools_0.5.9    rmarkdown_2.31    
-#> [53] labeling_0.4.3     compiler_4.6.0     S7_0.2.2
+#> [53] labeling_0.4.3     compiler_4.6.1     S7_0.2.2
 ```

@@ -25,6 +25,7 @@
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/common_indicators.html</loc></url>
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/complete_years.html</loc></url>
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/convert_country.html</loc></url>
+<url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/country_borders.html</loc></url>
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/country_codes.html</loc></url>
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/country_data.html</loc></url>
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/country_groups.html</loc></url>
@@ -33,6 +34,8 @@
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/country_join_all.html</loc></url>
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/country_meta.html</loc></url>
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/countryatlas-package.html</loc></url>
+<url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/distance_between.html</loc></url>
+<url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/dorling_map.html</loc></url>
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/facet_map.html</loc></url>
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/flow_map.html</loc></url>
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/geom_country_labels.html</loc></url>
@@ -44,6 +47,7 @@
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/interactive_map.html</loc></url>
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/join_world.html</loc></url>
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/locate_country.html</loc></url>
+<url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/neighbors.html</loc></url>
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/per_capita.html</loc></url>
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/rank_countries.html</loc></url>
 <url><loc>https://pursuitofdatascience.github.io/countryatlas/reference/repair_country_names.html</loc></url>

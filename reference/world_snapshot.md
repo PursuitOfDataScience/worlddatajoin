@@ -34,3 +34,4 @@ A list with two elements:
 ## Source
 
 World Bank via WDI; geometry from Natural Earth via rnaturalearth.
+Snapshot year: 2024.

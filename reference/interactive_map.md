@@ -33,6 +33,10 @@ interactive_map(
 
   `"plotly"` (default), `"ggiraph"`, `"leaflet"` or `"ggsql"`
   (database-side rendering to a Vega-Lite widget; needs an `sf` frame).
+  `tooltip` is honoured by the `"ggiraph"` and `"leaflet"` engines
+  (defaults to `fill` when omitted); `"plotly"`'s hover is controlled by
+  [`world_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_map.md)
+  aesthetics instead, and `"ggsql"` has no hover concept.
 
 - ...:
 

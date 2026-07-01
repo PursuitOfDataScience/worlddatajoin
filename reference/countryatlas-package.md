@@ -21,7 +21,10 @@ Everything else is opt-in.
 [`world_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_data.md),
 [`country_data()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_data.md),
 [`world_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/world_geometry.md),
-[`locate_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/locate_country.md).
+[`locate_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/locate_country.md),
+[`country_borders()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_borders.md),
+[`neighbors()`](https://pursuitofdatascience.github.io/countryatlas/reference/neighbors.md),
+[`distance_between()`](https://pursuitofdatascience.github.io/countryatlas/reference/distance_between.md).
 
 ## The join engine
 
@@ -71,6 +74,7 @@ and the datasets
 [`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md),
 [`bivariate_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bivariate_map.md),
 [`cartogram_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/cartogram_map.md),
+[`dorling_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/dorling_map.md),
 [`tile_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/tile_map.md),
 [`flow_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/flow_map.md),
 [`animate_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/animate_world.md),

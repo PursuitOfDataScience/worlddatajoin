@@ -78,7 +78,10 @@ R Markdown / Quarto. Engines are all optional <code>Suggests</code>.</p>
 
 <dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
 <dd><p><code>"plotly"</code> (default), <code>"ggiraph"</code>, <code>"leaflet"</code> or <code>"ggsql"</code>
-(database-side rendering to a Vega-Lite widget; needs an <code>sf</code> frame).</p></dd>
+(database-side rendering to a Vega-Lite widget; needs an <code>sf</code> frame).
+<code>tooltip</code> is honoured by the <code>"ggiraph"</code> and <code>"leaflet"</code> engines (defaults
+to <code>fill</code> when omitted); <code>"plotly"</code>'s hover is controlled by <code><a href="world_map.html">world_map()</a></code>
+aesthetics instead, and <code>"ggsql"</code> has no hover concept.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

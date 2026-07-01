@@ -12,7 +12,8 @@ cartogram_map(
   weight,
   type = c("contiguous", "dorling", "noncontiguous"),
   fill = NULL,
-  projection = "equal_earth"
+  projection = "equal_earth",
+  ...
 )
 ```
 
@@ -37,6 +38,12 @@ cartogram_map(
 - projection:
 
   Projection (an equal-area CRS is recommended).
+
+- ...:
+
+  Passed to the underlying `cartogram::cartogram_*()` function (e.g.
+  `itermax`, or `k` for `type = "dorling"` – see
+  [`dorling_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/dorling_map.md)).
 
 ## Value
 

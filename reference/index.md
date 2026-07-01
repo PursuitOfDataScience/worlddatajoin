@@ -13,6 +13,12 @@ geometry.
   : Geometry without the data
 - [`locate_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/locate_country.md)
   : Tag coordinates with the country that contains them
+- [`country_borders()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_borders.md)
+  : Country adjacency (shared land borders)
+- [`neighbors()`](https://pursuitofdatascience.github.io/countryatlas/reference/neighbors.md)
+  : A country's neighbours
+- [`distance_between()`](https://pursuitofdatascience.github.io/countryatlas/reference/distance_between.md)
+  : Great-circle distance between two countries
 
 ## The join engine
 
@@ -91,6 +97,8 @@ A full vocabulary of projected, area-honest maps.
   : Two-variable bivariate choropleth
 - [`cartogram_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/cartogram_map.md)
   : Area-honest cartogram
+- [`dorling_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/dorling_map.md)
+  : Dorling cartogram (first-class verb)
 - [`tile_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/tile_map.md)
   : Equal-area world tile grid
 - [`flow_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/flow_map.md)

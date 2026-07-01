@@ -101,4 +101,4 @@ moment your country panel lives in a warehouse — millions of rows, many
 years — pushing the aggregation and rendering down to where the data
 already is, rather than pulling it into R, is the whole point.
 countryatlas makes sure what you push down is keyed on an honest,
-reconciled ISO spine. \`\`\`
+reconciled ISO spine.

@@ -77,6 +77,10 @@ world_data(2020, c(gdp = "NY.GDP.PCAP.KD", life = "SP.DYN.LE00.IN"),
 world_data(2020, c(pop = "SP.POP.TOTL"), geometry = "sf") |>
   cartogram_map(pop, type = "dorling")
 
+# The same Dorling cartogram as a first-class verb, with its tuning exposed
+world_data(2020, c(pop = "SP.POP.TOTL"), geometry = "sf") |>
+  dorling_map(pop, k = 4)
+
 # Animated choropleth over a year panel — needs `gganimate`
 world_data(2000:2020, c(gdp = "NY.GDP.PCAP.KD")) |>
   animate_world(gdp)
@@ -84,6 +88,41 @@ world_data(2000:2020, c(gdp = "NY.GDP.PCAP.KD")) |>
 # Interactive choropleth — needs `leaflet`, `ggiraph` or `plotly`
 world_data(2020) |>
   interactive_map(gdp_per_capita, engine = "plotly")
+```
+
+## Country adjacency and distance
+
+Two lightweight spatial helpers that aren’t choropleths at all.
+[`distance_between()`](https://pursuitofdatascience.github.io/countryatlas/reference/distance_between.md)
+answers “how far apart” from the bundled \[country_meta\] centroids – no
+`sf` or network required:
+
+``` r
+
+distance_between("France", "Germany")
+#> [1] 802.3524
+```
+
+[`country_borders()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_borders.md)
+/
+[`neighbors()`](https://pursuitofdatascience.github.io/countryatlas/reference/neighbors.md)
+answer “who borders whom”, built from polygon topology, so they need
+`sf`:
+
+``` r
+
+neighbors("France")
+#> # A tibble: 8 × 3
+#>   iso3c neighbor neighbor_country
+#>   <chr> <chr>    <chr>           
+#> 1 FRA   SUR      Suriname        
+#> 2 FRA   LUX      Luxembourg      
+#> 3 FRA   ITA      Italy           
+#> 4 FRA   BRA      Brazil          
+#> 5 FRA   DEU      Germany         
+#> 6 FRA   CHE      Switzerland     
+#> 7 FRA   BEL      Belgium         
+#> 8 FRA   ESP      Spain
 ```
 
 Each degrades gracefully: if the optional package is missing you get a

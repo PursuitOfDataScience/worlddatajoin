@@ -134,6 +134,10 @@ optional packages, so they are shown here as code:</p>
 <span><span class="fu"><a href="../reference/world_data.html">world_data</a></span><span class="op">(</span><span class="fl">2020</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>pop <span class="op">=</span> <span class="st">"SP.POP.TOTL"</span><span class="op">)</span>, geometry <span class="op">=</span> <span class="st">"sf"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/cartogram_map.html">cartogram_map</a></span><span class="op">(</span><span class="va">pop</span>, type <span class="op">=</span> <span class="st">"dorling"</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># The same Dorling cartogram as a first-class verb, with its tuning exposed</span></span>
+<span><span class="fu"><a href="../reference/world_data.html">world_data</a></span><span class="op">(</span><span class="fl">2020</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>pop <span class="op">=</span> <span class="st">"SP.POP.TOTL"</span><span class="op">)</span>, geometry <span class="op">=</span> <span class="st">"sf"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/dorling_map.html">dorling_map</a></span><span class="op">(</span><span class="va">pop</span>, k <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># Animated choropleth over a year panel — needs `gganimate`</span></span>
 <span><span class="fu"><a href="../reference/world_data.html">world_data</a></span><span class="op">(</span><span class="fl">2000</span><span class="op">:</span><span class="fl">2020</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>gdp <span class="op">=</span> <span class="st">"NY.GDP.PCAP.KD"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/animate_world.html">animate_world</a></span><span class="op">(</span><span class="va">gdp</span><span class="op">)</span></span>
@@ -141,6 +145,32 @@ optional packages, so they are shown here as code:</p>
 <span><span class="co"># Interactive choropleth — needs `leaflet`, `ggiraph` or `plotly`</span></span>
 <span><span class="fu"><a href="../reference/world_data.html">world_data</a></span><span class="op">(</span><span class="fl">2020</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/interactive_map.html">interactive_map</a></span><span class="op">(</span><span class="va">gdp_per_capita</span>, engine <span class="op">=</span> <span class="st">"plotly"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="country-adjacency-and-distance">Country adjacency and distance<a class="anchor" aria-label="anchor" href="#country-adjacency-and-distance"></a>
+</h2>
+<p>Two lightweight spatial helpers that aren’t choropleths at all.
+<code><a href="../reference/distance_between.html">distance_between()</a></code> answers “how far apart” from the bundled
+[country_meta] centroids – no <code>sf</code> or network required:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/distance_between.html">distance_between</a></span><span class="op">(</span><span class="st">"France"</span>, <span class="st">"Germany"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 802.3524</span></span></code></pre></div>
+<p><code><a href="../reference/country_borders.html">country_borders()</a></code> / <code><a href="../reference/neighbors.html">neighbors()</a></code> answer “who
+borders whom”, built from polygon topology, so they need
+<code>sf</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/neighbors.html">neighbors</a></span><span class="op">(</span><span class="st">"France"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 3</span></span></span>
+<span><span class="co">#&gt;   iso3c neighbor neighbor_country</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> FRA   SUR      Suriname        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> FRA   LUX      Luxembourg      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> FRA   ITA      Italy           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> FRA   BRA      Brazil          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> FRA   DEU      Germany         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> FRA   CHE      Switzerland     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> FRA   BEL      Belgium         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> FRA   ESP      Spain</span></span></code></pre></div>
 <p>Each degrades gracefully: if the optional package is missing you get
 a clear, actionable message (and <code><a href="../reference/animate_world.html">animate_world()</a></code> falls back
 to a faceted small-multiple).</p>

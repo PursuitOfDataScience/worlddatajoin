@@ -36,6 +36,43 @@ test_that("sf-only plots error cleanly without sf", {
   expect_error(bivariate_map(snap, gdp_per_capita, life_expectancy))
 })
 
+test_that("interactive_map(engine='ggiraph') accepts a custom tooltip", {
+  skip_if_not_installed("ggiraph")
+  skip_if_not_installed("maps")
+  mapdf <- attach_geometry(snap, geometry = "polygon")
+  expect_s3_class(interactive_map(mapdf, gdp_per_capita, engine = "ggiraph"), "girafe")
+  expect_s3_class(
+    interactive_map(mapdf, gdp_per_capita, tooltip = country, engine = "ggiraph"),
+    "girafe"
+  )
+})
+
+test_that("interactive_map(engine='leaflet') accepts a custom tooltip", {
+  skip_if_not_installed("leaflet")
+  skip_if_not_installed("sf")
+  expect_s3_class(interactive_map(snap, gdp_per_capita, engine = "leaflet"), "leaflet")
+  expect_s3_class(
+    interactive_map(snap, gdp_per_capita, tooltip = country, engine = "leaflet"),
+    "leaflet"
+  )
+})
+
+test_that("dorling_map errors cleanly without sf/cartogram", {
+  skip_if(requireNamespace("sf", quietly = TRUE) &&
+            requireNamespace("cartogram", quietly = TRUE))
+  expect_error(dorling_map(snap, gdp_per_capita))
+})
+
+test_that("dorling_map builds a ggplot (needs sf + cartogram)", {
+  skip_if_not_installed("sf")
+  skip_if_not_installed("cartogram")
+  skip_if_not_installed("rnaturalearth")
+  sfdata <- world_geometry("countries", geometry = "sf")
+  sfdata <- dplyr::inner_join(sfdata, snap[, c("iso3c", "population")], by = "iso3c")
+  p <- dorling_map(sfdata, population)
+  expect_s3_class(p, "ggplot")
+})
+
 test_that("great_circle returns the requested number of points", {
   gc <- countryatlas:::great_circle(0, 0, 90, 0, n = 25)
   expect_equal(nrow(gc), 25)

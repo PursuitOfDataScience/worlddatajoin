@@ -57,15 +57,36 @@ convert_country <- function(x, to = "iso3c", from = "country.name",
                             custom_match = wdj_overrides(), warn = TRUE) {
   m <- convert_dest_map()
   dest <- if (to %in% names(m)) m[[to]] else to
-  # When reading names, resolve to the override-corrected iso3c first and then
-  # convert iso3c -> destination, so curated entities (Kosovo, Canary Islands,
-  # ...) resolve for EVERY destination, not just iso3c.
-  if (identical(from, "country.name")) {
-    iso <- wdj_to_iso3c(x, origin = "country.name", custom_match = custom_match)
+  # When reading names or iso3c, resolve to the override-corrected iso3c first
+  # and then convert iso3c -> destination, so curated entities (Kosovo, Canary
+  # Islands, ...) resolve for EVERY destination, not just iso3c.
+  if (from %in% c("country.name", "iso3c")) {
+    iso <- wdj_to_iso3c(x, origin = from, custom_match = custom_match)
     if (identical(dest, "iso3c")) return(iso)
-    return(suppressWarnings(
+    out <- suppressWarnings(
       countrycode::countrycode(iso, origin = "iso3c", destination = dest, warn = warn)
-    ))
+    )
+    # A handful of user-assigned codes (Kosovo's XKX) have NO row at all in
+    # countrycode::codelist, so the iso3c round-trip above is NA for every
+    # destination -- even ones (flag, name, region) that countrycode's own
+    # country.name matching resolves directly. Recover those from the
+    # original name rather than lose information the iso3c hop doesn't have.
+    if (identical(from, "country.name")) {
+      miss <- is.na(out)
+      if (any(miss)) {
+        out[miss] <- suppressWarnings(
+          countrycode::countrycode(x[miss], origin = "country.name",
+                                   destination = dest, warn = FALSE)
+        )
+      }
+    }
+    # Even direct name matching doesn't classify iso2c/continent/region for
+    # XKX; apply the same fallback standardize_country() uses, so
+    # convert_country() and locate_country() agree with it.
+    if (dest %in% c("iso2c", "continent", "region")) {
+      out <- apply_code_fallback(tibble::tibble(iso3c = iso, "{dest}" := out))[[dest]]
+    }
+    return(out)
   }
   suppressWarnings(
     countrycode::countrycode(x, origin = from, destination = dest, warn = warn)

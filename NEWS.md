@@ -41,6 +41,13 @@ behaviour may see different maps or values.
 * `country_overrides()` — preferred name for `wdj_overrides()` (kept as an
   alias) after the rename to countryatlas.
 * `country_groups_tbl` gains `Mercosur`, `GCC`, `Nordic` and `Visegrad`.
+* `country_borders()` — a tidy adjacency edge list built from polygon topology
+  (`sf::st_touches()`), with `neighbors()` for a vectorised per-country lookup.
+* `distance_between()` — great-circle (haversine) distance between two
+  countries' centroids; needs neither `sf` nor the network.
+* `dorling_map()` — the Dorling cartogram promoted to a first-class verb, with
+  `k`/`itermax` tuning; `cartogram_map()` itself gains `...` passthrough to the
+  underlying `cartogram::cartogram_*()` call.
 
 ## Bug fixes
 
@@ -61,8 +68,38 @@ behaviour may see different maps or values.
 * `projection = "plate_carree"` built an incoherent PROJ string
   (`+proj=longlat … +units=m`); it is now true equirectangular (`+proj=eqc`).
 * `convert_country()` only applied `wdj_overrides()` for `to = "iso3c"`, so
-  override-only entities (e.g. "Canary Islands") returned `NA` for derived
-  destinations. It now routes through the corrected `iso3c` first.
+  override-only entities (e.g. "Canary Islands", "Azores", "Bonaire") returned
+  `NA` for every other destination (continent, region, iso2c, flag, currency,
+  country name, ...). It now resolves the override-corrected `iso3c` first and
+  derives every other destination from that.
+* Kosovo's `XKX` needed extra care: it has no row at all in
+  `countrycode::codelist`, so deriving destinations purely via the `iso3c`
+  round-trip above is `NA` for everything — which would have *regressed*
+  `flag`/`region`/`country`, since 1.0.0 already resolved those via direct
+  name matching (verified against the actual 1.0.0 code). `convert_country()`
+  now recovers from the original name when the `iso3c` round-trip comes back
+  empty, and fills `iso2c`/`continent` (which neither path classifies) from
+  the same curated fallback `standardize_country()` uses. Net effect versus
+  1.0.0: zero regressions, plus newly-working `continent`/`iso2c` for Kosovo —
+  which also fixes `locate_country(..., add = "continent")` for points inside
+  it.
+* `interactive_map(..., tooltip = )` was accepted but silently ignored by every
+  engine (pre-dating 2.0.0). The `"ggiraph"` and `"leaflet"` engines now use the
+  supplied `tooltip` column, defaulting to `fill` as before when omitted.
+
+## Housekeeping
+
+* The `gdp_per_capita_2015` compatibility alias (a one-cycle deprecation shim
+  from 1.0.0) is now opt-in: set `options(countryatlas.gdp_compat = TRUE)` to
+  restore it. The default is `FALSE`, so `world_data()` no longer emits a
+  duplicate column.
+* `world_snapshot` refreshed to year **2024** (was 2022) and rebuilt with the
+  latest WDI data and curated overrides.
+* `country_groups_tbl` membership date bumped to 2026-06-01 (was 2024-01-01).
+* `?world_snapshot` was out of sync with the rebuilt data (missing the
+  "Snapshot year: 2024" note); regenerated.
+* Fixed a stray orphaned code fence at the end of the *countryatlas and
+  ggsql* vignette that broke its markdown structure.
 
 # countryatlas 1.0.0
 

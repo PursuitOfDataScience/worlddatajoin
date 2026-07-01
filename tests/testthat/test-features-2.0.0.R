@@ -45,6 +45,25 @@ test_that("convert_country routes overrides through iso3c for all destinations",
   expect_equal(convert_country("Canary Islands", to = "continent"), "Europe")
   expect_equal(convert_country(c("Japan", "Brazil"), to = "flag"),
                c("\U0001F1EF\U0001F1F5", "\U0001F1E7\U0001F1F7"))
+  # Kosovo's XKX has NO row at all in countrycode::codelist, so routing every
+  # destination through the iso3c round-trip is NA for everything, even ones
+  # (flag/region/country) that 1.0.0 already got right via direct name
+  # matching -- recover those from the original name rather than regress
+  # them. iso2c/continent never resolved even via direct name matching;
+  # those come from the same curated fallback standardize_country() uses.
+  expect_equal(convert_country("Kosovo", to = "continent"), "Europe")
+  expect_equal(convert_country("Kosovo", to = "region"), "Europe & Central Asia")
+  expect_equal(convert_country("Kosovo", to = "iso2c"), "XK")
+  expect_equal(convert_country("Kosovo", to = "flag"), "\U0001F1FD\U0001F1F0")
+  expect_equal(convert_country("Kosovo", to = "country"), "Kosovo")
+  # Genuinely missing data (countrycode has no currency for Kosovo) stays NA,
+  # not silently invented -- both before and after this fix.
+  expect_true(is.na(convert_country("Kosovo", to = "currency")))
+  # from = "iso3c" has no name to recover from, so it only gets the curated
+  # iso2c/continent/region fallback (the locate_country()/standardize_country()
+  # path), not the name-matching recovery -- a narrower but honest boundary.
+  expect_equal(convert_country("XKX", to = "continent", from = "iso3c"), "Europe")
+  expect_true(is.na(convert_country("XKX", to = "flag", from = "iso3c")))
 })
 
 test_that("new country groups are present and correctly sized", {
@@ -95,4 +114,47 @@ test_that("polygon centroids are one antimeridian-safe row per iso3c", {
   # USA centroid sits on the contiguous landmass, not pulled to ~0 by Alaska.
   usa_lon <- cent$centroid_lon[cent$iso3c == "USA"]
   expect_lt(usa_lon, -60)
+})
+
+test_that("distance_between computes symmetric great-circle distances", {
+  d1 <- distance_between("France", "Germany")
+  d2 <- distance_between("Germany", "France")
+  expect_equal(d1, d2)
+  expect_gt(d1, 0)
+  expect_lt(d1, 2000)
+  expect_true(is.na(distance_between("Wakanda", "France")))
+  # France is closer to Germany than to Australia.
+  expect_lt(distance_between("France", "Germany"),
+            distance_between("France", "Australia"))
+  # Recycles a length-1 argument against a longer one, the usual R way.
+  expect_length(distance_between("USA", c("Canada", "Mexico", "France")), 3)
+})
+
+test_that("country_borders and neighbors need sf", {
+  skip_if(requireNamespace("sf", quietly = TRUE))
+  expect_error(country_borders())
+  expect_error(neighbors("FRA", origin = "iso3c"))
+})
+
+test_that("country_borders finds real neighbours (needs sf)", {
+  skip_if_not_installed("sf")
+  skip_if_not_installed("rnaturalearth")
+  b <- country_borders()
+  expect_true(all(c("iso3c_a", "country_a", "iso3c_b", "country_b") %in% names(b)))
+  expect_false(any(b$iso3c_a == b$iso3c_b))
+  key <- paste(pmin(b$iso3c_a, b$iso3c_b), pmax(b$iso3c_a, b$iso3c_b))
+  expect_equal(anyDuplicated(key), 0L)
+  fra_deu <- (b$iso3c_a == "FRA" & b$iso3c_b == "DEU") |
+    (b$iso3c_a == "DEU" & b$iso3c_b == "FRA")
+  expect_true(any(fra_deu))
+})
+
+test_that("neighbors looks up a country's borders (needs sf)", {
+  skip_if_not_installed("sf")
+  skip_if_not_installed("rnaturalearth")
+  fra <- neighbors("France")
+  expect_true(all(fra$iso3c == "FRA"))
+  expect_true("DEU" %in% fra$neighbor)
+  # Japan is an island nation with no land border.
+  expect_equal(nrow(neighbors("Japan")), 0L)
 })

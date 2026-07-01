@@ -18,7 +18,7 @@
 #'   \item{year}{The reference year.}
 #' }
 #' @source World Bank via \pkg{WDI}; geometry from Natural Earth via
-#'   \pkg{rnaturalearth}.
+#'   \pkg{rnaturalearth}. Snapshot year: 2024.
 "world_snapshot"
 
 #' Static per-country metadata

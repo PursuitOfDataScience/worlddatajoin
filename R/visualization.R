@@ -300,6 +300,8 @@ bivariate_map <- function(data, fill_x, fill_y, palette = "GrPink", dim = 3,
 #' @param type `"contiguous"` (default), `"dorling"` or `"noncontiguous"`.
 #' @param fill Optional fill column (unquoted); defaults to `weight`.
 #' @param projection Projection (an equal-area CRS is recommended).
+#' @param ... Passed to the underlying `cartogram::cartogram_*()` function
+#'   (e.g. `itermax`, or `k` for `type = "dorling"` -- see [dorling_map()]).
 #'
 #' @return A `ggplot` object.
 #' @export
@@ -310,7 +312,7 @@ bivariate_map <- function(data, fill_x, fill_y, palette = "GrPink", dim = 3,
 #' }
 cartogram_map <- function(data, weight, type = c("contiguous", "dorling",
                                                  "noncontiguous"),
-                          fill = NULL, projection = "equal_earth") {
+                          fill = NULL, projection = "equal_earth", ...) {
   need_pkg(c("cartogram", "sf"), "for cartogram_map()")
   type <- match.arg(type)
   if (!is_sf(data)) wdj_abort("{.fn cartogram_map} needs an sf frame.")
@@ -322,15 +324,47 @@ cartogram_map <- function(data, weight, type = c("contiguous", "dorling",
   data <- data[!is.na(data[[w_name]]) & data[[w_name]] > 0, ]
   carto <- switch(
     type,
-    contiguous = cartogram::cartogram_cont(data, weight = w_name),
-    dorling = cartogram::cartogram_dorling(data, weight = w_name),
-    noncontiguous = cartogram::cartogram_ncont(data, weight = w_name)
+    contiguous = cartogram::cartogram_cont(data, weight = w_name, ...),
+    dorling = cartogram::cartogram_dorling(data, weight = w_name, ...),
+    noncontiguous = cartogram::cartogram_ncont(data, weight = w_name, ...)
   )
   ggplot2::ggplot(carto) +
     ggplot2::geom_sf(ggplot2::aes(fill = .data[[fill_name]]),
                      color = "grey30", linewidth = 0.1) +
     ggplot2::scale_fill_viridis_c(name = fill_name) +
     theme_world_map()
+}
+
+#' Dorling cartogram (first-class verb)
+#'
+#' Non-overlapping proportional circles sized by `weight`, positioned to stay
+#' as close as possible to each country's true location -- arguably the most
+#' legible cartogram variant, since a microstate's circle is exactly as
+#' visible as a giant country's. A first-class verb for
+#' [cartogram_map()]`(type = "dorling")` that surfaces the Dorling-specific
+#' tuning knobs.
+#'
+#' @param data An `sf` map-ready frame.
+#' @param weight The column controlling circle size (unquoted).
+#' @param fill Optional fill column (unquoted); defaults to `weight`.
+#' @param k Share of the bounding box filled by the largest circle (default
+#'   `5`; passed to `cartogram::cartogram_dorling()`).
+#' @param itermax Maximum iterations of the circle-repulsion algorithm
+#'   (default `1000`; raise it if circles still overlap in the result).
+#' @param projection Projection (an equal-area CRS is recommended).
+#'
+#' @return A `ggplot` object.
+#' @export
+#' @examples
+#' \dontrun{
+#' world_data(2020, c(pop = "SP.POP.TOTL"), geometry = "sf") |>
+#'   dorling_map(pop)
+#' }
+dorling_map <- function(data, weight, fill = NULL, k = 5, itermax = 1000,
+                        projection = "equal_earth") {
+  cartogram_map(data, !!rlang::enquo(weight), type = "dorling",
+                fill = !!rlang::enquo(fill), projection = projection,
+                k = k, itermax = itermax)
 }
 
 #' Equal-area world tile grid
@@ -508,6 +542,9 @@ animate_world <- function(data, fill, time = year, projection = "equal_earth",
 #' @param tooltip Optional tooltip column (unquoted).
 #' @param engine `"plotly"` (default), `"ggiraph"`, `"leaflet"` or `"ggsql"`
 #'   (database-side rendering to a Vega-Lite widget; needs an `sf` frame).
+#'   `tooltip` is honoured by the `"ggiraph"` and `"leaflet"` engines (defaults
+#'   to `fill` when omitted); `"plotly"`'s hover is controlled by `world_map()`
+#'   aesthetics instead, and `"ggsql"` has no hover concept.
 #' @param ... Passed to [world_map()] for the plotly/ggiraph engines, or to
 #'   [world_query()] for the `"ggsql"` engine.
 #'
@@ -524,6 +561,7 @@ interactive_map <- function(data, fill, tooltip = NULL,
                             ...) {
   engine <- match.arg(engine)
   fill_q <- rlang::enquo(fill)
+  tooltip_q <- rlang::enquo(tooltip)
   need_pkg(engine, sprintf("for interactive_map(engine = \"%s\")", engine))
 
   if (engine == "ggsql") {
@@ -541,16 +579,17 @@ interactive_map <- function(data, fill, tooltip = NULL,
   if (engine == "ggiraph") {
     need_pkg("ggiraph")
     fill_name <- rlang::as_name(fill_q)
+    tooltip_mapped <- if (rlang::quo_is_null(tooltip_q)) fill_q else tooltip_q
     if (is_sf(data)) {
       p <- ggplot2::ggplot(data) +
         ggiraph::geom_sf_interactive(
-          ggplot2::aes(fill = !!fill_q, tooltip = !!fill_q, data_id = .data$iso3c)
+          ggplot2::aes(fill = !!fill_q, tooltip = !!tooltip_mapped, data_id = .data$iso3c)
         ) + theme_world_map()
     } else {
       p <- ggplot2::ggplot(
         data, ggplot2::aes(.data$long, .data$lat, group = .data$group)) +
         ggiraph::geom_polygon_interactive(
-          ggplot2::aes(fill = !!fill_q, tooltip = !!fill_q, data_id = .data$iso3c)
+          ggplot2::aes(fill = !!fill_q, tooltip = !!tooltip_mapped, data_id = .data$iso3c)
         ) + ggplot2::coord_quickmap() + theme_world_map()
     }
     return(ggiraph::girafe(ggobj = p))
@@ -563,13 +602,14 @@ interactive_map <- function(data, fill, tooltip = NULL,
       geometry = "sf")
   }
   fill_name <- rlang::as_name(fill_q)
+  tooltip_name <- if (rlang::quo_is_null(tooltip_q)) fill_name else rlang::as_name(tooltip_q)
   pal <- leaflet::colorNumeric("viridis", domain = data[[fill_name]],
                                na.color = "#dddddd")
   leaflet::leaflet(sf::st_transform(data, 4326)) |>
     leaflet::addPolygons(
       fillColor = ~ pal(get(fill_name)), weight = 0.5, color = "grey",
       fillOpacity = 0.8,
-      label = ~ paste0(iso3c, ": ", get(fill_name))
+      label = ~ paste0(iso3c, ": ", get(tooltip_name))
     ) |>
     leaflet::addLegend(pal = pal, values = ~ get(fill_name), title = fill_name)
 }

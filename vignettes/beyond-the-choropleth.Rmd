@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
 library(countryatlas)
 library(ggplot2)
 snap <- world_snapshot$countries
+has_sf <- requireNamespace("sf", quietly = TRUE)
 ```
 
 "World data on a map" has many honest forms. A choropleth is only the first. The
@@ -80,6 +81,10 @@ world_data(2020, c(gdp = "NY.GDP.PCAP.KD", life = "SP.DYN.LE00.IN"),
 world_data(2020, c(pop = "SP.POP.TOTL"), geometry = "sf") |>
   cartogram_map(pop, type = "dorling")
 
+# The same Dorling cartogram as a first-class verb, with its tuning exposed
+world_data(2020, c(pop = "SP.POP.TOTL"), geometry = "sf") |>
+  dorling_map(pop, k = 4)
+
 # Animated choropleth over a year panel — needs `gganimate`
 world_data(2000:2020, c(gdp = "NY.GDP.PCAP.KD")) |>
   animate_world(gdp)
@@ -87,6 +92,23 @@ world_data(2000:2020, c(gdp = "NY.GDP.PCAP.KD")) |>
 # Interactive choropleth — needs `leaflet`, `ggiraph` or `plotly`
 world_data(2020) |>
   interactive_map(gdp_per_capita, engine = "plotly")
+```
+
+## Country adjacency and distance
+
+Two lightweight spatial helpers that aren't choropleths at all.
+`distance_between()` answers "how far apart" from the bundled [country_meta]
+centroids -- no `sf` or network required:
+
+```{r}
+distance_between("France", "Germany")
+```
+
+`country_borders()` / `neighbors()` answer "who borders whom", built from
+polygon topology, so they need `sf`:
+
+```{r eval = has_sf}
+neighbors("France")
 ```
 
 Each degrades gracefully: if the optional package is missing you get a clear,

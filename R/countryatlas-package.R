@@ -9,7 +9,8 @@
 #' The happy path stays one call: [world_data()]. Everything else is opt-in.
 #'
 #' @section Core data assembly:
-#' [world_data()], [country_data()], [world_geometry()], [locate_country()].
+#' [world_data()], [country_data()], [world_geometry()], [locate_country()],
+#' [country_borders()], [neighbors()], [distance_between()].
 #'
 #' @section The join engine:
 #' [standardize_country()], [join_world()], [attach_geometry()], [country_join()],
@@ -30,8 +31,8 @@
 #'
 #' @section Visualization:
 #' [world_map()], [globe_map()], [spin_globe()], [facet_map()], [bubble_map()],
-#' [bivariate_map()], [cartogram_map()], [tile_map()], [flow_map()],
-#' [animate_world()], [interactive_map()], [geom_country_labels()],
+#' [bivariate_map()], [cartogram_map()], [dorling_map()], [tile_map()],
+#' [flow_map()], [animate_world()], [interactive_map()], [geom_country_labels()],
 #' [theme_world_map()].
 #'
 #' @section Database rendering (ggsql):
@@ -53,5 +54,5 @@ utils::globalVariables(c(
   "country", "iso2c", "iso3c", "income", "continent", "year",
   "NY.GDP.PCAP.KD", "gdp_per_capita_2015", "value", "name", "indicator",
   "rank", "percentile", "z_score", "geometry", "centroid_lon", "centroid_lat",
-  "country_groups_tbl", "world_tiles"
+  "country_groups_tbl", "world_tiles", "country_meta"
 ))

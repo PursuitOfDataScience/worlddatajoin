@@ -20,7 +20,10 @@ interactive_map(
 \item{tooltip}{Optional tooltip column (unquoted).}
 
 \item{engine}{\code{"plotly"} (default), \code{"ggiraph"}, \code{"leaflet"} or \code{"ggsql"}
-(database-side rendering to a Vega-Lite widget; needs an \code{sf} frame).}
+(database-side rendering to a Vega-Lite widget; needs an \code{sf} frame).
+\code{tooltip} is honoured by the \code{"ggiraph"} and \code{"leaflet"} engines (defaults
+to \code{fill} when omitted); \code{"plotly"}'s hover is controlled by \code{world_map()}
+aesthetics instead, and \code{"ggsql"} has no hover concept.}
 
 \item{...}{Passed to \code{\link[=world_map]{world_map()}} for the plotly/ggiraph engines, or to
 \code{\link[=world_query]{world_query()}} for the \code{"ggsql"} engine.}

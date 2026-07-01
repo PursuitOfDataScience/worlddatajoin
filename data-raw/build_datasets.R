@@ -15,8 +15,8 @@ suppressPackageStartupMessages({
 })
 
 dir.create("data", showWarnings = FALSE)
-SNAPSHOT_YEAR <- 2022L
-MEMBERSHIP_AS_OF <- "2024-01-01"  # documented point-in-time for memberships
+SNAPSHOT_YEAR <- 2024L
+MEMBERSHIP_AS_OF <- "2026-06-01"  # documented point-in-time for memberships
 
 iso_of <- function(names) {
   countrycode(names, "country.name", "iso3c", warn = FALSE)

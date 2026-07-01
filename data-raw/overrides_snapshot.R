@@ -10,7 +10,13 @@ wdj_overrides_snapshot <- function() {
     "Madeira Islands" = "PRT", "Micronesia" = "FSM", "Saba" = "BES",
     "Saint Martin" = "MAF", "Siachen Glacier" = "IND", "Sint Eustatius" = "BES",
     "Virgin Islands" = "VIR", "Saint Barthelemy" = "BLM", "Curacao" = "CUW",
-    "Madeira" = "PRT"
+    "Madeira" = "PRT",
+    "Federated States of Micronesia" = "FSM",
+    "Micronesia, Fed. Sts." = "FSM",
+    "Virgin Islands, U.S." = "VIR",
+    "British Virgin Islands" = "VGB",
+    "Channel Islands" = "GBR",
+    "Kosovo, Republic of" = "XKX"
   )
 }
 

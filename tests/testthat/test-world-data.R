@@ -4,8 +4,13 @@ test_that("world_data(year) keeps the classic backward-compatible output", {
   w <- world_data(2020)
   expect_true(all(c("long", "lat", "group", "iso3c", "iso2c", "income",
                     "continent", "gdp_per_capita") %in% names(w)))
-  # The deprecation shim keeps the old column name available for one cycle.
-  expect_true("gdp_per_capita_2015" %in% names(w))
+  # The gdp_per_capita_2015 alias is opt-in as of 2.0.0: absent by default,
+  # restored only when options(countryatlas.gdp_compat = TRUE).
+  expect_false("gdp_per_capita_2015" %in% names(w))
+  opt <- options(countryatlas.gdp_compat = TRUE)
+  w_compat <- world_data(2020)
+  options(opt)
+  expect_true("gdp_per_capita_2015" %in% names(w_compat))
   expect_true(is.factor(w$income))
   expect_identical(levels(w$income), countryatlas:::income_levels())
 })

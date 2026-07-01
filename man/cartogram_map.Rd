@@ -9,7 +9,8 @@ cartogram_map(
   weight,
   type = c("contiguous", "dorling", "noncontiguous"),
   fill = NULL,
-  projection = "equal_earth"
+  projection = "equal_earth",
+  ...
 )
 }
 \arguments{
@@ -22,6 +23,9 @@ cartogram_map(
 \item{fill}{Optional fill column (unquoted); defaults to \code{weight}.}
 
 \item{projection}{Projection (an equal-area CRS is recommended).}
+
+\item{...}{Passed to the underlying \verb{cartogram::cartogram_*()} function
+(e.g. \code{itermax}, or \code{k} for \code{type = "dorling"} -- see \code{\link[=dorling_map]{dorling_map()}}).}
 }
 \value{
 A \code{ggplot} object.

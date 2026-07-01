@@ -18,7 +18,7 @@ available when the package was built.}
 }
 \source{
 World Bank via \pkg{WDI}; geometry from Natural Earth via
-\pkg{rnaturalearth}.
+\pkg{rnaturalearth}. Snapshot year: 2024.
 }
 \usage{
 world_snapshot

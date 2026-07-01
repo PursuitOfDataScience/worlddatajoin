@@ -116,7 +116,7 @@ audit_coverage <- function(data,
 
   structure(
     list(unmatched = unmatched, na_rates = na_rates, by_group = by_group),
-    class = "wdj_coverage"
+    class = "countryatlas_coverage"
   )
 }
 
@@ -171,7 +171,7 @@ repair_country_names <- function(x, threshold = 0.2, origin = "country.name",
 }
 
 #' @export
-print.wdj_coverage <- function(x, ...) {
+print.countryatlas_coverage <- function(x, ...) {
   cli::cli_h1("Coverage audit")
   n_un <- nrow(x$unmatched)
   if (n_un > 0L) {

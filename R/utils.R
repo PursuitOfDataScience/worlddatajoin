@@ -29,6 +29,21 @@ has_pkg <- function(pkg) {
   isTRUE(requireNamespace(pkg, quietly = TRUE))
 }
 
+# Some sf/s2/GEOS internals print diagnostic notices straight to stderr
+# (e.g. sf_use_s2()'s "Spherical geometry switched on/off", or st_touches()'s
+# own validity-repair fallback) that bypass R's message() condition system
+# entirely, so suppressMessages() can't catch them. Redirect the message
+# stream for the duration of expr instead.
+quietly_sf <- function(expr) {
+  con <- textConnection("wdj_sf_sink_buf", "w", local = TRUE)
+  sink(con, type = "message")
+  on.exit({
+    sink(type = "message")
+    close(con)
+  }, add = TRUE)
+  force(expr)
+}
+
 # Decide how many workers to use. Honours options(countryatlas.workers=) and
 # falls back to all-but-one available core, capped at the work size.
 wdj_workers <- function(n_tasks = Inf) {

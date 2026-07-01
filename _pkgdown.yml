@@ -41,6 +41,9 @@ reference:
   - country_data
   - world_geometry
   - locate_country
+  - country_borders
+  - neighbors
+  - distance_between
 
 - title: The join engine
   desc: The package's mission, exposed for your own data.
@@ -56,7 +59,7 @@ reference:
   contents:
   - check_country_match
   - repair_country_names
-  - wdj_overrides
+  - country_overrides
   - audit_coverage
 
 - title: Reference data & code translation
@@ -87,6 +90,7 @@ reference:
   - bubble_map
   - bivariate_map
   - cartogram_map
+  - dorling_map
   - tile_map
   - flow_map
   - animate_world

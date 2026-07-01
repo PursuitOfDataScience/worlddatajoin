@@ -376,3 +376,140 @@ locate_country <- function(lon = NULL, lat = NULL, points = NULL,
   }
   out
 }
+
+#' Country adjacency (shared land borders)
+#'
+#' Which countries share a land border with which, as a tidy edge list --
+#' built from polygon topology ([sf::st_touches()]), so it reflects the same
+#' curated geometry as the rest of the package. Powers [neighbors()]. Convert
+#' to a graph with e.g. `igraph::graph_from_data_frame(country_borders(),
+#' directed = FALSE)` if you need one.
+#'
+#' @param scale Natural Earth resolution to compute adjacency from. Coarser
+#'   scales simplify small slivers and may miss a handful of short borders.
+#' @param region Optional region subset (see [world_geometry()]); a pair is
+#'   only reported when both countries remain in the subset.
+#'
+#' @return A tibble, one row per bordering pair: `iso3c_a`, `country_a`,
+#'   `iso3c_b`, `country_b`. Each unordered pair appears once, with
+#'   `iso3c_a <= iso3c_b` alphabetically.
+#' @export
+#' @examples
+#' \dontrun{
+#' country_borders()
+#' country_borders(region = "Europe")
+#' }
+country_borders <- function(scale = "small", region = NULL) {
+  need_pkg("sf", "for country_borders()")
+  geom <- get_world_sf(scale = scale, region = region, project = FALSE)
+  geom <- geom[!is.na(geom$iso3c), ]
+  # A handful of Natural Earth rings are self-intersecting at this
+  # resolution; the strict S2 engine st_touches() uses by default on
+  # unprojected geometry rejects them outright. GEOS's planar predicate is
+  # more forgiving and plenty accurate at country scale. The s2 toggle (and
+  # st_touches()'s own internal validity fallback) print diagnostic notices
+  # straight to stderr, bypassing R's message() condition system entirely --
+  # quietly_sf() catches those too, where suppressMessages() can't.
+  use_s2 <- sf::sf_use_s2()
+  on.exit(quietly_sf(sf::sf_use_s2(use_s2)), add = TRUE)
+  touching <- quietly_sf({
+    sf::sf_use_s2(FALSE)
+    sf::st_touches(geom)
+  })
+  n <- nrow(geom)
+  # Some countries (Cyprus, divided between the Republic and the de facto
+  # Northern Cyprus) are more than one geometry row sharing one iso3c, and
+  # those pieces can touch each other -- exclude same-iso3c matches so a
+  # country never "borders" itself. st_touches() is symmetric, so every
+  # cross-country pair is collected from both sides at this point; that is
+  # resolved below rather than by row position, since row position only maps
+  # 1:1 to iso3c for countries that are a single piece.
+  pairs <- lapply(seq_len(n), function(i) {
+    js <- touching[[i]]
+    js <- js[geom$iso3c[js] != geom$iso3c[i]]
+    if (!length(js)) return(NULL)
+    tibble::tibble(iso3c_a = geom$iso3c[i], iso3c_b = geom$iso3c[js])
+  })
+  out <- dplyr::bind_rows(pairs)
+  if (!nrow(out)) {
+    return(tibble::tibble(iso3c_a = character(), country_a = character(),
+                          iso3c_b = character(), country_b = character()))
+  }
+  # Canonicalise to one row per unordered pair (alphabetical order), which
+  # collapses both the symmetric double-count and any duplicate-iso3c rows.
+  out <- dplyr::distinct(tibble::tibble(
+    iso3c_a = pmin(out$iso3c_a, out$iso3c_b),
+    iso3c_b = pmax(out$iso3c_a, out$iso3c_b)
+  ))
+  out$country_a <- convert_country(out$iso3c_a, to = "country", from = "iso3c", warn = FALSE)
+  out$country_b <- convert_country(out$iso3c_b, to = "country", from = "iso3c", warn = FALSE)
+  out[, c("iso3c_a", "country_a", "iso3c_b", "country_b")]
+}
+
+#' A country's neighbours
+#'
+#' Which countries border a given country (or countries) -- a vectorised
+#' lookup built on [country_borders()].
+#'
+#' @param x A vector of country names or codes.
+#' @param origin How to read `x` (default `"country.name"`).
+#' @param scale Natural Earth resolution to compute adjacency from.
+#'
+#' @return A tibble with one row per (`iso3c`, `neighbor`) pair: the queried
+#'   country's `iso3c`, and each bordering country's `iso3c` and `country`
+#'   name (`neighbor`, `neighbor_country`). Countries with no land border
+#'   (islands, e.g. Japan, Madagascar) return zero rows.
+#' @export
+#' @examples
+#' \dontrun{
+#' neighbors("France")
+#' neighbors(c("FRA", "JPN"), origin = "iso3c")
+#' }
+neighbors <- function(x, origin = "country.name", scale = "small") {
+  iso <- wdj_to_iso3c(x, origin = origin)
+  borders <- country_borders(scale = scale)
+  sym <- dplyr::bind_rows(
+    tibble::tibble(iso3c = borders$iso3c_a, neighbor = borders$iso3c_b,
+                   neighbor_country = borders$country_b),
+    tibble::tibble(iso3c = borders$iso3c_b, neighbor = borders$iso3c_a,
+                   neighbor_country = borders$country_a)
+  )
+  dplyr::filter(sym, .data$iso3c %in% iso)
+}
+
+#' Great-circle distance between two countries
+#'
+#' Haversine distance (km) between two countries' centroids -- the lightweight
+#' companion to [country_borders()] for "how far apart" rather than "do they
+#' touch". Works from the bundled [country_meta] centroids, so unlike most of
+#' the spatial toolkit it needs neither `sf` nor the network.
+#'
+#' @param a,b Vectors of country names or codes (recycled against each other).
+#' @param origin How to read `a`/`b` (default `"country.name"`).
+#'
+#' @return A numeric vector of great-circle distances in kilometres (`NA` for
+#'   any country that doesn't resolve to a known centroid).
+#' @export
+#' @examples
+#' distance_between("France", "Germany")
+#' distance_between("USA", c("Canada", "Mexico"))
+distance_between <- function(a, b, origin = "country.name") {
+  iso_a <- wdj_to_iso3c(a, origin = origin)
+  iso_b <- wdj_to_iso3c(b, origin = origin)
+  meta <- country_meta[, c("iso3c", "centroid_lon", "centroid_lat")]
+  ca <- meta[match(iso_a, meta$iso3c), ]
+  cb <- meta[match(iso_b, meta$iso3c), ]
+  haversine_km(ca$centroid_lon, ca$centroid_lat, cb$centroid_lon, cb$centroid_lat)
+}
+
+# Haversine great-circle distance (km) between lon/lat points (vectorised,
+# recycled the usual R way). Shares the Earth radius constant with
+# ring_area_km2() for consistency.
+haversine_km <- function(lon1, lat1, lon2, lat2) {
+  R <- 6371.0088
+  d2r <- pi / 180
+  dlat <- (lat2 - lat1) * d2r
+  dlon <- (lon2 - lon1) * d2r
+  a <- sin(dlat / 2)^2 + cos(lat1 * d2r) * cos(lat2 * d2r) * sin(dlon / 2)^2
+  2 * R * asin(pmin(1, sqrt(a)))
+}

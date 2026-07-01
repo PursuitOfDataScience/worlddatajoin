@@ -49,6 +49,9 @@ The happy path is one call: `world_data(2020)`. Everything else is opt-in.
   `country_join_all()` reduce-joins many tables at once.
 - **More analysis**: `growth_rate()`, `index_to()`, `share_of_world()`.
 - **More country groups**: Mercosur, GCC, Nordic, Visegrád.
+- **Spatial structure**: `country_borders()` / `neighbors()` (who borders
+  whom) and `distance_between()` (great-circle distance, no `sf` needed).
+- **`dorling_map()`**: the Dorling cartogram as a first-class verb.
 - **Correctness fixes** that change map output (quantile binning, centroids,
   label placement, projections, override-only lookups) — full
   [changelog](NEWS.md).
@@ -63,6 +66,25 @@ devtools::install_github("PursuitOfDataScience/countryatlas")
 The base install is light. Heavy spatial extras (`sf`, `rnaturalearth`,
 `cartogram`, `biscale`, `geofacet`, `gganimate`, `leaflet`, …) live in
 `Suggests` and are only needed for the features that use them.
+
+### Optional features at a glance
+
+| Feature / verb | Optional packages required |
+|---|---|
+| `world_map()` polygon backend | `maps` |
+| `world_map()` sf backend, `world_geometry(sf)` | `sf`, `rnaturalearth`, `rnaturalearthdata` |
+| `globe_map(backend = "polygon")`, `spin_globe()` | `maps`, `mapproj` |
+| `bivariate_map()` | `biscale`, `sf` |
+| `cartogram_map()`, `dorling_map()` | `cartogram`, `sf` |
+| `country_borders()`, `neighbors()` | `sf` |
+| `animate_world()` (animated GIF) | `gganimate` (+ `gifski` or `magick`) |
+| `interactive_map(engine = "plotly")` | `plotly` |
+| `interactive_map(engine = "ggiraph")` | `ggiraph` |
+| `interactive_map(engine = "leaflet")` | `leaflet`, `sf` |
+| `interactive_map(engine = "ggsql")`, `as_ggsql_source()` | `ggsql`, `duckdb`, `DBI`, `nanoarrow`, `sf` |
+| `tile_map()` with `geofacet`-style small multiples | `geofacet` |
+| `simplify_geometry()` with `rmapshaper` | `rmapshaper` |
+| `repair_country_names()` / `check_country_match()` with `stringdist` | `stringdist` |
 
 ```{r}
 library(countryatlas)
@@ -148,10 +170,11 @@ in_group(c("France", "United States", "Japan"), "EU")
 ## A whole vocabulary of honest maps
 
 Beyond the choropleth: proportional-symbol (`bubble_map()`), bivariate
-(`bivariate_map()`), area-honest cartograms (`cartogram_map()`), equal-area tile
-grids (`tile_map()`), great-circle flows (`flow_map()`), an orthographic globe
-(`globe_map()`), small multiples (`facet_map()`), animation (`animate_world()`)
-and interactivity (`interactive_map()`).
+(`bivariate_map()`), area-honest cartograms (`cartogram_map()`, including a
+first-class `dorling_map()`), equal-area tile grids (`tile_map()`),
+great-circle flows (`flow_map()`), an orthographic globe (`globe_map()`),
+small multiples (`facet_map()`), animation (`animate_world()`) and
+interactivity (`interactive_map()`).
 
 The world as a globe, not a rectangle — with the `"polygon"` backend (only
 `maps` + `mapproj`, no `sf`) you can draw it and even **spin** it:
@@ -204,10 +227,14 @@ t1 <- data.frame(country = c("Czechia", "South Korea"), gdp = c(1, 2))
 t2 <- data.frame(country = c("Czech Republic", "Korea, Rep."), pop = c(10, 51))
 t3 <- data.frame(country = c("Czechia", "Korea"), area = c(79, 100))
 country_join_all(list(t1, t2, t3), by = "country")
+
+# great-circle distance between two countries' centroids (no sf needed)
+distance_between("France", "Germany")
 ```
 
 `repair_country_names()` auto-fixes typos to the closest known country,
 `locate_country(lon, lat)` tags coordinates with the country that contains them,
+`neighbors()` / `country_borders()` answer "who shares a border with whom",
 and `growth_rate()` / `index_to()` add panel metrics.
 
 ## Offline by default

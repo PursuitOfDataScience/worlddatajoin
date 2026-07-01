@@ -15,7 +15,7 @@ test_that("check_country_match suggests near misses when stringdist available", 
 
 test_that("audit_coverage summarises missingness", {
   cov <- audit_coverage(world_snapshot$countries)
-  expect_s3_class(cov, "wdj_coverage")
+  expect_s3_class(cov, "countryatlas_coverage")
   expect_true(all(c("unmatched", "na_rates", "by_group") %in% names(cov)))
   expect_true("gdp_per_capita" %in% cov$na_rates$indicator)
   expect_true(all(cov$na_rates$na_rate >= 0 & cov$na_rates$na_rate <= 1))

@@ -36,3 +36,71 @@ test_that("bundled datasets have expected shape", {
   expect_type(world_snapshot, "list")
   expect_true(nrow(world_snapshot$countries) > 150)
 })
+
+test_that("country_overrides returns the same overrides as wdj_overrides", {
+  expect_equal(country_overrides(), wdj_overrides())
+  expect_equal(
+    country_overrides(c(Somaliland = "SOM")),
+    wdj_overrides(c(Somaliland = "SOM"))
+  )
+})
+
+test_that("country_overrides merges extra overrides on top of built-ins", {
+  base <- wdj_overrides()
+  ext <- country_overrides(c(Somaliland = "SOM"))
+  expect_equal(ext[["Somaliland"]], "SOM")
+  expect_equal(ext[["Kosovo"]], "XKX")  # built-in still present
+  expect_equal(ext[["Canary Islands"]], "ESP")
+})
+
+test_that("country_overrides errors on unnamed extra", {
+  expect_error(country_overrides(c("SOM")), class = "countryatlas_error")
+})
+
+test_that("repair_country_names corrects obvious typos", {
+  inp <- c("United States", "Brzil", "Germny")
+  out <- repair_country_names(inp, verbose = FALSE)
+  expect_equal(out[1], "United States")           # already correct
+  expect_false(identical(out[2], "Brzil"))         # was repaired
+  expect_false(identical(out[3], "Germny"))        # was repaired
+})
+
+test_that("repair_country_names respects threshold (low threshold = no repairs)", {
+  inp <- c("Brzil", "Germny")
+  out <- repair_country_names(inp, threshold = 0, verbose = FALSE)
+  # No repairs at threshold 0, but the repairs attribute is always attached
+  expect_equal(as.character(out), inp)
+  expect_equal(nrow(attr(out, "repairs")), 0)
+})
+
+test_that("repair_country_names attaches repairs attribute", {
+  inp <- c("Brzil", "United States")
+  out <- repair_country_names(inp, verbose = FALSE)
+  repairs <- attr(out, "repairs")
+  expect_s3_class(repairs, "tbl_df")
+  expect_true("from" %in% names(repairs))
+  expect_true("to" %in% names(repairs))
+})
+
+test_that("repair_country_names leaves matched names unchanged", {
+  inp <- c("United States", "France", "Japan")
+  out <- repair_country_names(inp, verbose = FALSE)
+  expect_equal(as.character(out), inp)
+  expect_equal(nrow(attr(out, "repairs")), 0)
+})
+
+test_that("convert_country resolves override-only entities for non-iso3c destinations", {
+  # Bug 3.7: override-only names (Canary Islands, Azores) should resolve for
+  # continent, region, flag etc -- not just iso3c.
+  expect_equal(convert_country("Canary Islands", to = "continent"), "Europe")
+  expect_equal(convert_country("Azores", to = "continent"), "Europe")
+  expect_equal(convert_country("Canary Islands", to = "region"),
+               "Europe & Central Asia")
+})
+
+test_that("convert_country Kosovo (XKX) fallback works for continent/iso2c", {
+  # XKX has no row in countrycode::codelist; the iso3c round-trip leaves
+  # continent/iso2c NA, so the fallback table must fill them.
+  expect_equal(convert_country("Kosovo", to = "continent"), "Europe")
+  expect_equal(convert_country("Kosovo", to = "iso2c"), "XK")
+})

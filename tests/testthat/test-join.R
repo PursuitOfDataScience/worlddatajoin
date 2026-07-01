@@ -33,3 +33,38 @@ test_that("attach_geometry bolts polygon geometry onto a country table", {
   expect_equal(out$value[out$iso3c == "USA"][1], 1)
   expect_true(any(is.na(out$value)))
 })
+
+test_that("country_join_all reduce-joins many messy tables on the ISO spine", {
+  a <- data.frame(country = c("Czechia", "South Korea"), gdp = c(1, 2))
+  b <- data.frame(country = c("Czech Republic", "Korea, Rep."), pop = c(10, 51))
+  d <- data.frame(country = c("Czechia", "Korea"), area = c(79, 100))
+  out <- country_join_all(list(a, b, d), by = "country")
+  expect_equal(nrow(out), 2)
+  expect_true(all(c("gdp", "pop", "area", "iso3c") %in% names(out)))
+  expect_equal(out$pop[out$iso3c == "CZE"], 10)
+  expect_equal(out$area[out$iso3c == "KOR"], 100)
+})
+
+test_that("country_join_all supports per-table origin specs", {
+  a <- data.frame(code = c("CZE", "KOR"), gdp = c(1, 2))
+  b <- data.frame(name = c("Czech Republic", "Korea, Rep."), pop = c(10, 51))
+  out <- country_join_all(list(a, b), by = c("code", "name"),
+                          origin = c("iso3c", "country.name"))
+  expect_equal(nrow(out), 2)
+  expect_true(all(c("gdp", "pop") %in% names(out)))
+})
+
+test_that("country_join_all supports inner and left joins", {
+  a <- data.frame(c = c("France", "Germany"), x = 1:2)
+  b <- data.frame(c = c("Germany", "Japan"), y = 1:2)
+  expect_equal(nrow(country_join_all(list(a, b), by = "c", type = "inner")), 1)
+  expect_equal(nrow(country_join_all(list(a, b), by = "c", type = "left")), 2)
+})
+
+test_that("country_join_all errors on bad input", {
+  expect_error(country_join_all(list(), by = "x"), class = "countryatlas_error")
+  expect_error(
+    country_join_all(list(data.frame(a = "France")), by = "missing"),
+    class = "countryatlas_error"
+  )
+})

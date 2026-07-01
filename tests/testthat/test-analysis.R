@@ -44,3 +44,108 @@ test_that("complete_years locf carries forward", {
   out <- complete_years(df, 2000:2002, method = "locf")
   expect_equal(out$gdp, c(1, 1, 1))
 })
+
+test_that("growth_rate computes year-on-year growth", {
+  df <- data.frame(iso3c = "USA", year = 2000:2002, gdp = c(100, 110, 121))
+  out <- growth_rate(df, gdp)
+  expect_true("gdp_growth" %in% names(out))
+  expect_true(is.na(out$gdp_growth[1]))                # first year has no lag
+  expect_equal(out$gdp_growth[2], 110 / 100 - 1)       # 0.10
+  expect_equal(out$gdp_growth[3], 121 / 110 - 1)       # 0.10
+})
+
+test_that("growth_rate computes CAGR from the first non-NA year", {
+  df <- data.frame(iso3c = "USA", year = c(2000L, 2002L, 2004L),
+                   gdp = c(100, 121, 144))
+  out <- growth_rate(df, gdp, type = "cagr")
+  expect_true("gdp_growth" %in% names(out))
+  # CAGR: (V_t / V_0)^(1/n) - 1
+  expect_equal(out$gdp_growth[2], (121 / 100)^(1 / 2) - 1)
+  expect_equal(out$gdp_growth[3], (144 / 100)^(1 / 4) - 1)
+})
+
+test_that("growth_rate is per-country (groups are isolated)", {
+  df <- data.frame(
+    iso3c = rep(c("A", "B"), each = 3),
+    year  = rep(2000:2002, 2),
+    gdp   = c(100, 110, 121, 50, 55, 60)
+  )
+  out <- growth_rate(df, gdp)
+  # Both countries see the same 10 % yoy growth, independent starting points
+  expect_equal(out$gdp_growth[out$iso3c == "A"], c(NA, 0.1, 0.1))
+  expect_equal(out$gdp_growth[out$iso3c == "B"], c(NA, 0.1, 0.0909090909090909))
+})
+
+test_that("growth_rate errors on missing columns", {
+  expect_error(growth_rate(data.frame(x = 1), gdp),
+               class = "countryatlas_error")
+  df <- data.frame(iso3c = "A", year = 2000L)
+  expect_error(growth_rate(df, gdp), class = "countryatlas_error")
+})
+
+test_that("index_to rebases a series to base year = 100", {
+  df <- data.frame(iso3c = "USA", year = 2000:2002, gdp = c(50, 55, 60))
+  out <- index_to(df, gdp, base_year = 2000)
+  expect_true("gdp_index" %in% names(out))
+  expect_equal(out$gdp_index, c(100, 110, 120))
+})
+
+test_that("index_to respects the `to` parameter", {
+  df <- data.frame(iso3c = "USA", year = 2000:2002, gdp = c(50, 55, 60))
+  out <- index_to(df, gdp, base_year = 2000, to = 1)
+  expect_equal(out$gdp_index, c(1, 1.1, 1.2))
+})
+
+test_that("index_to returns NA when base year is missing", {
+  df <- data.frame(iso3c = "USA", year = 2000:2002, gdp = c(50, 55, 60))
+  out <- index_to(df, gdp, base_year = 1999)
+  expect_true(all(is.na(out$gdp_index)))
+})
+
+test_that("index_to is per-country", {
+  df <- data.frame(
+    iso3c = rep(c("A", "B"), each = 3),
+    year  = rep(2000:2002, 2),
+    gdp   = c(100, 150, 200, 10, 12, 14)
+  )
+  out <- index_to(df, gdp, base_year = 2000)
+  expect_equal(out$gdp_index[out$iso3c == "A"], c(100, 150, 200))
+  expect_equal(out$gdp_index[out$iso3c == "B"], c(100, 120, 140))
+})
+
+test_that("index_to returns NA for zero-valued base", {
+  df <- data.frame(iso3c = "A", year = 2000:2002, gdp = c(0, 1, 2))
+  out <- index_to(df, gdp, base_year = 2000)
+  expect_true(all(is.na(out$gdp_index)))
+})
+
+test_that("share_of_world adds a share column (single year)", {
+  df <- data.frame(iso3c = c("USA", "CHN", "IND"), co2 = c(5, 10, 5))
+  out <- share_of_world(df, co2)
+  expect_true("co2_share" %in% names(out))
+  expect_equal(out$co2_share, c(0.25, 0.5, 0.25))
+})
+
+test_that("share_of_world operates within year for panels", {
+  df <- data.frame(
+    iso3c = rep(c("USA", "CHN"), 2),
+    year  = rep(c(2000L, 2001L), each = 2),
+    co2   = c(5, 15, 10, 30)
+  )
+  out <- share_of_world(df, co2)
+  # Within 2000: 5/(5+15)=0.25, 15/20=0.75
+  expect_equal(out$co2_share[out$year == 2000], c(0.25, 0.75))
+  # Within 2001: 10/(10+30)=0.25, 30/40=0.75
+  expect_equal(out$co2_share[out$year == 2001], c(0.25, 0.75))
+})
+
+test_that("share_of_world handles NA values", {
+  df <- data.frame(iso3c = c("A", "B", "C"), v = c(1, NA, 2))
+  out <- share_of_world(df, v)
+  expect_equal(out$v_share, c(1/3, NA, 2/3))
+})
+
+test_that("share_of_world errors on missing column", {
+  expect_error(share_of_world(data.frame(x = 1), y),
+               class = "countryatlas_error")
+})

@@ -377,7 +377,17 @@ locate_country <- function(lon = NULL, lat = NULL, points = NULL,
   } else {
     points <- sf::st_transform(points, 4326)
   }
-  hit <- suppressMessages(sf::st_intersects(points, geom))
+  # Natural Earth rings can be invalid as spherical geometry, which the strict
+  # s2 engine that st_intersects() uses by default on unprojected geometry
+  # rejects outright (erroring on the WKB->s2 conversion). Fall back to GEOS's
+  # planar predicate -- plenty accurate for point-in-country -- exactly as
+  # country_borders() does; quietly_sf() also swallows the s2 toggle's stderr note.
+  use_s2 <- sf::sf_use_s2()
+  on.exit(quietly_sf(sf::sf_use_s2(use_s2)), add = TRUE)
+  hit <- quietly_sf(suppressWarnings({
+    sf::sf_use_s2(FALSE)
+    sf::st_intersects(points, geom)
+  }))
   idx <- vapply(hit, function(h) if (length(h)) h[[1]] else NA_integer_, integer(1))
   iso3c <- geom$iso3c[idx]
   out <- tibble::tibble(iso3c = iso3c)

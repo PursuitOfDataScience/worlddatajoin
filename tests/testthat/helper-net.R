@@ -9,3 +9,14 @@ skip_if_offline_wb <- function() {
   }, error = function(e) FALSE)
   if (!isTRUE(ok)) testthat::skip("World Bank API not reachable")
 }
+
+# Skip (rather than fail) when a World Bank fetch came back empty despite the
+# reachability probe passing. The live multi-indicator fetch can still flake
+# transiently (timeouts, rate limits, a forked worker dying), which must
+# degrade to a skip, not a red suite -- consistent with CRAN's policy that
+# tests do not fail on unavailable internet resources.
+skip_if_wdi_empty <- function(data, cols) {
+  ok <- all(cols %in% names(data)) &&
+    all(vapply(cols, function(cl) any(!is.na(data[[cl]])), logical(1)))
+  if (!isTRUE(ok)) testthat::skip("World Bank fetch returned no data")
+}

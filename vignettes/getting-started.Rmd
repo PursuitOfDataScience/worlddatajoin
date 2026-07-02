@@ -60,6 +60,13 @@ columns), or browse the bundled catalogue:
 head(common_indicators)
 ```
 
+Or search the full World Bank catalogue by name — offline, against `WDI`'s
+bundled indicator cache:
+
+```{r}
+head(wdi_search("renewable energy"))
+```
+
 ```{r eval = FALSE}
 country_data(2020, c(life_exp = "SP.DYN.LE00.IN", pop = "SP.POP.TOTL"))
 ```

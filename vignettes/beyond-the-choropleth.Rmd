@@ -52,6 +52,17 @@ od <- data.frame(
 flow_map(od, from, to, weight)
 ```
 
+## Small multiples
+
+`facet_map()` splits one choropleth into per-group panels — the static
+counterpart to `animate_world()`, for print and side-by-side comparison:
+
+```{r fig.height = 5}
+world_poly <- attach_geometry(snap, geometry = "polygon") |>
+  dplyr::filter(!is.na(continent))
+facet_map(world_poly, gdp_per_capita, continent, style = "quantile", ncol = 3)
+```
+
 ## Labels
 
 Centroid-anchored labels (names, ISO codes or flag emoji), with `ggrepel`

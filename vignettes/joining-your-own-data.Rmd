@@ -15,6 +15,8 @@ knitr::opts_chunk$set(
 library(countryatlas)
 library(ggplot2)
 library(dplyr)
+has_sf <- requireNamespace("sf", quietly = TRUE) &&
+  requireNamespace("rnaturalearth", quietly = TRUE)
 ```
 
 The headline use case: *I have a frame keyed on messy country names — get it on
@@ -56,6 +58,19 @@ b <- data.frame(nation  = c("Czech Republic", "Korea, Rep.", "Russian Federation
 country_join(a, b, country, nation)
 ```
 
+## Reconcile many tables at once
+
+`country_join_all()` generalises this to a whole list of frames: every table is
+reconciled to `iso3c` first, then reduce-joined — three sources spelled three
+ways collapse into one honest table:
+
+```{r}
+t1 <- data.frame(country = c("Czechia", "South Korea"), gdp = c(1, 2))
+t2 <- data.frame(country = c("Czech Republic", "Korea, Rep."), pop = c(10, 51))
+t3 <- data.frame(country = c("Czechia", "Korea"), area = c(79, 100))
+country_join_all(list(t1, t2, t3), by = "country")
+```
+
 ## Check before you trust
 
 Always inspect what failed to match:
@@ -64,10 +79,23 @@ Always inspect what failed to match:
 check_country_match(my_data$nation)
 ```
 
-If something legitimately cannot be matched, extend the override table:
+## Repair what can be repaired
+
+`repair_country_names()` is the "act on it" companion to that report: it
+substitutes the closest known country name, but only when the match is
+confident, and attaches a record of what it changed:
 
 ```{r}
-wdj_overrides(c(Somaliland = "SOM"))[c("Kosovo", "Somaliland")]
+fixed <- repair_country_names(c("Brzil", "Nehterlands", "United States"),
+                              verbose = FALSE)
+fixed
+```
+
+If something legitimately cannot be matched (an entity the backends simply do
+not know), extend the override table:
+
+```{r}
+country_overrides(c(Somaliland = "SOM"))[c("Kosovo", "Somaliland")]
 ```
 
 ## Custom origins
@@ -79,3 +107,20 @@ via `origin`:
 df <- data.frame(code = c("US", "KR", "BR"))
 standardize_country(df, code, origin = "iso2c", warn = FALSE)
 ```
+
+## Point data onto the spine
+
+Not all data comes keyed on names — sometimes all you have is coordinates
+(events, weather stations, survey sites). `locate_country()` runs a
+point-in-polygon lookup and tags each point with the country that contains it,
+so point data joins the ISO spine like everything else. It needs the optional
+`sf` + `rnaturalearth` packages:
+
+```{r eval = has_sf}
+locate_country(lon = c(2.35, -74.0, 139.7), lat = c(48.85, 40.7, 35.7))
+```
+
+Coarse coastlines can place a genuinely-onshore point (a port city, say) just
+outside its country's simplified polygon; `locate_country()` snaps such points
+to the nearest country within `tolerance_km` (25 km by default) while leaving
+open-ocean points `NA`.

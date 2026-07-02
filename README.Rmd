@@ -122,10 +122,12 @@ country_data(2020, c(life_exp = "SP.DYN.LE00.IN", co2 = "EN.GHG.CO2.PC.CE.AR5"))
   head()
 ```
 
-Use the bundled `common_indicators` catalogue so you never memorise a code:
+Use the bundled `common_indicators` catalogue so you never memorise a code, or
+search the full World Bank catalogue offline with `wdi_search()`:
 
 ```{r}
 head(common_indicators)
+wdi_search("renewable energy") |> head(3)
 ```
 
 ## Get *your own* data onto a map
@@ -235,7 +237,9 @@ distance_between("France", "Germany")
 `repair_country_names()` auto-fixes typos to the closest known country,
 `locate_country(lon, lat)` tags coordinates with the country that contains them,
 `neighbors()` / `country_borders()` answer "who shares a border with whom",
-and `growth_rate()` / `index_to()` add panel metrics.
+`growth_rate()` / `index_to()` / `complete_years()` add panel metrics and fill
+panel gaps, and `country_codes()` exposes the whole countrycode crosswalk as a
+tidy, pipeable lookup.
 
 ## Offline by default
 

@@ -105,6 +105,14 @@ behaviour may see different maps or values.
   "Snapshot year: 2024" note); regenerated.
 * Fixed a stray orphaned code fence at the end of the *countryatlas and
   ggsql* vignette that broke its markdown structure.
+* README and vignettes now demonstrate every exported function:
+  `wdi_search()`, `country_codes()`, `complete_years()`, `growth_rate()` /
+  `index_to()`, `repair_country_names()`, `country_join_all()`,
+  `locate_country()` and `facet_map()` gained worked examples, and the
+  vignettes prefer `country_overrides()` over the soft-deprecated
+  `wdj_overrides()`. The README's rendered output and figures were stale
+  (pre-dating the quantile-breaks fix and the `gdp_per_capita_2015` opt-in)
+  and have been re-rendered from the 2.0.0 code.
 
 # countryatlas 1.0.0
 

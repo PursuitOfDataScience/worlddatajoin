@@ -45,8 +45,9 @@ opt-in.
   `country_join_all()` reduce-joins many tables at once.
 - **More analysis**: `growth_rate()`, `index_to()`, `share_of_world()`.
 - **More country groups**: Mercosur, GCC, Nordic, Visegrád.
-- **Spatial structure**: `country_borders()` / `neighbors()` (who borders
-  whom) and `distance_between()` (great-circle distance, no `sf` needed).
+- **Spatial structure**: `country_borders()` / `neighbors()` (who
+  borders whom) and `distance_between()` (great-circle distance, no `sf`
+  needed).
 - **`dorling_map()`**: the Dorling cartogram as a first-class verb.
 - **Correctness fixes** that change map output (quantile binning,
   centroids, label placement, projections, override-only lookups) — full
@@ -66,7 +67,7 @@ The base install is light. Heavy spatial extras (`sf`, `rnaturalearth`,
 ### Optional features at a glance
 
 | Feature / verb | Optional packages required |
-|---|---|
+|----|----|
 | `world_map()` polygon backend | `maps` |
 | `world_map()` sf backend, `world_geometry(sf)` | `sf`, `rnaturalearth`, `rnaturalearthdata` |
 | `globe_map(backend = "polygon")`, `spin_globe()` | `maps`, `mapproj` |
@@ -93,7 +94,7 @@ library(dplyr)
 ``` r
 data_2020 <- world_data(2020)
 data_2020
-#> # A tibble: 99,338 × 13
+#> # A tibble: 99,338 × 12
 #>     long   lat group order subregion iso3c iso2c country continent region income
 #>    <dbl> <dbl> <dbl> <int> <chr>     <chr> <chr> <chr>   <chr>     <chr>  <fct> 
 #>  1 -69.9  12.5     1     1 <NA>      ABW   AW    Aruba   Americas  Latin… High …
@@ -148,7 +149,8 @@ country_data(2020, c(life_exp = "SP.DYN.LE00.IN", co2 = "EN.GHG.CO2.PC.CE.AR5"))
 ```
 
 Use the bundled `common_indicators` catalogue so you never memorise a
-code:
+code, or search the full World Bank catalogue offline with
+`wdi_search()`:
 
 ``` r
 head(common_indicators)
@@ -161,6 +163,13 @@ head(common_indicators)
 #> 4 gdp_per_capita         NY.GDP.PCAP.KD GDP per capita (constant 2015 US$)
 #> 5 gdp_per_capita_current NY.GDP.PCAP.CD GDP per capita (current US$)      
 #> 6 gni_per_capita         NY.GNP.PCAP.CD GNI per capita (current US$)
+wdi_search("renewable energy") |> head(3)
+#> # A tibble: 3 × 2
+#>   indicator                    name                                     
+#>   <chr>                        <chr>                                    
+#> 1 2.1_SHARE.TOTAL.RE.IN.TFEC   Renewable energy consumption(% in TFEC)  
+#> 2 3.1_RE.CONSUMPTION           Renewable energy consumption (TJ)        
+#> 3 4.1.2_REN.ELECTRICITY.OUTPUT Renewable energy electricity output (GWh)
 ```
 
 ## Get *your own* data onto a map
@@ -223,21 +232,21 @@ in_group(c("France", "United States", "Japan"), "EU")
 ## A whole vocabulary of honest maps
 
 Beyond the choropleth: proportional-symbol (`bubble_map()`), bivariate
-(`bivariate_map()`), area-honest cartograms (`cartogram_map()`, including
-a first-class `dorling_map()`), equal-area tile grids (`tile_map()`),
-great-circle flows (`flow_map()`), an orthographic globe (`globe_map()`),
-small multiples (`facet_map()`), animation (`animate_world()`) and
-interactivity (`interactive_map()`).
+(`bivariate_map()`), area-honest cartograms (`cartogram_map()`,
+including a first-class `dorling_map()`), equal-area tile grids
+(`tile_map()`), great-circle flows (`flow_map()`), an orthographic globe
+(`globe_map()`), small multiples (`facet_map()`), animation
+(`animate_world()`) and interactivity (`interactive_map()`).
 
-The world as a globe, not a rectangle — with the `"polygon"` backend (only
-`maps` + `mapproj`, no `sf`) you can draw it and even **spin** it:
+The world as a globe, not a rectangle — with the `"polygon"` backend
+(only `maps` + `mapproj`, no `sf`) you can draw it and even **spin** it:
 
 ``` r
 globe_map(world_snapshot$countries, continent, backend = "polygon",
           style = "categorical", lon = 10, lat = 20)
 ```
 
-<img src="man/figures/README-globe-1.png" width="70%" />
+<img src="man/figures/README-globe-1.png" width="100%" />
 
 ``` r
 # assemble a rotating GIF (one full turn; needs gifski or magick)
@@ -310,8 +319,10 @@ distance_between("France", "Germany")
 
 `repair_country_names()` auto-fixes typos to the closest known country,
 `locate_country(lon, lat)` tags coordinates with the country that
-contains them, `neighbors()` / `country_borders()` answer "who shares a
-border with whom", and `growth_rate()` / `index_to()` add panel metrics.
+contains them, `neighbors()` / `country_borders()` answer “who shares a
+border with whom”, `growth_rate()` / `index_to()` / `complete_years()`
+add panel metrics and fill panel gaps, and `country_codes()` exposes the
+whole countrycode crosswalk as a tidy, pipeable lookup.
 
 ## Offline by default
 
@@ -323,5 +334,5 @@ the World Bank API.
 
 See the vignettes — *Getting started*, *Joining your own data*, *Modern
 maps with sf & projections*, *Beyond the choropleth*, and *countryatlas
-and ggsql* — and the
-[reference site](https://pursuitofdatascience.github.io/countryatlas/).
+and ggsql* — and the [reference
+site](https://pursuitofdatascience.github.io/countryatlas/).

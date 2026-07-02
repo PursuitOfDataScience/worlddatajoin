@@ -2,17 +2,12 @@
 
 0 errors | 0 warnings | 1 note
 
-* This is a new submission.
-
-## Resubmission
-
-This is a resubmission. In response to the automated incoming pre-tests:
-
-* Fixed: declared the minimum R version as `R (>= 4.1.0)` in DESCRIPTION,
-  since the package uses the native pipe `|>` (introduced in R 4.1.0).
-* The words flagged as "possibly misspelled" in DESCRIPTION — "choropleth",
-  "choropleths" and "cartogram" — are correctly spelled cartography and
-  data-visualization terms, not misspellings.
+* This is an update (1.0.0 -> 2.0.0). 2.0.0 is a planned major release: it
+  integrates the `ggsql` 0.4.1 spatial API (all optional, in Suggests) and
+  fixes several correctness bugs found by auditing 1.0.0 (quantile break
+  computation, centroid de-duplication, label placement, the `plate_carree`
+  CRS, override-only code conversion). The bug fixes change plot output for
+  affected calls, hence the major version bump.
 
 ## Test environments
 
@@ -28,5 +23,7 @@ This is a resubmission. In response to the automated incoming pre-tests:
   is unreachable; the bundled `world_snapshot` dataset keeps the remaining tests
   offline and deterministic.
 * Heavy spatial dependencies (`sf`, `rnaturalearth`, `cartogram`, `biscale`,
-  `geofacet`, `gganimate`, `leaflet`, `ggiraph`, `plotly`, `rmapshaper`) are in
-  `Suggests` and gated with `rlang::check_installed()`.
+  `geofacet`, `gganimate`, `leaflet`, `ggiraph`, `plotly`, `rmapshaper`,
+  `ggsql`, `duckdb`) are in `Suggests` and gated with
+  `rlang::check_installed()`; tests and vignette chunks that use them skip
+  cleanly when they are absent.

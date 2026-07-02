@@ -184,12 +184,19 @@ country_join(left, right, country, nation)
 
 # Diagnostics: never lose a country silently
 
-`check_country_match()` is a pre-flight report; `wdj_overrides()` is the curated
-match table that replaces the old drop-list; and `audit_coverage()` reports
-missingness before a half-empty map is published.
+`check_country_match()` is a pre-flight report; `country_overrides()` is the
+curated match table that replaces the old drop-list; and `audit_coverage()`
+reports missingness before a half-empty map is published.
 
 ```{r}
 check_country_match(c("USA", "Cote d'Ivoire", "Yugoslavia", "Wakanda"))
+```
+
+`repair_country_names()` acts on that report: it substitutes the closest known
+country name for confident misses only, and attaches a record of every change:
+
+```{r}
+repair_country_names(c("Brzil", "Germny", "United States"), verbose = FALSE)
 ```
 
 ```{r}
@@ -222,6 +229,15 @@ country_groups("G7")
 in_group(c("France", "United States", "Japan", "Brazil"), "EU")
 ```
 
+The whole `countrycode` codelist is exposed as a tidy, pipeable lookup with
+`country_codes()`, and the World Bank indicator catalogue is searchable offline
+with `wdi_search()`:
+
+```{r}
+head(country_codes(c("continent", "currency")))
+head(wdi_search("renewable energy"), 3)
+```
+
 The package also bundles `country_meta` (static per-country attributes),
 `common_indicators` (a friendly indicator catalogue), `country_groups_tbl` and
 `world_tiles`.
@@ -241,6 +257,30 @@ snapshot |>
 ```{r}
 snapshot |>
   aggregate_regions(population, by = "region", fun = "sum")
+```
+
+For panel data, `growth_rate()` (year-on-year or CAGR), `index_to()` (rebase a
+series so the base year = 100) and `share_of_world()` (share of the year's
+world total) cover the standard comparative moves, each computed per country:
+
+```{r}
+panel <- data.frame(
+  iso3c = rep(c("USA", "CHN"), each = 3),
+  year  = rep(2019:2021, 2),
+  gdp   = c(100, 104, 109, 60, 66, 73)
+)
+panel |>
+  growth_rate(gdp) |>
+  index_to(gdp, base_year = 2019)
+```
+
+And `complete_years()` fills the panel gaps that would otherwise make an
+animation flicker or a join silently drop years — by grid completion,
+carry-forward or linear interpolation:
+
+```{r}
+patchy <- data.frame(iso3c = "USA", year = c(2019L, 2021L), gdp = c(100, 110))
+complete_years(patchy, 2019:2021, method = "linear")
 ```
 
 # Performance and offline use

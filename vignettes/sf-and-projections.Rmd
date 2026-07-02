@@ -100,8 +100,9 @@ world_geometry("countries", geometry = "sf", recenter = 150)
 ## Region subsetting
 
 `region` accepts a continent, a group name (`"EU"`, `"OECD"`, …), a vector of
-`iso3c` codes, or a bounding box `c(xmin, ymin, xmax, ymax)`, and picks a
-sensible projection for it.
+`iso3c` codes, or a bounding box `c(xmin, ymin, xmax, ymax)`. Pair it with a
+`projection` suited to the subset (e.g. `"azimuthal_equal_area"` for a single
+continent, the polar projections for the Arctic) so the crop stays area-honest.
 
 ## Simplifying for the web
 

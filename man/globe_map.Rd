@@ -29,7 +29,7 @@ country-level frame with \code{iso3c} (or a polygon frame) for
 \item{lon, lat}{The longitude / latitude the globe is centred on (the face
 pointing at the viewer).}
 
-\item{backend}{\code{"sf"} (default, via \code{\link[ggplot2:coord_sf]{ggplot2::coord_sf()}}) or \code{"polygon"}
+\item{backend}{\code{"sf"} (default, via \code{\link[ggplot2:ggsf]{ggplot2::coord_sf()}}) or \code{"polygon"}
 (via \code{\link[ggplot2:coord_map]{ggplot2::coord_map()}}, no \code{sf} required).}
 
 \item{style, palette, n_bins, borders, title, legend, na_label}{As in \code{\link[=world_map]{world_map()}}.}

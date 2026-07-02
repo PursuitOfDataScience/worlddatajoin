@@ -519,6 +519,85 @@ neighbors <- function(x, origin = "country.name", scale = "small") {
   dplyr::filter(sym, .data$iso3c %in% iso)
 }
 
+#' Global Moran's I (spatial autocorrelation)
+#'
+#' Do neighbouring countries have similar values? Global Moran's I on the
+#' country spine, using the [country_borders()] land-border adjacency as the
+#' spatial weights (row-standardised), with a permutation pseudo-p-value. No
+#' `spdep` required: at ~200 countries the dense arithmetic is trivial, and
+#' reusing the package's own adjacency keeps the weights consistent with the
+#' maps. Countries with no land border in the data (islands) carry no weight
+#' and are excluded.
+#'
+#' @param data A country-level data frame with `iso3c` (map-ready frames are
+#'   reduced to one row per country).
+#' @param value The value column (unquoted).
+#' @param scale Natural Earth resolution for the adjacency (see
+#'   [country_borders()]).
+#' @param n_perm Number of permutations for the pseudo-p-value (default `999`;
+#'   use `0` to skip the test).
+#'
+#' @return A one-row tibble: `i` (observed Moran's I), `expected`
+#'   (\eqn{-1/(n-1)} under no autocorrelation), `n` (countries used),
+#'   `n_links` (border pairs among them) and `p_value` (one-sided,
+#'   \eqn{P(I_{perm} \ge I_{obs})}; positive autocorrelation is the standard
+#'   alternative). Set a seed beforehand for a reproducible `p_value`.
+#' @export
+#' @examples
+#' \dontrun{
+#' snap <- countryatlas::world_snapshot$countries
+#' set.seed(42)
+#' morans_i(snap, gdp_per_capita)   # GDP clusters strongly in space
+#' }
+morans_i <- function(data, value, scale = "small", n_perm = 999) {
+  need_pkg("sf", "for morans_i() (adjacency comes from country_borders())")
+  val_name <- rlang::as_name(rlang::enquo(value))
+  if (!"iso3c" %in% names(data)) {
+    wdj_abort("{.arg data} must contain an {.field iso3c} column.")
+  }
+  df <- dplyr::distinct(tibble::as_tibble(data), .data$iso3c, .keep_all = TRUE)
+  df <- df[!is.na(df$iso3c) & is.finite(df[[val_name]]), ]
+
+  borders <- country_borders(scale = scale)
+  b <- borders[borders$iso3c_a %in% df$iso3c & borders$iso3c_b %in% df$iso3c, ]
+  # Countries with at least one neighbour in the data.
+  iso <- sort(unique(c(b$iso3c_a, b$iso3c_b)))
+  n <- length(iso)
+  if (n < 3L) {
+    wdj_abort(c(
+      "Not enough bordering countries with data to compute Moran's I.",
+      "i" = "Got {n}; need at least 3."
+    ))
+  }
+  W <- matrix(0, n, n, dimnames = list(iso, iso))
+  W[cbind(b$iso3c_a, b$iso3c_b)] <- 1
+  W[cbind(b$iso3c_b, b$iso3c_a)] <- 1
+  W <- W / rowSums(W)   # row-standardise; every row has >= 1 neighbour
+
+  x <- df[[val_name]][match(iso, df$iso3c)]
+  moran_stat <- function(x) {
+    z <- x - mean(x)
+    # With row-standardised weights, sum(W) == n, so the n/S0 factor is 1.
+    (n / sum(W)) * sum(W * outer(z, z)) / sum(z^2)
+  }
+  i_obs <- moran_stat(x)
+
+  p_value <- NA_real_
+  n_perm <- max(0L, as.integer(n_perm))
+  if (n_perm > 0L) {
+    i_perm <- vapply(seq_len(n_perm), function(k) moran_stat(sample(x)),
+                     numeric(1))
+    p_value <- (1 + sum(i_perm >= i_obs)) / (n_perm + 1)
+  }
+  tibble::tibble(
+    i = i_obs,
+    expected = -1 / (n - 1),
+    n = n,
+    n_links = nrow(b),
+    p_value = p_value
+  )
+}
+
 #' Great-circle distance between two countries
 #'
 #' Haversine distance (km) between two countries' centroids -- the lightweight

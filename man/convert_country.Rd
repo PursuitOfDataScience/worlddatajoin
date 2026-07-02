@@ -16,7 +16,9 @@ convert_country(
 \item{x}{A vector of country names or codes.}
 
 \item{to}{Destination scheme. A shortcut (\code{"iso3c"}, \code{"flag"}, \code{"currency"},
-\code{"tld"}, \code{"continent"}, \code{"region"}, \code{"cown"}, ...) or any raw countrycode
+\code{"tld"}, \code{"continent"}, \code{"region"}, \code{"cown"}, ...), a localized name
+\code{"name_<lang>"} (\code{"name_fr"}, \code{"name_es"}, \code{"name_zh"}, ... -- any
+language in countrycode's CLDR tables), or any raw countrycode
 destination.}
 
 \item{from}{Origin scheme (default \code{"country.name"}).}
@@ -38,4 +40,5 @@ emoji, currency, top-level domain, continent/region and research codes
 convert_country(c("Japan", "Brazil"), to = "flag")
 convert_country("Germany", to = "currency")
 convert_country(c("USA", "France"), to = "continent")
+convert_country(c("Germany", "United States"), to = "name_fr")
 }

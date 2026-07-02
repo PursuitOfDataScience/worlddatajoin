@@ -3,7 +3,6 @@ title: "countryatlas: Joining World Data to Maps on the ISO Spine"
 author: |
   Youzhi Yu
   <span style="font-size: 0.8em;">University of Chicago</span>
-date: "`r format(Sys.Date(), '%B %e, %Y')`"
 output:
   rmarkdown::html_vignette:
     toc: true
@@ -212,6 +211,17 @@ dropped <- c("Kosovo", "Micronesia", "Virgin Islands", "Canary Islands",
 standardize_country(data.frame(region = dropped), region, warn = FALSE)
 ```
 
+Dissolved entities get first-class treatment too. The `historical` column of
+`check_country_match()` flags them — including `"USSR"`, which countrycode
+silently resolves to Russia's `RUS` (so Soviet-era data becomes Russian data
+without a warning) — and `dissolve_country()` expands them to their successor
+states via the curated `historical_codes` crosswalk:
+
+```{r}
+check_country_match(c("USSR", "Czechoslovakia"))
+dissolve_country("Yugoslavia")
+```
+
 # Reference data and code translation
 
 `convert_country()` exposes the full countrycode vocabulary with first-class
@@ -276,12 +286,42 @@ panel |>
 
 And `complete_years()` fills the panel gaps that would otherwise make an
 animation flicker or a join silently drop years — by grid completion,
-carry-forward or linear interpolation:
+carry-forward or linear interpolation (`lag_by_country()` and
+`diff_by_country()` round out the panel toolkit):
 
 ```{r}
 patchy <- data.frame(iso3c = "USA", year = c(2019L, 2021L), gdp = c(100, 110))
 complete_years(patchy, 2019:2021, method = "linear")
 ```
+
+## Inequality, correlation and convergence
+
+Three questions this data is constantly asked: *how unequal is the world*,
+*what moves together*, and *are poor countries catching up?* `gini()` and
+`theil()` measure inequality across countries — weight by population and they
+describe inequality between people; `theil()` decomposes exactly into
+between/within components:
+
+```{r}
+gini(snapshot$gdp_per_capita, weights = snapshot$population)
+theil(snapshot$gdp_per_capita, weights = snapshot$population,
+      groups = snapshot$continent)
+```
+
+`correlate_indicators()` screens indicator pairs (pairwise-complete, with the
+per-pair `n` reported so a correlation computed on 12 countries cannot
+masquerade as a world fact):
+
+```{r}
+correlate_indicators(snapshot)
+```
+
+For panels, `beta_convergence()` runs the classic growth-on-initial-level
+regression (returning the implied convergence speed and half-life) and
+`sigma_convergence()` tracks whether cross-country dispersion is actually
+narrowing. And on the spatial side, `morans_i()` measures whether neighbouring
+countries have similar values, using the package's own `country_borders()`
+adjacency — no `spdep` needed.
 
 # Performance and offline use
 

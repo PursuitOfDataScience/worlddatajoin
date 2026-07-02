@@ -10,11 +10,11 @@
 #'
 #' @section Core data assembly:
 #' [world_data()], [country_data()], [world_geometry()], [locate_country()],
-#' [country_borders()], [neighbors()], [distance_between()].
+#' [country_borders()], [neighbors()], [distance_between()], [morans_i()].
 #'
 #' @section The join engine:
 #' [standardize_country()], [join_world()], [attach_geometry()], [country_join()],
-#' [country_join_all()].
+#' [country_join_all()], [dissolve_country()].
 #'
 #' @section Diagnostics:
 #' [check_country_match()], [repair_country_names()], [country_overrides()],
@@ -23,17 +23,19 @@
 #' @section Reference data:
 #' [convert_country()], [country_codes()], [country_groups()], [in_group()],
 #' [wdi_search()], and the datasets [country_meta], [common_indicators],
-#' [country_groups_tbl], [world_snapshot], [world_tiles].
+#' [country_groups_tbl], [world_snapshot], [world_tiles], [historical_codes].
 #'
 #' @section Analysis helpers:
 #' [per_capita()], [aggregate_regions()], [rank_countries()], [complete_years()],
-#' [growth_rate()], [index_to()], [share_of_world()].
+#' [growth_rate()], [index_to()], [share_of_world()], [lag_by_country()],
+#' [diff_by_country()], [correlate_indicators()], [beta_convergence()],
+#' [sigma_convergence()], [gini()], [theil()].
 #'
 #' @section Visualization:
 #' [world_map()], [globe_map()], [spin_globe()], [facet_map()], [bubble_map()],
-#' [bivariate_map()], [cartogram_map()], [dorling_map()], [tile_map()],
-#' [flow_map()], [animate_world()], [interactive_map()], [geom_country_labels()],
-#' [theme_world_map()].
+#' [spike_map()], [bivariate_map()], [cartogram_map()], [dorling_map()],
+#' [tile_map()], [flow_map()], [animate_world()], [interactive_map()],
+#' [geom_country_labels()], [theme_world_map()].
 #'
 #' @section Database rendering (ggsql):
 #' [as_ggsql_source()], [world_query()].
@@ -54,5 +56,5 @@ utils::globalVariables(c(
   "country", "iso2c", "iso3c", "income", "continent", "year",
   "NY.GDP.PCAP.KD", "gdp_per_capita_2015", "value", "name", "indicator",
   "rank", "percentile", "z_score", "geometry", "centroid_lon", "centroid_lat",
-  "country_groups_tbl", "world_tiles", "country_meta"
+  "country_groups_tbl", "world_tiles", "country_meta", "historical_codes"
 ))

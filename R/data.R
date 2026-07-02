@@ -61,3 +61,28 @@
 #' @format A tibble with columns `iso3c`, `country`, `row`, `col`.
 #' @source Derived from Natural Earth country centroids.
 "world_tiles"
+
+#' Historical / dissolved entities and their successor states
+#'
+#' A curated crosswalk from dissolved entities (Soviet Union, Yugoslavia,
+#' Czechoslovakia, ...) to the modern states that succeeded them -- one row per
+#' (entity, successor) pair, dated, so historical panels can be brought onto
+#' the modern ISO spine honestly instead of being silently dropped (or worse:
+#' `countrycode` resolves `"USSR"` to Russia alone). Consumed by
+#' [dissolve_country()] and flagged by [check_country_match()].
+#'
+#' Kosovo (`XKX`) is included among the Yugoslavia and Serbia-and-Montenegro
+#' successors on a *territory* basis (its territory was part of both); filter
+#' it out if your analysis follows strict UN-membership succession.
+#'
+#' @format A tibble with one row per (entity, successor):
+#' \describe{
+#'   \item{historical}{Canonical name of the dissolved entity.}
+#'   \item{iso3c_hist}{The alpha-3 code the entity held at dissolution, where
+#'     one existed (`SUN`, `YUG`, `CSK`, `DDR`, `ANT`, `SCG`, `YMD`, ...); it
+#'     may since have been inherited by a successor (e.g. `YEM`).}
+#'   \item{dissolved}{Year the entity ceased to exist.}
+#'   \item{iso3c, country}{The successor state.}
+#' }
+#' @source Curated from ISO 3166-3 and the historical record.
+"historical_codes"

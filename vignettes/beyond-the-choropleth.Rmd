@@ -31,6 +31,16 @@ circles at centroids are the right idiom.
 bubble_map(snap, population)
 ```
 
+## Spike maps
+
+The same "totals" job as bubbles, with a different overplotting trade-off:
+spikes only grow upward, so dense regions (Europe, the Caribbean) stay
+legible.
+
+```{r}
+spike_map(snap, population)
+```
+
 ## Equal-area tile grids
 
 Give every country the same visual weight so micro-states are visible.

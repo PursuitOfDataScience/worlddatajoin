@@ -79,6 +79,20 @@ Always inspect what failed to match:
 check_country_match(my_data$nation)
 ```
 
+## Historical data: dissolved countries
+
+Historical panels bring a nastier failure mode: dissolved entities. Most are
+silently unmatched — but some are silently *mis*matched. countrycode resolves
+`"USSR"` to Russia's `RUS`, so Soviet-era totals quietly become Russian totals.
+The `historical` column in the report above flags both cases, and
+`dissolve_country()` resolves them to successor states via the curated
+`historical_codes` crosswalk (one row per successor, dated):
+
+```{r}
+check_country_match(c("USSR", "Yugoslavia", "West Germany"))
+dissolve_country(c("Czechoslovakia", "France"))
+```
+
 ## Repair what can be repaired
 
 `repair_country_names()` is the "act on it" companion to that report: it

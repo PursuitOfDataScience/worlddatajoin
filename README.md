@@ -46,9 +46,21 @@ opt-in.
 - **More analysis**: `growth_rate()`, `index_to()`, `share_of_world()`.
 - **More country groups**: Mercosur, GCC, Nordic, Visegrád.
 - **Spatial structure**: `country_borders()` / `neighbors()` (who
-  borders whom) and `distance_between()` (great-circle distance, no `sf`
-  needed).
-- **`dorling_map()`**: the Dorling cartogram as a first-class verb.
+  borders whom), `distance_between()` (great-circle distance, no `sf`
+  needed) and `morans_i()` (spatial autocorrelation on the package’s own
+  adjacency — no `spdep`).
+- **Historical entities**: `dissolve_country()` + the `historical_codes`
+  crosswalk resolve the USSR / Yugoslavia / Czechoslovakia to successor
+  states; `check_country_match()` now flags them (countrycode silently
+  maps `"USSR"` to Russia — caught).
+- **Inequality & convergence**: `gini()`, `theil()`
+  (population-weighted, between/within decomposition),
+  `beta_convergence()`, `sigma_convergence()`, `correlate_indicators()`,
+  `lag_by_country()` / `diff_by_country()`.
+- **`dorling_map()`** and **`spike_map()`**: two more honest displays
+  for totals.
+- **Localized names**:
+  `convert_country(to = "name_fr" / "name_es" / …)`.
 - **Correctness fixes** that change map output (quantile binning,
   centroids, label placement, projections, override-only lookups) — full
   [changelog](NEWS.md).
@@ -73,7 +85,8 @@ The base install is light. Heavy spatial extras (`sf`, `rnaturalearth`,
 | `globe_map(backend = "polygon")`, `spin_globe()` | `maps`, `mapproj` |
 | `bivariate_map()` | `biscale`, `sf` |
 | `cartogram_map()`, `dorling_map()` | `cartogram`, `sf` |
-| `country_borders()`, `neighbors()` | `sf` |
+| `spike_map()` | `maps` |
+| `country_borders()`, `neighbors()`, `morans_i()` | `sf` |
 | `animate_world()` (animated GIF) | `gganimate` (+ `gifski` or `magick`) |
 | `interactive_map(engine = "plotly")` | `plotly` |
 | `interactive_map(engine = "ggiraph")` | `ggiraph` |
@@ -209,13 +222,13 @@ country_join(a, b, country, nation)
 
 ``` r
 check_country_match(c("USA", "Cote d'Ivoire", "Yugoslavia", "Wakanda"))
-#> # A tibble: 4 × 4
-#>   input         iso3c matched suggestion
-#>   <chr>         <chr> <lgl>   <chr>     
-#> 1 USA           USA   TRUE    <NA>      
-#> 2 Cote d'Ivoire CIV   TRUE    <NA>      
-#> 3 Yugoslavia    <NA>  FALSE   Yugoslavia
-#> 4 Wakanda       <NA>  FALSE   Canada
+#> # A tibble: 4 × 5
+#>   input         iso3c matched historical suggestion
+#>   <chr>         <chr> <lgl>   <lgl>      <chr>     
+#> 1 USA           USA   TRUE    FALSE      <NA>      
+#> 2 Cote d'Ivoire CIV   TRUE    FALSE      <NA>      
+#> 3 Yugoslavia    <NA>  FALSE   TRUE       Yugoslavia
+#> 4 Wakanda       <NA>  FALSE   FALSE      Canada
 ```
 
 ## Reference data at your fingertips
@@ -316,6 +329,55 @@ country_join_all(list(t1, t2, t3), by = "country")
 distance_between("France", "Germany")
 #> [1] 802.3524
 ```
+
+## Historical data, honest joins
+
+Dissolved entities poison country joins twice over: most are silently
+dropped, and some are silently *mis*matched — countrycode resolves
+`"USSR"` to Russia alone, so Soviet-era totals quietly become Russian
+totals. `check_country_match()` flags both cases, and
+`dissolve_country()` resolves them to successor states (one-to-many,
+dated) via the curated `historical_codes` crosswalk:
+
+``` r
+check_country_match(c("USSR", "Yugoslavia", "France"))
+#> # A tibble: 3 × 5
+#>   input      iso3c matched historical suggestion
+#>   <chr>      <chr> <lgl>   <lgl>      <chr>     
+#> 1 USSR       RUS   TRUE    TRUE       <NA>      
+#> 2 Yugoslavia <NA>  FALSE   TRUE       Yugoslavia
+#> 3 France     FRA   TRUE    FALSE      <NA>
+dissolve_country("Czechoslovakia")
+#> # A tibble: 2 × 5
+#>   input          historical     dissolved iso3c country 
+#>   <chr>          <chr>              <int> <chr> <chr>   
+#> 1 Czechoslovakia Czechoslovakia      1993 CZE   Czechia 
+#> 2 Czechoslovakia Czechoslovakia      1993 SVK   Slovakia
+```
+
+## Inequality, convergence and spatial statistics
+
+World inequality between *people*, not country units — and how much of
+it sits between continents vs within them:
+
+``` r
+snap <- world_snapshot$countries
+gini(snap$gdp_per_capita, weights = snap$population)
+#> [1] 0.6094909
+theil(snap$gdp_per_capita, weights = snap$population, groups = snap$continent)
+#> # A tibble: 3 × 3
+#>   component value share
+#>   <chr>     <dbl> <dbl>
+#> 1 total     0.678 1    
+#> 2 between   0.310 0.458
+#> 3 within    0.368 0.542
+```
+
+`beta_convergence()` / `sigma_convergence()` test whether poor countries
+are catching up; `correlate_indicators()` screens indicator pairs
+(pairwise-complete, with `n` reported); and `morans_i()` measures
+spatial autocorrelation on the package’s own border adjacency — no
+`spdep` required.
 
 `repair_country_names()` auto-fixes typos to the closest known country,
 `locate_country(lon, lat)` tags coordinates with the country that

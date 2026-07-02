@@ -3,9 +3,14 @@
 #' Pre-flight country-match report
 #'
 #' A report on what will and will not match before you trust the map: the
-#' input, its `iso3c`, whether it `matched`, and a `suggestion` (the closest
-#' known country name by string distance) for misses. Surfaced automatically by
-#' [join_world()].
+#' input, its `iso3c`, whether it `matched`, whether it is a `historical`
+#' (dissolved) entity, and a `suggestion` (the closest known country name by
+#' string distance) for misses. Surfaced automatically by [join_world()].
+#'
+#' The `historical` flag matters even for rows that *matched*: countrycode
+#' silently resolves `"USSR"` to Russia's `RUS`, so Soviet-era data becomes
+#' Russian data without a warning. Rows flagged `historical` should usually be
+#' routed through [dissolve_country()] instead.
 #'
 #' @param x A vector of country names or codes.
 #' @param origin How to read `x` (any countrycode origin scheme).
@@ -14,10 +19,13 @@
 #' @param suggest Whether to compute closest-name suggestions for misses
 #'   (requires the optional `stringdist` package; default `TRUE`).
 #'
-#' @return A tibble with columns `input`, `iso3c`, `matched`, `suggestion`.
+#' @return A tibble with columns `input`, `iso3c`, `matched`, `historical`,
+#'   `suggestion`.
 #' @export
 #' @examples
 #' check_country_match(c("USA", "Cote d'Ivoire", "Yugoslavia", "Wakanda"))
+#' # "USSR" matches (to RUS!) but is flagged historical:
+#' check_country_match("USSR")
 check_country_match <- function(x,
                                 origin = "country.name",
                                 custom_match = wdj_overrides(),
@@ -25,6 +33,7 @@ check_country_match <- function(x,
   x <- as.character(x)
   iso3c <- wdj_to_iso3c(x, origin = origin, custom_match = custom_match)
   matched <- !is.na(iso3c)
+  historical <- normalize_historical(x) %in% names(historical_aliases())
 
   suggestion <- rep(NA_character_, length(x))
   if (isTRUE(suggest) && any(!matched)) {
@@ -51,6 +60,7 @@ check_country_match <- function(x,
     input = x,
     iso3c = iso3c,
     matched = matched,
+    historical = historical,
     suggestion = suggestion
   )
 }
@@ -149,6 +159,11 @@ repair_country_names <- function(x, threshold = 0.2, origin = "country.name",
   repairs <- tibble::tibble(from = character(), to = character())
   for (i in which(changed)) {
     cand <- report$suggestion[i]
+    # A dissolved entity (e.g. "Yugoslavia") exists in the codelist by name but
+    # has no ISO code, so its own name comes back as the "suggestion" --
+    # substituting it would be a no-op, not a repair. dissolve_country() is
+    # the right tool there.
+    if (identical(cand, x[i])) next
     d <- if (has_pkg("stringdist")) {
       stringdist::stringdist(tolower(x[i]), tolower(cand), method = "jw")
     } else {

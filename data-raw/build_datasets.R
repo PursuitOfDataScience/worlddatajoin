@@ -273,8 +273,46 @@ if (have_sf && !is.null(countries_snap)) {
 
 world_snapshot <- list(countries = countries_snap, sf = snap_sf, year = SNAPSHOT_YEAR)
 
+# --- historical_codes ----------------------------------------------------------
+# Curated crosswalk of dissolved entities -> successor states (one row per
+# entity-successor pair). `iso3c_hist` is the alpha-3 code the entity held at
+# dissolution, where one existed (it may since have been inherited by a
+# successor, e.g. YEM). Kosovo (XKX) is included among the Yugoslavia /
+# Serbia-and-Montenegro successors on a territory basis; filter it out if your
+# analysis follows strict UN-membership succession.
+
+hist_spec <- list(
+  list("Soviet Union",          "SUN", 1991L,
+       c("ARM","AZE","BLR","EST","GEO","KAZ","KGZ","LVA","LTU","MDA",
+         "RUS","TJK","TKM","UKR","UZB")),
+  list("Yugoslavia",            "YUG", 1992L,
+       c("BIH","HRV","MKD","MNE","SRB","SVN","XKX")),
+  list("Serbia and Montenegro", "SCG", 2006L, c("SRB","MNE","XKX")),
+  list("Czechoslovakia",        "CSK", 1993L, c("CZE","SVK")),
+  list("East Germany",          "DDR", 1990L, "DEU"),
+  list("Netherlands Antilles",  "ANT", 2010L, c("CUW","SXM","BES")),
+  list("North Yemen",           "YEM", 1990L, "YEM"),
+  list("South Yemen",           "YMD", 1990L, "YEM"),
+  list("Sudan (former)",        "SDN", 2011L, c("SDN","SSD")),
+  list("United Arab Republic",  NA_character_, 1961L, c("EGY","SYR")),
+  list("Tanganyika",            NA_character_, 1964L, "TZA"),
+  list("Zanzibar",              NA_character_, 1964L, "TZA"),
+  list("North Vietnam",         "VDR", 1976L, "VNM"),
+  list("South Vietnam",         "VNM", 1976L, "VNM")
+)
+
+historical_codes <- dplyr::bind_rows(lapply(hist_spec, function(e) {
+  tibble(historical = e[[1]], iso3c_hist = e[[2]], dissolved = e[[3]],
+         iso3c = e[[4]])
+}))
+historical_codes$country <- countrycode(historical_codes$iso3c, "iso3c",
+                                        "country.name", warn = FALSE)
+historical_codes$country[historical_codes$iso3c == "XKX"] <- "Kosovo"
+stopifnot(!anyNA(historical_codes$country))
+
 # --- save ---------------------------------------------------------------------
 
+save(historical_codes,   file = "data/historical_codes.rda",   compress = "xz")
 save(country_groups_tbl, file = "data/country_groups_tbl.rda", compress = "xz")
 save(common_indicators,  file = "data/common_indicators.rda",  compress = "xz")
 save(country_meta,       file = "data/country_meta.rda",       compress = "xz")
@@ -282,6 +320,7 @@ save(world_tiles,        file = "data/world_tiles.rda",        compress = "xz")
 save(world_snapshot,     file = "data/world_snapshot.rda",     compress = "xz")
 
 cat("Datasets written to data/:\n")
+cat(" historical_codes:", nrow(historical_codes), "rows\n")
 cat(" country_groups_tbl:", nrow(country_groups_tbl), "rows\n")
 cat(" common_indicators:", nrow(common_indicators), "rows\n")
 cat(" country_meta:", nrow(country_meta), "rows (",

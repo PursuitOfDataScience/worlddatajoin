@@ -28,6 +28,22 @@ geometry — §2.3; the disputed-territory de-facto/de-jure policy — §2.6; an
 release ships are collected in the new **§2.7** below; the rest of this document
 is the original plan, kept for reference.
 
+**Second wave (implemented)** — a further pass over §2.2/§2.5/§2.7 picked out
+everything that is self-contained, offline-testable and high-value for the
+research audience, now shipped in 2.0.0 (see §2.8 for the itemised list and
+design notes): the historical / dissolved-entity crosswalk (`historical_codes`
++ `dissolve_country()`, closing the §2.2 gap and the "USSR silently matches
+Russia" trap), `correlate_indicators()`, `beta_convergence()` /
+`sigma_convergence()`, `gini()` / `theil()` (population-weightable, with a
+between/within decomposition), `lag_by_country()` / `diff_by_country()`,
+`morans_i()` (spatial autocorrelation with *no* `spdep` dependency — it reuses
+the shipped `country_borders()` adjacency), `spike_map()`, multilingual
+`convert_country(to = "name_<lang>")`, and SI-formatted binned legends. Still
+deferred (unchanged reasoning): §2.1 external adapters, §2.3 `admin1`
+geometry / `cache_geometry()`, §2.6 point-in-time membership and the
+disputed-territory policy, the ggsql render-engine broadening, the Shiny
+module, and the animation/WebGL extras.
+
 ---
 
 ## 0. Carryover TODO (original note)
@@ -243,6 +259,69 @@ each is self-contained. Tagged ★ high value / ◐ medium / ◦ nice-to-have.
   choropleth drops into an app in two lines (ggplot / leaflet / ggsql engine).
 - ◦ **`gt` / report helpers** — `country_factsheet()` and a `gt`-formatted
   `world_table()` for one-country or top-N summaries.
+
+### 2.8 Second wave for 2.0.0 (implemented — design notes)
+
+A concrete, shippable cut of the remaining §2.2/§2.5/§2.7 candidates, chosen by
+three filters: (a) hangs off the existing ISO spine / adjacency / panel
+plumbing with **zero new hard dependencies**, (b) fully testable offline
+(bundled snapshot or synthetic panels — no live API at test time), and (c)
+directly useful to the research community (comparative development, inequality
+and spatial econometrics are the three most common uses of exactly this data).
+
+**Join & reconciliation (closes the §2.2 gap)**
+- **`historical_codes`** (bundled dataset) — a curated crosswalk of dissolved
+  entities to their successor states, one row per (entity, successor):
+  Soviet Union → 15, SFR Yugoslavia → 7 (incl. XKX, territory-based),
+  Serbia and Montenegro, Czechoslovakia, East Germany, Netherlands Antilles,
+  North/South Yemen, Sudan (pre-2011) → SDN+SSD, United Arab Republic,
+  Tanganyika/Zanzibar, North/South Vietnam. Retired ISO codes (`SUN`, `YUG`,
+  `CSK`, `DDR`, `ANT`, `SCG`, `YMD`) are carried where they existed.
+- **`dissolve_country(x)`** — resolve a mixed vector of historical *and*
+  modern names to successor `iso3c` rows (one→many, dated). Modern names pass
+  through as single rows, so a whole messy column can be piped in unchanged.
+- **`check_country_match()` gains a `historical` column** — flags dissolved
+  entities *even when countrycode "matches" them*: the killer case is
+  `"USSR"`, which countrycode silently resolves to `RUS` (measured), so Soviet-
+  era data quietly becomes Russian data. The flag catches Yugoslavia (NA) and
+  USSR (false-positive RUS) alike and points at `dissolve_country()`.
+
+**Analysis helpers (ships the §2.5/§2.7 spine)**
+- **`correlate_indicators(data, ...)`** — pairwise correlation of indicator
+  columns on the spine (pearson/spearman, pairwise-complete, per-pair `n`),
+  tidy long output sorted by |r|.
+- **`beta_convergence(data, value)`** — the growth-regression convergence
+  test (average log growth on log initial level), returning `beta`, inference,
+  implied convergence `speed` and `half_life` in one row.
+- **`sigma_convergence(data, value)`** — cross-country dispersion per year
+  (sd of logs, or CV), the "is the distribution actually narrowing" companion.
+- **`gini(x, weights = )`** and **`theil(x, weights = , groups = )`** —
+  inequality across countries, population-weightable; `theil()` decomposes
+  between/within groups (continents, income groups) when `groups` is given.
+- **`lag_by_country()` / `diff_by_country()`** — panel lag/difference done
+  right (grouped by `iso3c`, ordered by `year`), completing the set with
+  `growth_rate()` / `index_to()` / `complete_years()`.
+
+**Spatial statistics (the §2.7 ask, minus the spdep dependency)**
+- **`morans_i(data, value)`** — global Moran's I with a permutation
+  pseudo-p-value, computed on the row-standardised `country_borders()`
+  adjacency. No `spdep`: at 200 countries the dense-matrix arithmetic is
+  trivial, and reusing our own adjacency keeps the weights consistent with
+  the maps. (LISA / local Moran's stays deferred; it wants map integration.)
+
+**Visualization polish**
+- **`spike_map(data, height)`** — the classic "population spikes" display:
+  triangular spikes at country centroids, height ∝ value. Uses the same
+  polygon centroids as `bubble_map()`; needs only `maps`.
+- **Formatted binned legends** — `world_map(style = "binned")` now labels
+  breaks with SI-formatted numbers (`4M`, not `4e+06`) when `scales` is
+  installed, closing the §2.4 "raw breaks" note.
+
+**Reference data**
+- **Multilingual names** — `convert_country(to = "name_fr" / "name_es" /
+  "name_de" / ...)` maps any `name_<lang>` to countrycode's CLDR tables
+  (`cldr.name.<lang>`, 555 columns available), for localized labels and
+  joining non-English sources.
 
 ---
 

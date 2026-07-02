@@ -41,7 +41,9 @@ convert_dest_map <- function() {
 #'
 #' @param x A vector of country names or codes.
 #' @param to Destination scheme. A shortcut (`"iso3c"`, `"flag"`, `"currency"`,
-#'   `"tld"`, `"continent"`, `"region"`, `"cown"`, ...) or any raw countrycode
+#'   `"tld"`, `"continent"`, `"region"`, `"cown"`, ...), a localized name
+#'   `"name_<lang>"` (`"name_fr"`, `"name_es"`, `"name_zh"`, ... -- any
+#'   language in countrycode's CLDR tables), or any raw countrycode
 #'   destination.
 #' @param from Origin scheme (default `"country.name"`).
 #' @param custom_match Optional overrides (default [wdj_overrides()]).
@@ -53,10 +55,18 @@ convert_dest_map <- function() {
 #' convert_country(c("Japan", "Brazil"), to = "flag")
 #' convert_country("Germany", to = "currency")
 #' convert_country(c("USA", "France"), to = "continent")
+#' convert_country(c("Germany", "United States"), to = "name_fr")
 convert_country <- function(x, to = "iso3c", from = "country.name",
                             custom_match = wdj_overrides(), warn = TRUE) {
   m <- convert_dest_map()
-  dest <- if (to %in% names(m)) m[[to]] else to
+  dest <- if (to %in% names(m)) {
+    m[[to]]
+  } else if (grepl("^name_[a-z]{2,3}(_[a-z]+)?$", to)) {
+    # Localized names: name_fr -> cldr.name.fr (countrycode's CLDR tables).
+    sub("^name_", "cldr.name.", to)
+  } else {
+    to
+  }
   # When reading names or iso3c, resolve to the override-corrected iso3c first
   # and then convert iso3c -> destination, so curated entities (Kosovo, Canary
   # Islands, ...) resolve for EVERY destination, not just iso3c.

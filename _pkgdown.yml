@@ -53,6 +53,7 @@ reference:
   - attach_geometry
   - country_join
   - country_join_all
+  - dissolve_country
 
 - title: Diagnostics & data quality
   desc: Never lose a country silently.
@@ -79,6 +80,13 @@ reference:
   - growth_rate
   - index_to
   - share_of_world
+  - lag_by_country
+  - correlate_indicators
+  - beta_convergence
+  - sigma_convergence
+  - gini
+  - theil
+  - morans_i
 
 - title: Visualization
   desc: A full vocabulary of projected, area-honest maps.
@@ -88,6 +96,7 @@ reference:
   - spin_globe
   - facet_map
   - bubble_map
+  - spike_map
   - bivariate_map
   - cartogram_map
   - dorling_map
@@ -116,6 +125,7 @@ reference:
   - common_indicators
   - country_groups_tbl
   - world_tiles
+  - historical_codes
 
 - title: Package
   contents:

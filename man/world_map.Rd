@@ -51,7 +51,7 @@ A \code{ggplot} object.
 \description{
 Encapsulates the choropleth boilerplate and goes beyond a single style.
 Auto-detects the polygon vs \code{sf} backend, applies \code{\link[=theme_world_map]{theme_world_map()}}, and --
-for \code{sf} -- a real projection via \code{\link[ggplot2:coord_sf]{ggplot2::coord_sf()}}. Binned / quantile /
+for \code{sf} -- a real projection via \code{\link[ggplot2:ggsf]{ggplot2::coord_sf()}}. Binned / quantile /
 jenks styles are offered because a continuous fill on a skewed indicator
 hides almost all the variation; binning is the honest default for
 choropleths.

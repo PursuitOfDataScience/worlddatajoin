@@ -18,7 +18,7 @@ A simplified \code{sf} object.
 }
 \description{
 Reduce the vertex count of an \code{sf} object via the optional \code{rmapshaper}
-package (falling back to \code{\link[sf:st_simplify]{sf::st_simplify()}}), for fast web/plotting.
+package (falling back to \code{\link[sf:geos_unary]{sf::st_simplify()}}), for fast web/plotting.
 }
 \examples{
 \dontrun{

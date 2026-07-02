@@ -49,6 +49,43 @@ behaviour may see different maps or values.
   `k`/`itermax` tuning; `cartogram_map()` itself gains `...` passthrough to the
   underlying `cartogram::cartogram_*()` call.
 
+## New: historical entities, inequality and spatial statistics
+
+* `historical_codes` — a curated, dated crosswalk of dissolved entities
+  (Soviet Union, Yugoslavia, Czechoslovakia, East Germany, Netherlands
+  Antilles, North/South Yemen, pre-2011 Sudan, United Arab Republic,
+  Tanganyika/Zanzibar, North/South Vietnam, Serbia and Montenegro) to their
+  successor states, with retired ISO codes where they existed. Kosovo is
+  included among the Yugoslav successors on a territory basis (documented).
+* `dissolve_country()` — resolve a mixed vector of historical *and* modern
+  names to successor `iso3c` rows (one-to-many, dated); modern names pass
+  through as single rows, so a whole messy column pipes in unchanged.
+* `check_country_match()` gains a `historical` column. It flags dissolved
+  entities **even when countrycode "matches" them** — the headline case is
+  `"USSR"`, which countrycode silently resolves to Russia's `RUS`, so
+  Soviet-era data becomes Russian data with no warning.
+* `correlate_indicators()` — pairwise indicator correlations on the spine
+  (pearson/spearman, pairwise-complete, per-pair `n`), tidy long output.
+* `beta_convergence()` / `sigma_convergence()` — the two standard convergence
+  diagnostics: the growth-on-initial-level regression (with implied
+  convergence speed and half-life) and per-year cross-country dispersion.
+* `gini()` and `theil()` — inequality across countries, population-weightable;
+  `theil()` decomposes exactly into between/within components when a grouping
+  (continent, income) is supplied.
+* `lag_by_country()` / `diff_by_country()` — panel lag and difference grouped
+  by `iso3c` and ordered by `year`, completing the panel toolkit around
+  `growth_rate()` / `index_to()` / `complete_years()`.
+* `morans_i()` — global Moran's I with a permutation pseudo-p-value, computed
+  on the row-standardised `country_borders()` adjacency. No `spdep`
+  dependency: the weights come from the package's own curated topology.
+* `spike_map()` — triangular spikes at country centroids (height ∝ value), the
+  overplotting-resistant cousin of `bubble_map()`; needs only `maps`.
+* `convert_country()` accepts `to = "name_<lang>"` (`"name_fr"`, `"name_es"`,
+  `"name_zh"`, …) for localized country names via countrycode's CLDR tables.
+* `world_map(style = "binned")` legends now show SI-formatted breaks
+  (`4M`, not `4e+06`) when `scales` is installed; the continuous scale uses
+  the same formatter.
+
 ## Bug fixes
 
 * `world_map(style = "quantile"/"jenks")` computed breaks over polygon
@@ -91,6 +128,10 @@ behaviour may see different maps or values.
   the geometry backend always matched with the default `wdj_overrides()`. The
   override set now flows through to both the polygon and `sf` matchers, so a
   custom mapping actually changes which polygons a country claims.
+* `repair_country_names()` no longer records a no-op "repair" when a dissolved
+  entity's own name (e.g. "Yugoslavia", which exists in the codelist but has
+  no ISO code) comes back as its closest suggestion; `dissolve_country()` is
+  the right tool there and is what the report now points to.
 
 ## Housekeeping
 

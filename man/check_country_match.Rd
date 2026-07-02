@@ -23,14 +23,23 @@ check_country_match(
 (requires the optional \code{stringdist} package; default \code{TRUE}).}
 }
 \value{
-A tibble with columns \code{input}, \code{iso3c}, \code{matched}, \code{suggestion}.
+A tibble with columns \code{input}, \code{iso3c}, \code{matched}, \code{historical},
+\code{suggestion}.
 }
 \description{
 A report on what will and will not match before you trust the map: the
-input, its \code{iso3c}, whether it \code{matched}, and a \code{suggestion} (the closest
-known country name by string distance) for misses. Surfaced automatically by
-\code{\link[=join_world]{join_world()}}.
+input, its \code{iso3c}, whether it \code{matched}, whether it is a \code{historical}
+(dissolved) entity, and a \code{suggestion} (the closest known country name by
+string distance) for misses. Surfaced automatically by \code{\link[=join_world]{join_world()}}.
+}
+\details{
+The \code{historical} flag matters even for rows that \emph{matched}: countrycode
+silently resolves \code{"USSR"} to Russia's \code{RUS}, so Soviet-era data becomes
+Russian data without a warning. Rows flagged \code{historical} should usually be
+routed through \code{\link[=dissolve_country]{dissolve_country()}} instead.
 }
 \examples{
 check_country_match(c("USA", "Cote d'Ivoire", "Yugoslavia", "Wakanda"))
+# "USSR" matches (to RUS!) but is flagged historical:
+check_country_match("USSR")
 }

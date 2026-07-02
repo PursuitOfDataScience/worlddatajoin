@@ -18,13 +18,13 @@ The happy path stays one call: \code{\link[=world_data]{world_data()}}. Everythi
 \section{Core data assembly}{
 
 \code{\link[=world_data]{world_data()}}, \code{\link[=country_data]{country_data()}}, \code{\link[=world_geometry]{world_geometry()}}, \code{\link[=locate_country]{locate_country()}},
-\code{\link[=country_borders]{country_borders()}}, \code{\link[=neighbors]{neighbors()}}, \code{\link[=distance_between]{distance_between()}}.
+\code{\link[=country_borders]{country_borders()}}, \code{\link[=neighbors]{neighbors()}}, \code{\link[=distance_between]{distance_between()}}, \code{\link[=morans_i]{morans_i()}}.
 }
 
 \section{The join engine}{
 
 \code{\link[=standardize_country]{standardize_country()}}, \code{\link[=join_world]{join_world()}}, \code{\link[=attach_geometry]{attach_geometry()}}, \code{\link[=country_join]{country_join()}},
-\code{\link[=country_join_all]{country_join_all()}}.
+\code{\link[=country_join_all]{country_join_all()}}, \code{\link[=dissolve_country]{dissolve_country()}}.
 }
 
 \section{Diagnostics}{
@@ -37,21 +37,23 @@ The happy path stays one call: \code{\link[=world_data]{world_data()}}. Everythi
 
 \code{\link[=convert_country]{convert_country()}}, \code{\link[=country_codes]{country_codes()}}, \code{\link[=country_groups]{country_groups()}}, \code{\link[=in_group]{in_group()}},
 \code{\link[=wdi_search]{wdi_search()}}, and the datasets \link{country_meta}, \link{common_indicators},
-\link{country_groups_tbl}, \link{world_snapshot}, \link{world_tiles}.
+\link{country_groups_tbl}, \link{world_snapshot}, \link{world_tiles}, \link{historical_codes}.
 }
 
 \section{Analysis helpers}{
 
 \code{\link[=per_capita]{per_capita()}}, \code{\link[=aggregate_regions]{aggregate_regions()}}, \code{\link[=rank_countries]{rank_countries()}}, \code{\link[=complete_years]{complete_years()}},
-\code{\link[=growth_rate]{growth_rate()}}, \code{\link[=index_to]{index_to()}}, \code{\link[=share_of_world]{share_of_world()}}.
+\code{\link[=growth_rate]{growth_rate()}}, \code{\link[=index_to]{index_to()}}, \code{\link[=share_of_world]{share_of_world()}}, \code{\link[=lag_by_country]{lag_by_country()}},
+\code{\link[=diff_by_country]{diff_by_country()}}, \code{\link[=correlate_indicators]{correlate_indicators()}}, \code{\link[=beta_convergence]{beta_convergence()}},
+\code{\link[=sigma_convergence]{sigma_convergence()}}, \code{\link[=gini]{gini()}}, \code{\link[=theil]{theil()}}.
 }
 
 \section{Visualization}{
 
 \code{\link[=world_map]{world_map()}}, \code{\link[=globe_map]{globe_map()}}, \code{\link[=spin_globe]{spin_globe()}}, \code{\link[=facet_map]{facet_map()}}, \code{\link[=bubble_map]{bubble_map()}},
-\code{\link[=bivariate_map]{bivariate_map()}}, \code{\link[=cartogram_map]{cartogram_map()}}, \code{\link[=dorling_map]{dorling_map()}}, \code{\link[=tile_map]{tile_map()}},
-\code{\link[=flow_map]{flow_map()}}, \code{\link[=animate_world]{animate_world()}}, \code{\link[=interactive_map]{interactive_map()}}, \code{\link[=geom_country_labels]{geom_country_labels()}},
-\code{\link[=theme_world_map]{theme_world_map()}}.
+\code{\link[=spike_map]{spike_map()}}, \code{\link[=bivariate_map]{bivariate_map()}}, \code{\link[=cartogram_map]{cartogram_map()}}, \code{\link[=dorling_map]{dorling_map()}},
+\code{\link[=tile_map]{tile_map()}}, \code{\link[=flow_map]{flow_map()}}, \code{\link[=animate_world]{animate_world()}}, \code{\link[=interactive_map]{interactive_map()}},
+\code{\link[=geom_country_labels]{geom_country_labels()}}, \code{\link[=theme_world_map]{theme_world_map()}}.
 }
 
 \section{Database rendering (ggsql)}{

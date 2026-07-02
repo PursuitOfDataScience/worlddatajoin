@@ -153,7 +153,7 @@ add_fill_scale <- function(style, palette, n_bins, na_label, legend) {
     ),
     binned = ggplot2::scale_fill_viridis_b(
       name = legend, na.value = na_val, n.breaks = n_bins,
-      option = palette %||% "viridis"
+      option = palette %||% "viridis", labels = scales_format()
     ),
     quantile = ,
     jenks = ggplot2::scale_fill_viridis_d(
@@ -165,9 +165,14 @@ add_fill_scale <- function(style, palette, n_bins, na_label, legend) {
   )
 }
 
-# Use scales::label_number if available, else identity labels.
+# Use scales::label_number if available, else identity labels. SI-style
+# cut_short_scale() turns 4e+06 into "4M" so binned legends stay readable.
 scales_format <- function() {
-  if (has_pkg("scales")) scales::label_number() else ggplot2::waiver()
+  if (has_pkg("scales")) {
+    scales::label_number(scale_cut = scales::cut_short_scale())
+  } else {
+    ggplot2::waiver()
+  }
 }
 
 #' Proportional-symbol (bubble) map
@@ -246,6 +251,73 @@ bubble_map <- function(data, size, color = NULL, projection = "equal_earth",
     ) +
     ggplot2::geom_point(data = pts, mapping = aes_pt, alpha = alpha) +
     ggplot2::scale_size_area(max_size = max_size) +
+    ggplot2::coord_quickmap() +
+    theme_world_map()
+}
+
+#' Spike map (heights at country centroids)
+#'
+#' The classic "population spikes" display: a triangular spike at each country
+#' centroid whose height encodes the value. Like [bubble_map()] it is the
+#' honest idiom for *totals*, with a different visual trade-off: spikes
+#' overplot less in dense regions (Europe, the Caribbean) because they only
+#' grow upward. Uses the polygon backend, so it needs only `maps`.
+#'
+#' @param data A country-level frame with `iso3c` and the `height` column.
+#' @param height The column controlling spike height (unquoted).
+#' @param max_height Height of the tallest spike, in degrees of latitude
+#'   (default `20`).
+#' @param width Base width of each spike, in degrees of longitude (default
+#'   `1.6`).
+#' @param color Spike colour (default a warm red).
+#' @param alpha Spike fill transparency.
+#'
+#' @return A `ggplot` object.
+#' @export
+#' @examples
+#' \donttest{
+#' if (requireNamespace("maps", quietly = TRUE)) {
+#'   spike_map(countryatlas::world_snapshot$countries, population)
+#' }
+#' }
+spike_map <- function(data, height, max_height = 20, width = 1.6,
+                      color = "#B2182B", alpha = 0.65) {
+  height_q <- rlang::enquo(height)
+  h_name <- rlang::as_name(height_q)
+  if (!"iso3c" %in% names(data)) {
+    wdj_abort("{.arg data} must contain an {.field iso3c} column.")
+  }
+  data <- dplyr::distinct(tibble::as_tibble(data), .data$iso3c, .keep_all = TRUE)
+  cent <- world_geometry("centroids", geometry = "polygon")
+  pts <- dplyr::inner_join(data, cent[, c("iso3c", "centroid_lon", "centroid_lat")],
+                           by = "iso3c")
+  pts <- pts[is.finite(pts[[h_name]]) & pts[[h_name]] >= 0, ]
+  if (!nrow(pts)) {
+    wdj_abort("No rows with a non-negative {.val {h_name}} joined to a centroid.")
+  }
+  h <- pts[[h_name]] / max(pts[[h_name]]) * max_height
+
+  # One triangle (3 vertices) per country: (x - w/2, y), (x, y + h), (x + w/2, y).
+  spikes <- tibble::tibble(
+    iso3c = rep(pts$iso3c, each = 3L),
+    long = as.vector(rbind(pts$centroid_lon - width / 2,
+                           pts$centroid_lon,
+                           pts$centroid_lon + width / 2)),
+    lat = as.vector(rbind(pts$centroid_lat,
+                          pts$centroid_lat + h,
+                          pts$centroid_lat))
+  )
+  ggplot2::ggplot() +
+    ggplot2::geom_polygon(
+      data = world_geometry("countries", geometry = "polygon"),
+      ggplot2::aes(.data$long, .data$lat, group = .data$group),
+      fill = "grey92", color = "grey80", linewidth = 0.1
+    ) +
+    ggplot2::geom_polygon(
+      data = spikes,
+      ggplot2::aes(.data$long, .data$lat, group = .data$iso3c),
+      fill = color, color = color, alpha = alpha, linewidth = 0.3
+    ) +
     ggplot2::coord_quickmap() +
     theme_world_map()
 }

@@ -296,6 +296,344 @@ index_to <- function(data, value, base_year, to = 100, suffix = "_index") {
   dplyr::ungroup(out)
 }
 
+#' Pairwise correlation of indicators on the spine
+#'
+#' Which indicators move together across countries? Computes pairwise
+#' correlations between indicator columns (pairwise-complete, so patchy
+#' coverage doesn't shrink every pair to the common subset), with the per-pair
+#' `n` reported so a headline `r` computed on 12 countries can't masquerade as
+#' a world fact.
+#'
+#' @param data A country-level (or map-ready) data frame; polygon frames are
+#'   reduced to one row per country first.
+#' @param ... <[`tidy-select`][dplyr::dplyr_tidy_select]> Indicator columns to
+#'   correlate. If empty, all numeric columns except coordinates, `year` and
+#'   other structural columns are used.
+#' @param method `"pearson"` (default) or `"spearman"`.
+#' @param min_n Minimum number of complete pairs for a correlation to be
+#'   reported (default `3`).
+#'
+#' @return A tibble with one row per indicator pair: `var_x`, `var_y`, `r`,
+#'   `n` (complete pairs), sorted by `|r|` descending.
+#' @export
+#' @examples
+#' correlate_indicators(countryatlas::world_snapshot$countries)
+correlate_indicators <- function(data, ..., method = c("pearson", "spearman"),
+                                 min_n = 3) {
+  method <- match.arg(method)
+  data <- tibble::as_tibble(data)
+  if (all(c("iso3c", "group") %in% names(data))) {
+    data <- dplyr::distinct(data, .data$iso3c, .keep_all = TRUE)
+  }
+  sel <- rlang::enquos(...)
+  if (length(sel)) {
+    vals <- dplyr::select(data, !!!sel)
+  } else {
+    num <- names(data)[vapply(data, is.numeric, logical(1))]
+    keep <- setdiff(num, c("year", "long", "lat", "group", "order",
+                           "centroid_lon", "centroid_lat", "row", "col"))
+    vals <- data[, keep, drop = FALSE]
+  }
+  bad <- names(vals)[!vapply(vals, is.numeric, logical(1))]
+  if (length(bad)) {
+    wdj_abort("Column{?s} {.val {bad}} {?is/are} not numeric.")
+  }
+  if (ncol(vals) < 2L) {
+    wdj_abort("Need at least two numeric indicator columns to correlate.")
+  }
+  nms <- names(vals)
+  pairs <- utils::combn(nms, 2, simplify = FALSE)
+  out <- lapply(pairs, function(p) {
+    x <- vals[[p[1]]]; y <- vals[[p[2]]]
+    ok <- is.finite(x) & is.finite(y)
+    n <- sum(ok)
+    r <- if (n >= min_n) {
+      suppressWarnings(stats::cor(x[ok], y[ok], method = method))
+    } else {
+      NA_real_
+    }
+    tibble::tibble(var_x = p[1], var_y = p[2], r = r, n = n)
+  })
+  out <- dplyr::bind_rows(out)
+  out[order(-abs(out$r), na.last = TRUE), ]
+}
+
+#' Panel lag / difference by country
+#'
+#' The two panel primitives everyone hand-rolls (and gets subtly wrong when the
+#' frame isn't sorted): the value `n` years back, and the change since then --
+#' grouped by `iso3c`, ordered by `year`, so country A's 1960 never leaks into
+#' country B's first row.
+#'
+#' @param data A panel with `iso3c` and `year`.
+#' @param value The value column (unquoted).
+#' @param n Number of periods to lag / difference over (default `1`).
+#' @param suffix Suffix for the new column. Defaults to `"_lag"` / `"_diff"`
+#'   (with `n` appended when `n > 1`, e.g. `"_lag5"`).
+#'
+#' @return `data` with the lagged / differenced column added.
+#' @export
+#' @examples
+#' df <- data.frame(iso3c = "USA", year = 2000:2003, gdp = c(100, 110, 121, 133))
+#' lag_by_country(df, gdp)
+#' diff_by_country(df, gdp)
+lag_by_country <- function(data, value, n = 1, suffix = NULL) {
+  val_name <- rlang::as_name(rlang::enquo(value))
+  check_panel_cols(data, val_name)
+  n <- max(1L, as.integer(n))
+  new_col <- paste0(val_name, suffix %||% paste0("_lag", if (n > 1L) n else ""))
+  out <- data %>%
+    dplyr::group_by(.data$iso3c) %>%
+    dplyr::arrange(.data$year, .by_group = TRUE) %>%
+    dplyr::mutate("{new_col}" := dplyr::lag(.data[[val_name]], n = n))
+  dplyr::ungroup(out)
+}
+
+#' @rdname lag_by_country
+#' @export
+diff_by_country <- function(data, value, n = 1, suffix = NULL) {
+  val_name <- rlang::as_name(rlang::enquo(value))
+  check_panel_cols(data, val_name)
+  n <- max(1L, as.integer(n))
+  new_col <- paste0(val_name, suffix %||% paste0("_diff", if (n > 1L) n else ""))
+  out <- data %>%
+    dplyr::group_by(.data$iso3c) %>%
+    dplyr::arrange(.data$year, .by_group = TRUE) %>%
+    dplyr::mutate(
+      "{new_col}" := .data[[val_name]] - dplyr::lag(.data[[val_name]], n = n)
+    )
+  dplyr::ungroup(out)
+}
+
+# Shared validation for the panel helpers.
+check_panel_cols <- function(data, val_name, call = rlang::caller_env()) {
+  if (!all(c("iso3c", "year") %in% names(data))) {
+    wdj_abort("{.arg data} must have {.field iso3c} and {.field year} columns.",
+              call = call)
+  }
+  if (!val_name %in% names(data)) {
+    wdj_abort("Column {.val {val_name}} not found in {.arg data}.", call = call)
+  }
+  invisible(TRUE)
+}
+
+#' Beta convergence (growth regression)
+#'
+#' Do poor countries grow faster than rich ones? The classic unconditional
+#' beta-convergence test: each country's average log growth rate is regressed
+#' on its log *initial* level. A significantly negative `beta` is convergence;
+#' the implied convergence `speed` and `half_life` (years to close half the
+#' gap) are derived from it.
+#'
+#' @param data A panel with `iso3c` and `year`.
+#' @param value The value column (unquoted); must be positive (log scale).
+#'
+#' @return A one-row tibble: `beta`, `se`, `t_value`, `p_value`, `r_squared`,
+#'   `n` (countries), `speed` (annual convergence rate, `NA` when `beta >= 0`)
+#'   and `half_life` (years). The fitted [lm] object is attached as the
+#'   `"model"` attribute.
+#' @export
+#' @seealso [sigma_convergence()] for the dispersion-over-time counterpart.
+#' @examples
+#' set.seed(1)
+#' start <- runif(20, 6, 11)                              # log initial level
+#' growth <- 0.05 - 0.004 * start + rnorm(20, 0, 0.002)   # poorer grow faster
+#' panel <- data.frame(
+#'   iso3c = rep(sprintf("C%02d", 1:20), each = 2),
+#'   year  = rep(c(2000L, 2020L), 20),
+#'   gdp   = as.vector(rbind(exp(start), exp(start + growth * 20)))
+#' )
+#' beta_convergence(panel, gdp)
+beta_convergence <- function(data, value) {
+  val_name <- rlang::as_name(rlang::enquo(value))
+  check_panel_cols(data, val_name)
+
+  per_country <- data %>%
+    dplyr::filter(!is.na(.data[[val_name]]), .data[[val_name]] > 0) %>%
+    dplyr::group_by(.data$iso3c) %>%
+    dplyr::arrange(.data$year, .by_group = TRUE) %>%
+    dplyr::summarise(
+      y0 = dplyr::first(.data$year),
+      y1 = dplyr::last(.data$year),
+      v0 = dplyr::first(.data[[val_name]]),
+      v1 = dplyr::last(.data[[val_name]]),
+      .groups = "drop"
+    ) %>%
+    dplyr::filter(.data$y1 > .data$y0)
+
+  if (nrow(per_country) < 3L) {
+    wdj_abort(c(
+      "Not enough countries with two positive observations to run the regression.",
+      "i" = "Got {nrow(per_country)}; need at least 3."
+    ))
+  }
+  growth <- (log(per_country$v1) - log(per_country$v0)) /
+    (per_country$y1 - per_country$y0)
+  log_v0 <- log(per_country$v0)
+  fit <- stats::lm(growth ~ log_v0)
+  co <- summary(fit)$coefficients
+  beta <- co["log_v0", "Estimate"]
+  span <- mean(per_country$y1 - per_country$y0)
+  # Implied annual convergence speed: beta = -(1 - exp(-lambda * T)) / T.
+  speed <- if (beta < 0 && (1 + beta * span) > 0) {
+    -log(1 + beta * span) / span
+  } else {
+    NA_real_
+  }
+  out <- tibble::tibble(
+    beta = beta,
+    se = co["log_v0", "Std. Error"],
+    t_value = co["log_v0", "t value"],
+    p_value = co["log_v0", "Pr(>|t|)"],
+    r_squared = summary(fit)$r.squared,
+    n = nrow(per_country),
+    speed = speed,
+    half_life = if (is.na(speed)) NA_real_ else log(2) / speed
+  )
+  attr(out, "model") <- fit
+  out
+}
+
+#' Sigma convergence (dispersion over time)
+#'
+#' Is the cross-country distribution actually narrowing? Reports the dispersion
+#' of a (positive) indicator across countries for every year of a panel --
+#' falling dispersion is sigma convergence. The natural companion to
+#' [beta_convergence()]: beta convergence is necessary but not sufficient for
+#' sigma convergence.
+#'
+#' @param data A panel with `iso3c` and `year`.
+#' @param value The value column (unquoted).
+#' @param measure `"sd_log"` (default; standard deviation of log values, the
+#'   standard choice) or `"cv"` (coefficient of variation).
+#'
+#' @return A tibble with one row per year: `year`, `n` (countries with
+#'   positive values) and `sigma`.
+#' @export
+#' @examples
+#' df <- data.frame(
+#'   iso3c = rep(c("A", "B", "C"), 2),
+#'   year = rep(c(2000L, 2010L), each = 3),
+#'   gdp = c(1, 10, 100, 2, 11, 60)   # dispersion falls
+#' )
+#' sigma_convergence(df, gdp)
+sigma_convergence <- function(data, value, measure = c("sd_log", "cv")) {
+  measure <- match.arg(measure)
+  val_name <- rlang::as_name(rlang::enquo(value))
+  check_panel_cols(data, val_name)
+  data %>%
+    dplyr::filter(!is.na(.data[[val_name]]), .data[[val_name]] > 0) %>%
+    dplyr::group_by(.data$year) %>%
+    dplyr::summarise(
+      n = dplyr::n(),
+      sigma = if (measure == "sd_log") {
+        stats::sd(log(.data[[val_name]]))
+      } else {
+        stats::sd(.data[[val_name]]) / mean(.data[[val_name]])
+      },
+      .groups = "drop"
+    ) %>%
+    dplyr::arrange(.data$year)
+}
+
+#' Gini coefficient (population-weightable)
+#'
+#' The Gini index of inequality across countries, optionally weighted (weight
+#' by population and the statistic describes inequality between *people*
+#' assigned their country's mean, not between country units).
+#'
+#' @param x A numeric vector (e.g. GDP per capita by country).
+#' @param weights Optional non-negative weights (e.g. population), recycled
+#'   against `x` the usual R way. `NULL` (default) weights all values equally.
+#' @param na.rm Whether to drop `NA` values (pairwise with their weight;
+#'   default `TRUE`).
+#'
+#' @return A single number in `[0, 1]`: `0` is perfect equality.
+#' @export
+#' @seealso [theil()], which adds a between/within-group decomposition.
+#' @examples
+#' snap <- countryatlas::world_snapshot$countries
+#' gini(snap$gdp_per_capita)                          # between countries
+#' gini(snap$gdp_per_capita, weights = snap$population)  # between people
+gini <- function(x, weights = NULL, na.rm = TRUE) {
+  w <- if (is.null(weights)) rep(1, length(x)) else rep_len(as.numeric(weights),
+                                                            length(x))
+  if (isTRUE(na.rm)) {
+    ok <- !is.na(x) & !is.na(w)
+    x <- x[ok]; w <- w[ok]
+  }
+  if (length(x) == 0L || anyNA(x) || anyNA(w)) return(NA_real_)
+  if (any(w < 0)) wdj_abort("{.arg weights} must be non-negative.")
+  sw <- sum(w)
+  mu <- sum(w * x) / sw
+  if (sw == 0 || mu == 0) return(NA_real_)
+  # Mean absolute difference over all weighted pairs; O(n^2) is trivial at
+  # country scale (~200 values) and immune to ties/ordering subtleties.
+  sum(outer(w, w) * abs(outer(x, x, "-"))) / (2 * sw^2 * mu)
+}
+
+#' Theil index, with between/within decomposition
+#'
+#' The Theil T inequality index -- less famous than Gini, but it decomposes
+#' *exactly* into a between-group and a within-group component, answering "how
+#' much of world inequality is between continents vs within them?" in one
+#' call. Weight by population to describe inequality between people rather
+#' than between country units.
+#'
+#' @param x A positive numeric vector (log scale; zero/negative values are
+#'   dropped with a warning).
+#' @param weights Optional non-negative weights (e.g. population).
+#' @param groups Optional grouping vector (e.g. continent). When supplied, the
+#'   decomposition is returned instead of the scalar.
+#' @param na.rm Whether to drop `NA` values (default `TRUE`).
+#'
+#' @return Without `groups`: a single non-negative number (`0` = perfect
+#'   equality). With `groups`: a tibble with components `"total"`,
+#'   `"between"` and `"within"` (`total = between + within`) and each
+#'   component's `share` of the total.
+#' @export
+#' @examples
+#' snap <- countryatlas::world_snapshot$countries
+#' theil(snap$gdp_per_capita, weights = snap$population)
+#' theil(snap$gdp_per_capita, weights = snap$population, groups = snap$continent)
+theil <- function(x, weights = NULL, groups = NULL, na.rm = TRUE) {
+  w <- if (is.null(weights)) rep(1, length(x)) else rep_len(as.numeric(weights),
+                                                            length(x))
+  g <- if (is.null(groups)) NULL else rep_len(as.character(groups), length(x))
+  if (isTRUE(na.rm)) {
+    ok <- !is.na(x) & !is.na(w) & (if (is.null(g)) TRUE else !is.na(g))
+    x <- x[ok]; w <- w[ok]; g <- g[ok]
+  }
+  bad <- x <= 0
+  if (any(bad, na.rm = TRUE)) {
+    wdj_warn("Dropping {sum(bad)} non-positive value{?s} (Theil needs x > 0).")
+    x <- x[!bad]; w <- w[!bad]; g <- g[!bad]
+  }
+  if (length(x) == 0L || anyNA(x) || anyNA(w)) return(NA_real_)
+  if (any(w < 0)) wdj_abort("{.arg weights} must be non-negative.")
+  sw <- sum(w)
+  mu <- sum(w * x) / sw
+  theil_t <- function(x, w, sw, mu) sum((w / sw) * (x / mu) * log(x / mu))
+  total <- theil_t(x, w, sw, mu)
+  if (is.null(g)) return(total)
+
+  parts <- lapply(split(seq_along(x), g), function(i) {
+    swg <- sum(w[i]); mug <- sum(w[i] * x[i]) / swg
+    tibble::tibble(
+      between = (swg / sw) * (mug / mu) * log(mug / mu),
+      within = (swg / sw) * (mug / mu) * theil_t(x[i], w[i], swg, mug)
+    )
+  })
+  parts <- dplyr::bind_rows(parts)
+  between <- sum(parts$between)
+  within <- sum(parts$within)
+  tibble::tibble(
+    component = c("total", "between", "within"),
+    value = c(total, between, within),
+    share = c(1, between / total, within / total)
+  )
+}
+
 #' Each country's share of the world total
 #'
 #' Adds a column giving each country's value as a share of the (year's) world

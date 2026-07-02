@@ -123,10 +123,28 @@ names, by reconciling both sides to <code>iso3c</code> first:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Russia          3 RUS   Russian Federation   144</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="reconcile-many-tables-at-once">Reconcile many tables at once<a class="anchor" aria-label="anchor" href="#reconcile-many-tables-at-once"></a>
+</h2>
+<p><code><a href="../reference/country_join_all.html">country_join_all()</a></code> generalises this to a whole list of
+frames: every table is reconciled to <code>iso3c</code> first, then
+reduce-joined — three sources spelled three ways collapse into one
+honest table:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">t1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>country <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Czechia"</span>, <span class="st">"South Korea"</span><span class="op">)</span>, gdp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">t2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>country <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Czech Republic"</span>, <span class="st">"Korea, Rep."</span><span class="op">)</span>, pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">51</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">t3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>country <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Czechia"</span>, <span class="st">"Korea"</span><span class="op">)</span>, area <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">79</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/country_join_all.html">country_join_all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">t1</span>, <span class="va">t2</span>, <span class="va">t3</span><span class="op">)</span>, by <span class="op">=</span> <span class="st">"country"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 7</span></span></span>
+<span><span class="co">#&gt;   country.x     gdp iso3c country.y        pop country  area</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Czechia         1 CZE   Czech Republic    10 Czechia    79</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> South Korea     2 KOR   Korea, Rep.       51 Korea     100</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="check-before-you-trust">Check before you trust<a class="anchor" aria-label="anchor" href="#check-before-you-trust"></a>
 </h2>
 <p>Always inspect what failed to match:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_country_match.html">check_country_match</a></span><span class="op">(</span><span class="va">my_data</span><span class="op">$</span><span class="va">nation</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
 <span><span class="co">#&gt;   input         iso3c matched suggestion</span></span>
@@ -137,10 +155,29 @@ names, by reconciling both sides to <code>iso3c</code> first:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Kosovo        XKX   TRUE    <span style="color: #BB0000;">NA</span>        </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Cote d'Ivoire CIV   TRUE    <span style="color: #BB0000;">NA</span>        </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> UK            GBR   TRUE    <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
-<p>If something legitimately cannot be matched, extend the override
-table:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/wdj_overrides.html">wdj_overrides</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Somaliland <span class="op">=</span> <span class="st">"SOM"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Kosovo"</span>, <span class="st">"Somaliland"</span><span class="op">)</span><span class="op">]</span></span>
+</div>
+<div class="section level2">
+<h2 id="repair-what-can-be-repaired">Repair what can be repaired<a class="anchor" aria-label="anchor" href="#repair-what-can-be-repaired"></a>
+</h2>
+<p><code><a href="../reference/repair_country_names.html">repair_country_names()</a></code> is the “act on it” companion to
+that report: it substitutes the closest known country name, but only
+when the match is confident, and attaches a record of what it
+changed:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/repair_country_names.html">repair_country_names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Brzil"</span>, <span class="st">"Nehterlands"</span>, <span class="st">"United States"</span><span class="op">)</span>,</span>
+<span>                              verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">fixed</span></span>
+<span><span class="co">#&gt; [1] "Brazil"        "Netherlands"   "United States"</span></span>
+<span><span class="co">#&gt; attr(,"repairs")</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 2</span></span></span>
+<span><span class="co">#&gt;   from        to         </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Brzil       Brazil     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Nehterlands Netherlands</span></span></code></pre></div>
+<p>If something legitimately cannot be matched (an entity the backends
+simply do not know), extend the override table:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/wdj_overrides.html">country_overrides</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Somaliland <span class="op">=</span> <span class="st">"SOM"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Kosovo"</span>, <span class="st">"Somaliland"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;     Kosovo Somaliland </span></span>
 <span><span class="co">#&gt;      "XKX"      "SOM"</span></span></code></pre></div>
 </div>
@@ -149,7 +186,7 @@ table:</p>
 </h2>
 <p>If your key is already an ISO-2 or World Bank code, tell
 <code><a href="../reference/standardize_country.html">standardize_country()</a></code> via <code>origin</code>:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"US"</span>, <span class="st">"KR"</span>, <span class="st">"BR"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/standardize_country.html">standardize_country</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">code</span>, origin <span class="op">=</span> <span class="st">"iso2c"</span>, warn <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
@@ -158,6 +195,29 @@ table:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> US    USA   US    Americas  North America            </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> KR    KOR   KR    Asia      East Asia &amp; Pacific      </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> BR    BRA   BR    Americas  Latin America &amp; Caribbean</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="point-data-onto-the-spine">Point data onto the spine<a class="anchor" aria-label="anchor" href="#point-data-onto-the-spine"></a>
+</h2>
+<p>Not all data comes keyed on names — sometimes all you have is
+coordinates (events, weather stations, survey sites).
+<code><a href="../reference/locate_country.html">locate_country()</a></code> runs a point-in-polygon lookup and tags
+each point with the country that contains it, so point data joins the
+ISO spine like everything else. It needs the optional <code>sf</code> +
+<code>rnaturalearth</code> packages:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/locate_country.html">locate_country</a></span><span class="op">(</span>lon <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2.35</span>, <span class="op">-</span><span class="fl">74.0</span>, <span class="fl">139.7</span><span class="op">)</span>, lat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">48.85</span>, <span class="fl">40.7</span>, <span class="fl">35.7</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 2</span></span></span>
+<span><span class="co">#&gt;   iso3c country      </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> FRA   France       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> USA   United States</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> JPN   Japan</span></span></code></pre></div>
+<p>Coarse coastlines can place a genuinely-onshore point (a port city,
+say) just outside its country’s simplified polygon;
+<code><a href="../reference/locate_country.html">locate_country()</a></code> snaps such points to the nearest country
+within <code>tolerance_km</code> (25 km by default) while leaving
+open-ocean points <code>NA</code>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

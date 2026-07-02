@@ -148,8 +148,10 @@ projecting, so nothing streaks across the frame:</p>
 <p><code>region</code> accepts a continent, a group name
 (<code>"EU"</code>, <code>"OECD"</code>, …), a vector of
 <code>iso3c</code> codes, or a bounding box
-<code>c(xmin, ymin, xmax, ymax)</code>, and picks a sensible projection
-for it.</p>
+<code>c(xmin, ymin, xmax, ymax)</code>. Pair it with a
+<code>projection</code> suited to the subset
+(e.g. <code>"azimuthal_equal_area"</code> for a single continent, the
+polar projections for the Arctic) so the crop stays area-honest.</p>
 </div>
 <div class="section level2">
 <h2 id="simplifying-for-the-web">Simplifying for the web<a class="anchor" aria-label="anchor" href="#simplifying-for-the-web"></a>

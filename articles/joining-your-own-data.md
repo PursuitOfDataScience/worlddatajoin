@@ -62,6 +62,26 @@ country_join(a, b, country, nation)
 #> 3 Russia          3 RUS   Russian Federation   144
 ```
 
+## Reconcile many tables at once
+
+[`country_join_all()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join_all.md)
+generalises this to a whole list of frames: every table is reconciled to
+`iso3c` first, then reduce-joined — three sources spelled three ways
+collapse into one honest table:
+
+``` r
+
+t1 <- data.frame(country = c("Czechia", "South Korea"), gdp = c(1, 2))
+t2 <- data.frame(country = c("Czech Republic", "Korea, Rep."), pop = c(10, 51))
+t3 <- data.frame(country = c("Czechia", "Korea"), area = c(79, 100))
+country_join_all(list(t1, t2, t3), by = "country")
+#> # A tibble: 2 × 7
+#>   country.x     gdp iso3c country.y        pop country  area
+#>   <chr>       <dbl> <chr> <chr>          <dbl> <chr>   <dbl>
+#> 1 Czechia         1 CZE   Czech Republic    10 Czechia    79
+#> 2 South Korea     2 KOR   Korea, Rep.       51 Korea     100
+```
+
 ## Check before you trust
 
 Always inspect what failed to match:
@@ -80,11 +100,33 @@ check_country_match(my_data$nation)
 #> 6 UK            GBR   TRUE    NA
 ```
 
-If something legitimately cannot be matched, extend the override table:
+## Repair what can be repaired
+
+[`repair_country_names()`](https://pursuitofdatascience.github.io/countryatlas/reference/repair_country_names.md)
+is the “act on it” companion to that report: it substitutes the closest
+known country name, but only when the match is confident, and attaches a
+record of what it changed:
 
 ``` r
 
-wdj_overrides(c(Somaliland = "SOM"))[c("Kosovo", "Somaliland")]
+fixed <- repair_country_names(c("Brzil", "Nehterlands", "United States"),
+                              verbose = FALSE)
+fixed
+#> [1] "Brazil"        "Netherlands"   "United States"
+#> attr(,"repairs")
+#> # A tibble: 2 × 2
+#>   from        to         
+#>   <chr>       <chr>      
+#> 1 Brzil       Brazil     
+#> 2 Nehterlands Netherlands
+```
+
+If something legitimately cannot be matched (an entity the backends
+simply do not know), extend the override table:
+
+``` r
+
+country_overrides(c(Somaliland = "SOM"))[c("Kosovo", "Somaliland")]
 #>     Kosovo Somaliland 
 #>      "XKX"      "SOM"
 ```
@@ -106,3 +148,29 @@ standardize_country(df, code, origin = "iso2c", warn = FALSE)
 #> 2 KR    KOR   KR    Asia      East Asia & Pacific      
 #> 3 BR    BRA   BR    Americas  Latin America & Caribbean
 ```
+
+## Point data onto the spine
+
+Not all data comes keyed on names — sometimes all you have is
+coordinates (events, weather stations, survey sites).
+[`locate_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/locate_country.md)
+runs a point-in-polygon lookup and tags each point with the country that
+contains it, so point data joins the ISO spine like everything else. It
+needs the optional `sf` + `rnaturalearth` packages:
+
+``` r
+
+locate_country(lon = c(2.35, -74.0, 139.7), lat = c(48.85, 40.7, 35.7))
+#> # A tibble: 3 × 2
+#>   iso3c country      
+#>   <chr> <chr>        
+#> 1 FRA   France       
+#> 2 USA   United States
+#> 3 JPN   Japan
+```
+
+Coarse coastlines can place a genuinely-onshore point (a port city, say)
+just outside its country’s simplified polygon;
+[`locate_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/locate_country.md)
+snaps such points to the nearest country within `tolerance_km` (25 km by
+default) while leaving open-ocean points `NA`.

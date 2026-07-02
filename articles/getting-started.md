@@ -65,6 +65,21 @@ head(common_indicators)
 #> 6 gni_per_capita         NY.GNP.PCAP.CD GNI per capita (current US$)
 ```
 
+Or search the full World Bank catalogue by name — offline, against
+`WDI`’s bundled indicator cache:
+
+``` r
+
+head(wdi_search("renewable energy"))
+#> # A tibble: 4 × 2
+#>   indicator                    name                                             
+#>   <chr>                        <chr>                                            
+#> 1 2.1_SHARE.TOTAL.RE.IN.TFEC   Renewable energy consumption(% in TFEC)          
+#> 2 3.1_RE.CONSUMPTION           Renewable energy consumption (TJ)                
+#> 3 4.1.2_REN.ELECTRICITY.OUTPUT Renewable energy electricity output (GWh)        
+#> 4 EG.FEC.RNEW.ZS               Renewable energy consumption (% of total final e…
+```
+
 ``` r
 
 country_data(2020, c(life_exp = "SP.DYN.LE00.IN", pop = "SP.POP.TOTL"))

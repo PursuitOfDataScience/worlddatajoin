@@ -164,6 +164,25 @@ see different maps or values.
   2024” note); regenerated.
 - Fixed a stray orphaned code fence at the end of the *countryatlas and
   ggsql* vignette that broke its markdown structure.
+- README and vignettes now demonstrate every exported function:
+  [`wdi_search()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdi_search.md),
+  [`country_codes()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_codes.md),
+  [`complete_years()`](https://pursuitofdatascience.github.io/countryatlas/reference/complete_years.md),
+  [`growth_rate()`](https://pursuitofdatascience.github.io/countryatlas/reference/growth_rate.md)
+  /
+  [`index_to()`](https://pursuitofdatascience.github.io/countryatlas/reference/index_to.md),
+  [`repair_country_names()`](https://pursuitofdatascience.github.io/countryatlas/reference/repair_country_names.md),
+  [`country_join_all()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join_all.md),
+  [`locate_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/locate_country.md)
+  and
+  [`facet_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/facet_map.md)
+  gained worked examples, and the vignettes prefer
+  [`country_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)
+  over the soft-deprecated
+  [`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md).
+  The README’s rendered output and figures were stale (pre-dating the
+  quantile-breaks fix and the `gdp_per_capita_2015` opt-in) and have
+  been re-rendered from the 2.0.0 code.
 
 ## countryatlas 1.0.0
 

@@ -212,7 +212,7 @@ country_join(left, right, country, nation)
 
 [`check_country_match()`](https://pursuitofdatascience.github.io/countryatlas/reference/check_country_match.md)
 is a pre-flight report;
-[`wdj_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)
+[`country_overrides()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdj_overrides.md)
 is the curated match table that replaces the old drop-list; and
 [`audit_coverage()`](https://pursuitofdatascience.github.io/countryatlas/reference/audit_coverage.md)
 reports missingness before a half-empty map is published.
@@ -227,6 +227,22 @@ check_country_match(c("USA", "Cote d'Ivoire", "Yugoslavia", "Wakanda"))
 #> 2 Cote d'Ivoire CIV   TRUE    NA        
 #> 3 Yugoslavia    NA    FALSE   Yugoslavia
 #> 4 Wakanda       NA    FALSE   Canada
+```
+
+[`repair_country_names()`](https://pursuitofdatascience.github.io/countryatlas/reference/repair_country_names.md)
+acts on that report: it substitutes the closest known country name for
+confident misses only, and attaches a record of every change:
+
+``` r
+
+repair_country_names(c("Brzil", "Germny", "United States"), verbose = FALSE)
+#> [1] "Brazil"        "Germany"       "United States"
+#> attr(,"repairs")
+#> # A tibble: 2 × 2
+#>   from   to     
+#>   <chr>  <chr>  
+#> 1 Brzil  Brazil 
+#> 2 Germny Germany
 ```
 
 ``` r
@@ -292,6 +308,33 @@ in_group(c("France", "United States", "Japan", "Brazil"), "EU")
 #> [1]  TRUE FALSE FALSE FALSE
 ```
 
+The whole `countrycode` codelist is exposed as a tidy, pipeable lookup
+with
+[`country_codes()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_codes.md),
+and the World Bank indicator catalogue is searchable offline with
+[`wdi_search()`](https://pursuitofdatascience.github.io/countryatlas/reference/wdi_search.md):
+
+``` r
+
+head(country_codes(c("continent", "currency")))
+#> # A tibble: 6 × 4
+#>   country        iso3c continent currency
+#>   <chr>          <chr> <chr>     <chr>   
+#> 1 Afghanistan    AFG   Asia      AFN     
+#> 2 Albania        ALB   Europe    ALL     
+#> 3 Algeria        DZA   Africa    DZD     
+#> 4 American Samoa ASM   Oceania   USD     
+#> 5 Andorra        AND   Europe    EUR     
+#> 6 Angola         AGO   Africa    AOA
+head(wdi_search("renewable energy"), 3)
+#> # A tibble: 3 × 2
+#>   indicator                    name                                     
+#>   <chr>                        <chr>                                    
+#> 1 2.1_SHARE.TOTAL.RE.IN.TFEC   Renewable energy consumption(% in TFEC)  
+#> 2 3.1_RE.CONSUMPTION           Renewable energy consumption (TJ)        
+#> 3 4.1.2_REN.ELECTRICITY.OUTPUT Renewable energy electricity output (GWh)
+```
+
 The package also bundles `country_meta` (static per-country attributes),
 `common_indicators` (a friendly indicator catalogue),
 `country_groups_tbl` and `world_tiles`.
@@ -332,6 +375,54 @@ snapshot |>
 #> 6 South Asia                 1971301188
 #> 7 Sub-Saharan Africa         1291044964
 #> 8 NA                            3203295
+```
+
+For panel data,
+[`growth_rate()`](https://pursuitofdatascience.github.io/countryatlas/reference/growth_rate.md)
+(year-on-year or CAGR),
+[`index_to()`](https://pursuitofdatascience.github.io/countryatlas/reference/index_to.md)
+(rebase a series so the base year = 100) and
+[`share_of_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/share_of_world.md)
+(share of the year’s world total) cover the standard comparative moves,
+each computed per country:
+
+``` r
+
+panel <- data.frame(
+  iso3c = rep(c("USA", "CHN"), each = 3),
+  year  = rep(2019:2021, 2),
+  gdp   = c(100, 104, 109, 60, 66, 73)
+)
+panel |>
+  growth_rate(gdp) |>
+  index_to(gdp, base_year = 2019)
+#> # A tibble: 6 × 5
+#>   iso3c  year   gdp gdp_growth gdp_index
+#>   <chr> <int> <dbl>      <dbl>     <dbl>
+#> 1 CHN    2019    60    NA           100 
+#> 2 CHN    2020    66     0.100       110 
+#> 3 CHN    2021    73     0.106       122.
+#> 4 USA    2019   100    NA           100 
+#> 5 USA    2020   104     0.0400      104 
+#> 6 USA    2021   109     0.0481      109
+```
+
+And
+[`complete_years()`](https://pursuitofdatascience.github.io/countryatlas/reference/complete_years.md)
+fills the panel gaps that would otherwise make an animation flicker or a
+join silently drop years — by grid completion, carry-forward or linear
+interpolation:
+
+``` r
+
+patchy <- data.frame(iso3c = "USA", year = c(2019L, 2021L), gdp = c(100, 110))
+complete_years(patchy, 2019:2021, method = "linear")
+#> # A tibble: 3 × 3
+#>   iso3c  year   gdp
+#>   <chr> <int> <dbl>
+#> 1 USA    2019   100
+#> 2 USA    2020   105
+#> 3 USA    2021   110
 ```
 
 ## Performance and offline use
@@ -380,18 +471,19 @@ sessionInfo()
 #> [1] dplyr_1.2.1        ggplot2_4.0.3      countryatlas_2.0.0
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] sass_0.4.10        utf8_1.2.6         generics_0.1.4     class_7.3-23      
-#>  [5] KernSmooth_2.23-26 digest_0.6.39      magrittr_2.0.5     countrycode_1.8.0 
-#>  [9] evaluate_1.0.5     grid_4.6.1         RColorBrewer_1.1-3 fastmap_1.2.0     
-#> [13] maps_3.4.3         jsonlite_2.0.0     e1071_1.7-17       viridisLite_0.4.3 
-#> [17] scales_1.4.0       stringdist_0.9.17  textshaping_1.0.5  jquerylib_0.1.4   
-#> [21] cli_3.6.6          rlang_1.2.0        withr_3.0.3        cachem_1.1.0      
-#> [25] yaml_2.3.12        otel_0.2.0         tools_4.6.1        parallel_4.6.1    
-#> [29] memoise_2.0.1      vctrs_0.7.3        R6_2.6.1           proxy_0.4-29      
-#> [33] lifecycle_1.0.5    classInt_0.4-11    fs_2.1.0           htmlwidgets_1.6.4 
-#> [37] ragg_1.5.2         pkgconfig_2.0.3    desc_1.4.3         pkgdown_2.2.0     
-#> [41] pillar_1.11.1      bslib_0.11.0       gtable_0.3.6       glue_1.8.1        
-#> [45] systemfonts_1.3.2  xfun_0.59          tibble_3.3.1       tidyselect_1.2.1  
-#> [49] knitr_1.51         farver_2.1.2       htmltools_0.5.9    rmarkdown_2.31    
-#> [53] labeling_0.4.3     compiler_4.6.1     S7_0.2.2
+#>  [1] tidyr_1.3.2        sass_0.4.10        utf8_1.2.6         generics_0.1.4    
+#>  [5] class_7.3-23       KernSmooth_2.23-26 digest_0.6.39      magrittr_2.0.5    
+#>  [9] countrycode_1.8.0  evaluate_1.0.5     grid_4.6.1         RColorBrewer_1.1-3
+#> [13] fastmap_1.2.0      maps_3.4.3         jsonlite_2.0.0     e1071_1.7-17      
+#> [17] purrr_1.2.2        viridisLite_0.4.3  scales_1.4.0       stringdist_0.9.17 
+#> [21] textshaping_1.0.5  jquerylib_0.1.4    cli_3.6.6          rlang_1.2.0       
+#> [25] withr_3.0.3        cachem_1.1.0       yaml_2.3.12        otel_0.2.0        
+#> [29] tools_4.6.1        parallel_4.6.1     memoise_2.0.1      vctrs_0.7.3       
+#> [33] R6_2.6.1           proxy_0.4-29       lifecycle_1.0.5    classInt_0.4-11   
+#> [37] fs_2.1.0           htmlwidgets_1.6.4  ragg_1.5.2         pkgconfig_2.0.3   
+#> [41] desc_1.4.3         pkgdown_2.2.0      pillar_1.11.1      bslib_0.11.0      
+#> [45] gtable_0.3.6       glue_1.8.1         systemfonts_1.3.2  xfun_0.59         
+#> [49] tibble_3.3.1       tidyselect_1.2.1   knitr_1.51         farver_2.1.2      
+#> [53] htmltools_0.5.9    rmarkdown_2.31     labeling_0.4.3     compiler_4.6.1    
+#> [57] WDI_2.7.10         S7_0.2.2
 ```

@@ -44,6 +44,22 @@ flow_map(od, from, to, weight)
 
 ![](beyond-the-choropleth_files/figure-html/unnamed-chunk-4-1.png)
 
+## Small multiples
+
+[`facet_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/facet_map.md)
+splits one choropleth into per-group panels — the static counterpart to
+[`animate_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/animate_world.md),
+for print and side-by-side comparison:
+
+``` r
+
+world_poly <- attach_geometry(snap, geometry = "polygon") |>
+  dplyr::filter(!is.na(continent))
+facet_map(world_poly, gdp_per_capita, continent, style = "quantile", ncol = 3)
+```
+
+![](beyond-the-choropleth_files/figure-html/unnamed-chunk-5-1.png)
+
 ## Labels
 
 Centroid-anchored labels (names, ISO codes or flag emoji), with
@@ -59,7 +75,7 @@ world_map(mapdf, gdp_per_capita) +
   ggplot2::coord_cartesian(xlim = c(-25, 45), ylim = c(34, 72))
 ```
 
-![](beyond-the-choropleth_files/figure-html/unnamed-chunk-5-1.png)
+![](beyond-the-choropleth_files/figure-html/unnamed-chunk-6-1.png)
 
 ## Maps that need optional packages
 

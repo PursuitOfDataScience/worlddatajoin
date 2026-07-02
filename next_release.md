@@ -41,6 +41,37 @@ de-facto/de-jure policy — §2.6; and a `world_snapshot` year refresh
 this release ships are collected in the new **§2.7** below; the rest of
 this document is the original plan, kept for reference.
 
+**Second wave (implemented)** — a further pass over §2.2/§2.5/§2.7
+picked out everything that is self-contained, offline-testable and
+high-value for the research audience, now shipped in 2.0.0 (see §2.8 for
+the itemised list and design notes): the historical / dissolved-entity
+crosswalk (`historical_codes` +
+[`dissolve_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/dissolve_country.md),
+closing the §2.2 gap and the “USSR silently matches Russia” trap),
+[`correlate_indicators()`](https://pursuitofdatascience.github.io/countryatlas/reference/correlate_indicators.md),
+[`beta_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/beta_convergence.md)
+/
+[`sigma_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/sigma_convergence.md),
+[`gini()`](https://pursuitofdatascience.github.io/countryatlas/reference/gini.md)
+/
+[`theil()`](https://pursuitofdatascience.github.io/countryatlas/reference/theil.md)
+(population-weightable, with a between/within decomposition),
+[`lag_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md)
+/
+[`diff_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md),
+[`morans_i()`](https://pursuitofdatascience.github.io/countryatlas/reference/morans_i.md)
+(spatial autocorrelation with *no* `spdep` dependency — it reuses the
+shipped
+[`country_borders()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_borders.md)
+adjacency),
+[`spike_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/spike_map.md),
+multilingual `convert_country(to = "name_<lang>")`, and SI-formatted
+binned legends. Still deferred (unchanged reasoning): §2.1 external
+adapters, §2.3 `admin1` geometry / `cache_geometry()`, §2.6
+point-in-time membership and the disputed-territory policy, the ggsql
+render-engine broadening, the Shiny module, and the animation/WebGL
+extras.
+
 ------------------------------------------------------------------------
 
 ## 0. Carryover TODO (original note)
@@ -181,7 +212,8 @@ World in Data and V-Dem are especially natural (we already expose V-Dem
   “Yugoslavia”, “Czechoslovakia”, “Sudan (pre-2011)” resolve to
   successor states (one→many, dated).
   `check_country_match("Yugoslavia")` already flags this gap; ship the
-  table, e.g. `historical_codes` + `dissolve_country()`.
+  table, e.g. `historical_codes` +
+  [`dissolve_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/dissolve_country.md).
 - **`country_join_all(list_of_tables, by = ...)`** — reduce-join many
   messy tables on the ISO spine in one call.
 
@@ -222,8 +254,8 @@ World in Data and V-Dem are especially natural (we already expose V-Dem
   panel
   [`lag()`](https://rdrr.io/r/stats/lag.html)/[`diff()`](https://rdrr.io/r/base/diff.html)
   helpers.
-- `correlate_indicators()` for quick cross-indicator scatter/▢ on the
-  spine.
+- [`correlate_indicators()`](https://pursuitofdatascience.github.io/countryatlas/reference/correlate_indicators.md)
+  for quick cross-indicator scatter/▢ on the spine.
 
 ### 2.6 Reference data
 
@@ -277,8 +309,8 @@ non-contiguous cartograms with sane defaults (extends §2.4). - ★
 **`bivariate_legend()`** — finish the
 [`bivariate_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bivariate_map.md)
 story with a standalone legend, more palettes, and binning controls. - ◐
-**`spike_map()`** and a `statebins`-style standalone tile map beyond the
-US-oriented
+**[`spike_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/spike_map.md)**
+and a `statebins`-style standalone tile map beyond the US-oriented
 [`tile_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/tile_map.md). -
 ◐ **Animated transitions** — `animate_world(transition = "tween")`
 between years (gganimate), and
@@ -289,16 +321,24 @@ between years (gganimate), and
 /
 [`spin_globe()`](https://pursuitofdatascience.github.io/countryatlas/reference/spin_globe.md).
 
-**Analysis helpers** - ★ **`correlate_indicators()`** — quick
-cross-indicator correlation/scatter on the spine (listed in §2.5 but not
-yet shipped). - ◐ **Convergence diagnostics** — `beta_convergence()` /
-`sigma_convergence()`, pairing naturally with the shipped
+**Analysis helpers** - ★
+**[`correlate_indicators()`](https://pursuitofdatascience.github.io/countryatlas/reference/correlate_indicators.md)**
+— quick cross-indicator correlation/scatter on the spine (listed in §2.5
+but not yet shipped). - ◐ **Convergence diagnostics** —
+[`beta_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/beta_convergence.md)
+/
+[`sigma_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/sigma_convergence.md),
+pairing naturally with the shipped
 [`growth_rate()`](https://pursuitofdatascience.github.io/countryatlas/reference/growth_rate.md)
 /
 [`index_to()`](https://pursuitofdatascience.github.io/countryatlas/reference/index_to.md). -
-◐ **Inequality measures** — `gini()`, `theil()`, and a between/within
-decomposition across countries (population-weighted). - ◐ **Panel
-utilities** — `build_panel()`, `lag_by_country()`, `diff_by_country()`,
+◐ **Inequality measures** —
+[`gini()`](https://pursuitofdatascience.github.io/countryatlas/reference/gini.md),
+[`theil()`](https://pursuitofdatascience.github.io/countryatlas/reference/theil.md),
+and a between/within decomposition across countries
+(population-weighted). - ◐ **Panel utilities** — `build_panel()`,
+[`lag_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md),
+[`diff_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md),
 and `interpolate_missing()` (linear/LOCF) so panels join cleanly across
 patchy source coverage.
 
@@ -312,6 +352,86 @@ API stabilises. - ◐ **Shiny module** — `worldMapInput()` /
 lines (ggplot / leaflet / ggsql engine). - ◦ **`gt` / report helpers** —
 `country_factsheet()` and a `gt`-formatted `world_table()` for
 one-country or top-N summaries.
+
+### 2.8 Second wave for 2.0.0 (implemented — design notes)
+
+A concrete, shippable cut of the remaining §2.2/§2.5/§2.7 candidates,
+chosen by three filters: (a) hangs off the existing ISO spine /
+adjacency / panel plumbing with **zero new hard dependencies**, (b)
+fully testable offline (bundled snapshot or synthetic panels — no live
+API at test time), and (c) directly useful to the research community
+(comparative development, inequality and spatial econometrics are the
+three most common uses of exactly this data).
+
+**Join & reconciliation (closes the §2.2 gap)** - **`historical_codes`**
+(bundled dataset) — a curated crosswalk of dissolved entities to their
+successor states, one row per (entity, successor): Soviet Union → 15,
+SFR Yugoslavia → 7 (incl. XKX, territory-based), Serbia and Montenegro,
+Czechoslovakia, East Germany, Netherlands Antilles, North/South Yemen,
+Sudan (pre-2011) → SDN+SSD, United Arab Republic, Tanganyika/Zanzibar,
+North/South Vietnam. Retired ISO codes (`SUN`, `YUG`, `CSK`, `DDR`,
+`ANT`, `SCG`, `YMD`) are carried where they existed. -
+**`dissolve_country(x)`** — resolve a mixed vector of historical *and*
+modern names to successor `iso3c` rows (one→many, dated). Modern names
+pass through as single rows, so a whole messy column can be piped in
+unchanged. -
+**[`check_country_match()`](https://pursuitofdatascience.github.io/countryatlas/reference/check_country_match.md)
+gains a `historical` column** — flags dissolved entities *even when
+countrycode “matches” them*: the killer case is `"USSR"`, which
+countrycode silently resolves to `RUS` (measured), so Soviet- era data
+quietly becomes Russian data. The flag catches Yugoslavia (NA) and USSR
+(false-positive RUS) alike and points at
+[`dissolve_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/dissolve_country.md).
+
+**Analysis helpers (ships the §2.5/§2.7 spine)** -
+**`correlate_indicators(data, ...)`** — pairwise correlation of
+indicator columns on the spine (pearson/spearman, pairwise-complete,
+per-pair `n`), tidy long output sorted by \|r\|. -
+**`beta_convergence(data, value)`** — the growth-regression convergence
+test (average log growth on log initial level), returning `beta`,
+inference, implied convergence `speed` and `half_life` in one row. -
+**`sigma_convergence(data, value)`** — cross-country dispersion per year
+(sd of logs, or CV), the “is the distribution actually narrowing”
+companion. - **`gini(x, weights = )`** and
+**`theil(x, weights = , groups = )`** — inequality across countries,
+population-weightable;
+[`theil()`](https://pursuitofdatascience.github.io/countryatlas/reference/theil.md)
+decomposes between/within groups (continents, income groups) when
+`groups` is given. -
+**[`lag_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md)
+/
+[`diff_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md)**
+— panel lag/difference done right (grouped by `iso3c`, ordered by
+`year`), completing the set with
+[`growth_rate()`](https://pursuitofdatascience.github.io/countryatlas/reference/growth_rate.md)
+/
+[`index_to()`](https://pursuitofdatascience.github.io/countryatlas/reference/index_to.md)
+/
+[`complete_years()`](https://pursuitofdatascience.github.io/countryatlas/reference/complete_years.md).
+
+**Spatial statistics (the §2.7 ask, minus the spdep dependency)** -
+**`morans_i(data, value)`** — global Moran’s I with a permutation
+pseudo-p-value, computed on the row-standardised
+[`country_borders()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_borders.md)
+adjacency. No `spdep`: at 200 countries the dense-matrix arithmetic is
+trivial, and reusing our own adjacency keeps the weights consistent with
+the maps. (LISA / local Moran’s stays deferred; it wants map
+integration.)
+
+**Visualization polish** - **`spike_map(data, height)`** — the classic
+“population spikes” display: triangular spikes at country centroids,
+height ∝ value. Uses the same polygon centroids as
+[`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md);
+needs only `maps`. - **Formatted binned legends** —
+`world_map(style = "binned")` now labels breaks with SI-formatted
+numbers (`4M`, not `4e+06`) when `scales` is installed, closing the §2.4
+“raw breaks” note.
+
+**Reference data** - **Multilingual names** —
+`convert_country(to = "name_fr" / "name_es" / "name_de" / ...)` maps any
+`name_<lang>` to countrycode’s CLDR tables (`cldr.name.<lang>`, 555
+columns available), for localized labels and joining non-English
+sources.
 
 ------------------------------------------------------------------------
 

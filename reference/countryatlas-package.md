@@ -24,7 +24,8 @@ Everything else is opt-in.
 [`locate_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/locate_country.md),
 [`country_borders()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_borders.md),
 [`neighbors()`](https://pursuitofdatascience.github.io/countryatlas/reference/neighbors.md),
-[`distance_between()`](https://pursuitofdatascience.github.io/countryatlas/reference/distance_between.md).
+[`distance_between()`](https://pursuitofdatascience.github.io/countryatlas/reference/distance_between.md),
+[`morans_i()`](https://pursuitofdatascience.github.io/countryatlas/reference/morans_i.md).
 
 ## The join engine
 
@@ -32,7 +33,8 @@ Everything else is opt-in.
 [`join_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/join_world.md),
 [`attach_geometry()`](https://pursuitofdatascience.github.io/countryatlas/reference/attach_geometry.md),
 [`country_join()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join.md),
-[`country_join_all()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join_all.md).
+[`country_join_all()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join_all.md),
+[`dissolve_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/dissolve_country.md).
 
 ## Diagnostics
 
@@ -53,7 +55,8 @@ and the datasets
 [common_indicators](https://pursuitofdatascience.github.io/countryatlas/reference/common_indicators.md),
 [country_groups_tbl](https://pursuitofdatascience.github.io/countryatlas/reference/country_groups_tbl.md),
 [world_snapshot](https://pursuitofdatascience.github.io/countryatlas/reference/world_snapshot.md),
-[world_tiles](https://pursuitofdatascience.github.io/countryatlas/reference/world_tiles.md).
+[world_tiles](https://pursuitofdatascience.github.io/countryatlas/reference/world_tiles.md),
+[historical_codes](https://pursuitofdatascience.github.io/countryatlas/reference/historical_codes.md).
 
 ## Analysis helpers
 
@@ -63,7 +66,14 @@ and the datasets
 [`complete_years()`](https://pursuitofdatascience.github.io/countryatlas/reference/complete_years.md),
 [`growth_rate()`](https://pursuitofdatascience.github.io/countryatlas/reference/growth_rate.md),
 [`index_to()`](https://pursuitofdatascience.github.io/countryatlas/reference/index_to.md),
-[`share_of_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/share_of_world.md).
+[`share_of_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/share_of_world.md),
+[`lag_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md),
+[`diff_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md),
+[`correlate_indicators()`](https://pursuitofdatascience.github.io/countryatlas/reference/correlate_indicators.md),
+[`beta_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/beta_convergence.md),
+[`sigma_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/sigma_convergence.md),
+[`gini()`](https://pursuitofdatascience.github.io/countryatlas/reference/gini.md),
+[`theil()`](https://pursuitofdatascience.github.io/countryatlas/reference/theil.md).
 
 ## Visualization
 
@@ -72,6 +82,7 @@ and the datasets
 [`spin_globe()`](https://pursuitofdatascience.github.io/countryatlas/reference/spin_globe.md),
 [`facet_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/facet_map.md),
 [`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md),
+[`spike_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/spike_map.md),
 [`bivariate_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bivariate_map.md),
 [`cartogram_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/cartogram_map.md),
 [`dorling_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/dorling_map.md),

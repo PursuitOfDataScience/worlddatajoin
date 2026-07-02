@@ -95,9 +95,15 @@
 <li>
 <strong>More country groups</strong>: Mercosur, GCC, Nordic, Visegrád.</li>
 <li>
-<strong>Spatial structure</strong>: <code><a href="reference/country_borders.html">country_borders()</a></code> / <code><a href="reference/neighbors.html">neighbors()</a></code> (who borders whom) and <code><a href="reference/distance_between.html">distance_between()</a></code> (great-circle distance, no <code>sf</code> needed).</li>
+<strong>Spatial structure</strong>: <code><a href="reference/country_borders.html">country_borders()</a></code> / <code><a href="reference/neighbors.html">neighbors()</a></code> (who borders whom), <code><a href="reference/distance_between.html">distance_between()</a></code> (great-circle distance, no <code>sf</code> needed) and <code><a href="reference/morans_i.html">morans_i()</a></code> (spatial autocorrelation on the package’s own adjacency — no <code>spdep</code>).</li>
 <li>
-<strong><code><a href="reference/dorling_map.html">dorling_map()</a></code></strong>: the Dorling cartogram as a first-class verb.</li>
+<strong>Historical entities</strong>: <code><a href="reference/dissolve_country.html">dissolve_country()</a></code> + the <code>historical_codes</code> crosswalk resolve the USSR / Yugoslavia / Czechoslovakia to successor states; <code><a href="reference/check_country_match.html">check_country_match()</a></code> now flags them (countrycode silently maps <code>"USSR"</code> to Russia — caught).</li>
+<li>
+<strong>Inequality &amp; convergence</strong>: <code><a href="reference/gini.html">gini()</a></code>, <code><a href="reference/theil.html">theil()</a></code> (population-weighted, between/within decomposition), <code><a href="reference/beta_convergence.html">beta_convergence()</a></code>, <code><a href="reference/sigma_convergence.html">sigma_convergence()</a></code>, <code><a href="reference/correlate_indicators.html">correlate_indicators()</a></code>, <code><a href="reference/lag_by_country.html">lag_by_country()</a></code> / <code><a href="reference/lag_by_country.html">diff_by_country()</a></code>.</li>
+<li>
+<strong><code><a href="reference/dorling_map.html">dorling_map()</a></code></strong> and <strong><code><a href="reference/spike_map.html">spike_map()</a></code></strong>: two more honest displays for totals.</li>
+<li>
+<strong>Localized names</strong>: <code>convert_country(to = "name_fr" / "name_es" / …)</code>.</li>
 <li>
 <strong>Correctness fixes</strong> that change map output (quantile binning, centroids, label placement, projections, override-only lookups) — full <a href="NEWS.html">changelog</a>.</li>
 </ul>
@@ -158,8 +164,12 @@
 </td>
 </tr>
 <tr>
+<td><code><a href="reference/spike_map.html">spike_map()</a></code></td>
+<td><code>maps</code></td>
+</tr>
+<tr>
 <td>
-<code><a href="reference/country_borders.html">country_borders()</a></code>, <code><a href="reference/neighbors.html">neighbors()</a></code>
+<code><a href="reference/country_borders.html">country_borders()</a></code>, <code><a href="reference/neighbors.html">neighbors()</a></code>, <code><a href="reference/morans_i.html">morans_i()</a></code>
 </td>
 <td><code>sf</code></td>
 </tr>
@@ -312,13 +322,13 @@
 </h2>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/check_country_match.html">check_country_match</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA"</span>, <span class="st">"Cote d'Ivoire"</span>, <span class="st">"Yugoslavia"</span>, <span class="st">"Wakanda"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 4 × 4</span></span>
-<span><span class="co">#&gt;   input         iso3c matched suggestion</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;         &lt;chr&gt; &lt;lgl&gt;   &lt;chr&gt;     </span></span>
-<span><span class="co">#&gt; 1 USA           USA   TRUE    &lt;NA&gt;      </span></span>
-<span><span class="co">#&gt; 2 Cote d'Ivoire CIV   TRUE    &lt;NA&gt;      </span></span>
-<span><span class="co">#&gt; 3 Yugoslavia    &lt;NA&gt;  FALSE   Yugoslavia</span></span>
-<span><span class="co">#&gt; 4 Wakanda       &lt;NA&gt;  FALSE   Canada</span></span></code></pre></div>
+<span><span class="co">#&gt; # A tibble: 4 × 5</span></span>
+<span><span class="co">#&gt;   input         iso3c matched historical suggestion</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;         &lt;chr&gt; &lt;lgl&gt;   &lt;lgl&gt;      &lt;chr&gt;     </span></span>
+<span><span class="co">#&gt; 1 USA           USA   TRUE    FALSE      &lt;NA&gt;      </span></span>
+<span><span class="co">#&gt; 2 Cote d'Ivoire CIV   TRUE    FALSE      &lt;NA&gt;      </span></span>
+<span><span class="co">#&gt; 3 Yugoslavia    &lt;NA&gt;  FALSE   TRUE       Yugoslavia</span></span>
+<span><span class="co">#&gt; 4 Wakanda       &lt;NA&gt;  FALSE   FALSE      Canada</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="reference-data-at-your-fingertips">Reference data at your fingertips<a class="anchor" aria-label="anchor" href="#reference-data-at-your-fingertips"></a>
@@ -392,6 +402,42 @@
 <span><span class="co"># great-circle distance between two countries' centroids (no sf needed)</span></span>
 <span><span class="fu"><a href="reference/distance_between.html">distance_between</a></span><span class="op">(</span><span class="st">"France"</span>, <span class="st">"Germany"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 802.3524</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="historical-data-honest-joins">Historical data, honest joins<a class="anchor" aria-label="anchor" href="#historical-data-honest-joins"></a>
+</h2>
+<p>Dissolved entities poison country joins twice over: most are silently dropped, and some are silently <em>mis</em>matched — countrycode resolves <code>"USSR"</code> to Russia alone, so Soviet-era totals quietly become Russian totals. <code><a href="reference/check_country_match.html">check_country_match()</a></code> flags both cases, and <code><a href="reference/dissolve_country.html">dissolve_country()</a></code> resolves them to successor states (one-to-many, dated) via the curated <code>historical_codes</code> crosswalk:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/check_country_match.html">check_country_match</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USSR"</span>, <span class="st">"Yugoslavia"</span>, <span class="st">"France"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 3 × 5</span></span>
+<span><span class="co">#&gt;   input      iso3c matched historical suggestion</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;      &lt;chr&gt; &lt;lgl&gt;   &lt;lgl&gt;      &lt;chr&gt;     </span></span>
+<span><span class="co">#&gt; 1 USSR       RUS   TRUE    TRUE       &lt;NA&gt;      </span></span>
+<span><span class="co">#&gt; 2 Yugoslavia &lt;NA&gt;  FALSE   TRUE       Yugoslavia</span></span>
+<span><span class="co">#&gt; 3 France     FRA   TRUE    FALSE      &lt;NA&gt;</span></span>
+<span><span class="fu"><a href="reference/dissolve_country.html">dissolve_country</a></span><span class="op">(</span><span class="st">"Czechoslovakia"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 5</span></span>
+<span><span class="co">#&gt;   input          historical     dissolved iso3c country </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;          &lt;chr&gt;              &lt;int&gt; &lt;chr&gt; &lt;chr&gt;   </span></span>
+<span><span class="co">#&gt; 1 Czechoslovakia Czechoslovakia      1993 CZE   Czechia </span></span>
+<span><span class="co">#&gt; 2 Czechoslovakia Czechoslovakia      1993 SVK   Slovakia</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="inequality-convergence-and-spatial-statistics">Inequality, convergence and spatial statistics<a class="anchor" aria-label="anchor" href="#inequality-convergence-and-spatial-statistics"></a>
+</h2>
+<p>World inequality between <em>people</em>, not country units — and how much of it sits between continents vs within them:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">snap</span> <span class="op">&lt;-</span> <span class="va">world_snapshot</span><span class="op">$</span><span class="va">countries</span></span>
+<span><span class="fu"><a href="reference/gini.html">gini</a></span><span class="op">(</span><span class="va">snap</span><span class="op">$</span><span class="va">gdp_per_capita</span>, weights <span class="op">=</span> <span class="va">snap</span><span class="op">$</span><span class="va">population</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0.6094909</span></span>
+<span><span class="fu"><a href="reference/theil.html">theil</a></span><span class="op">(</span><span class="va">snap</span><span class="op">$</span><span class="va">gdp_per_capita</span>, weights <span class="op">=</span> <span class="va">snap</span><span class="op">$</span><span class="va">population</span>, groups <span class="op">=</span> <span class="va">snap</span><span class="op">$</span><span class="va">continent</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 3 × 3</span></span>
+<span><span class="co">#&gt;   component value share</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;     &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 total     0.678 1    </span></span>
+<span><span class="co">#&gt; 2 between   0.310 0.458</span></span>
+<span><span class="co">#&gt; 3 within    0.368 0.542</span></span></code></pre></div>
+<p><code><a href="reference/beta_convergence.html">beta_convergence()</a></code> / <code><a href="reference/sigma_convergence.html">sigma_convergence()</a></code> test whether poor countries are catching up; <code><a href="reference/correlate_indicators.html">correlate_indicators()</a></code> screens indicator pairs (pairwise-complete, with <code>n</code> reported); and <code><a href="reference/morans_i.html">morans_i()</a></code> measures spatial autocorrelation on the package’s own border adjacency — no <code>spdep</code> required.</p>
 <p><code><a href="reference/repair_country_names.html">repair_country_names()</a></code> auto-fixes typos to the closest known country, <code>locate_country(lon, lat)</code> tags coordinates with the country that contains them, <code><a href="reference/neighbors.html">neighbors()</a></code> / <code><a href="reference/country_borders.html">country_borders()</a></code> answer “who shares a border with whom”, <code><a href="reference/growth_rate.html">growth_rate()</a></code> / <code><a href="reference/index_to.html">index_to()</a></code> / <code><a href="reference/complete_years.html">complete_years()</a></code> add panel metrics and fill panel gaps, and <code><a href="reference/country_codes.html">country_codes()</a></code> exposes the whole countrycode crosswalk as a tidy, pipeable lookup.</p>
 </div>
 <div class="section level2">

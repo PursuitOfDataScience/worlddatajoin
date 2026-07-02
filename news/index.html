@@ -85,6 +85,31 @@
 <code><a href="../reference/dorling_map.html">dorling_map()</a></code> — the Dorling cartogram promoted to a first-class verb, with <code>k</code>/<code>itermax</code> tuning; <code><a href="../reference/cartogram_map.html">cartogram_map()</a></code> itself gains <code>...</code> passthrough to the underlying <code>cartogram::cartogram_*()</code> call.</li>
 </ul></div>
 <div class="section level3">
+<h3 id="new-historical-entities-inequality-and-spatial-statistics-2-0-0">New: historical entities, inequality and spatial statistics<a class="anchor" aria-label="anchor" href="#new-historical-entities-inequality-and-spatial-statistics-2-0-0"></a></h3>
+<ul><li>
+<code>historical_codes</code> — a curated, dated crosswalk of dissolved entities (Soviet Union, Yugoslavia, Czechoslovakia, East Germany, Netherlands Antilles, North/South Yemen, pre-2011 Sudan, United Arab Republic, Tanganyika/Zanzibar, North/South Vietnam, Serbia and Montenegro) to their successor states, with retired ISO codes where they existed. Kosovo is included among the Yugoslav successors on a territory basis (documented).</li>
+<li>
+<code><a href="../reference/dissolve_country.html">dissolve_country()</a></code> — resolve a mixed vector of historical <em>and</em> modern names to successor <code>iso3c</code> rows (one-to-many, dated); modern names pass through as single rows, so a whole messy column pipes in unchanged.</li>
+<li>
+<code><a href="../reference/check_country_match.html">check_country_match()</a></code> gains a <code>historical</code> column. It flags dissolved entities <strong>even when countrycode “matches” them</strong> — the headline case is <code>"USSR"</code>, which countrycode silently resolves to Russia’s <code>RUS</code>, so Soviet-era data becomes Russian data with no warning.</li>
+<li>
+<code><a href="../reference/correlate_indicators.html">correlate_indicators()</a></code> — pairwise indicator correlations on the spine (pearson/spearman, pairwise-complete, per-pair <code>n</code>), tidy long output.</li>
+<li>
+<code><a href="../reference/beta_convergence.html">beta_convergence()</a></code> / <code><a href="../reference/sigma_convergence.html">sigma_convergence()</a></code> — the two standard convergence diagnostics: the growth-on-initial-level regression (with implied convergence speed and half-life) and per-year cross-country dispersion.</li>
+<li>
+<code><a href="../reference/gini.html">gini()</a></code> and <code><a href="../reference/theil.html">theil()</a></code> — inequality across countries, population-weightable; <code><a href="../reference/theil.html">theil()</a></code> decomposes exactly into between/within components when a grouping (continent, income) is supplied.</li>
+<li>
+<code><a href="../reference/lag_by_country.html">lag_by_country()</a></code> / <code><a href="../reference/lag_by_country.html">diff_by_country()</a></code> — panel lag and difference grouped by <code>iso3c</code> and ordered by <code>year</code>, completing the panel toolkit around <code><a href="../reference/growth_rate.html">growth_rate()</a></code> / <code><a href="../reference/index_to.html">index_to()</a></code> / <code><a href="../reference/complete_years.html">complete_years()</a></code>.</li>
+<li>
+<code><a href="../reference/morans_i.html">morans_i()</a></code> — global Moran’s I with a permutation pseudo-p-value, computed on the row-standardised <code><a href="../reference/country_borders.html">country_borders()</a></code> adjacency. No <code>spdep</code> dependency: the weights come from the package’s own curated topology.</li>
+<li>
+<code><a href="../reference/spike_map.html">spike_map()</a></code> — triangular spikes at country centroids (height ∝ value), the overplotting-resistant cousin of <code><a href="../reference/bubble_map.html">bubble_map()</a></code>; needs only <code>maps</code>.</li>
+<li>
+<code><a href="../reference/convert_country.html">convert_country()</a></code> accepts <code>to = "name_&lt;lang&gt;"</code> (<code>"name_fr"</code>, <code>"name_es"</code>, <code>"name_zh"</code>, …) for localized country names via countrycode’s CLDR tables.</li>
+<li>
+<code>world_map(style = "binned")</code> legends now show SI-formatted breaks (<code>4M</code>, not <code>4e+06</code>) when <code>scales</code> is installed; the continuous scale uses the same formatter.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="bug-fixes-2-0-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-2-0-0"></a></h3>
 <ul><li>
 <code>world_map(style = "quantile"/"jenks")</code> computed breaks over polygon <strong>vertices</strong>, so a country’s geometric complexity biased the quantiles and the bins held unequal numbers of countries. Breaks are now computed on one value per country.</li>
@@ -102,6 +127,8 @@
 <code>interactive_map(..., tooltip = )</code> was accepted but silently ignored by every engine (pre-dating 2.0.0). The <code>"ggiraph"</code> and <code>"leaflet"</code> engines now use the supplied <code>tooltip</code> column, defaulting to <code>fill</code> as before when omitted.</li>
 <li>
 <code>world_data(overrides = )</code> (and <code>attach_geometry(overrides = )</code>) accepted a custom name -&gt; iso3c override set but silently ignored it (pre-dating 2.0.0) – the geometry backend always matched with the default <code><a href="../reference/wdj_overrides.html">wdj_overrides()</a></code>. The override set now flows through to both the polygon and <code>sf</code> matchers, so a custom mapping actually changes which polygons a country claims.</li>
+<li>
+<code><a href="../reference/repair_country_names.html">repair_country_names()</a></code> no longer records a no-op “repair” when a dissolved entity’s own name (e.g. “Yugoslavia”, which exists in the codelist but has no ISO code) comes back as its closest suggestion; <code><a href="../reference/dissolve_country.html">dissolve_country()</a></code> is the right tool there and is what the report now points to.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="housekeeping-2-0-0">Housekeeping<a class="anchor" aria-label="anchor" href="#housekeeping-2-0-0"></a></h3>

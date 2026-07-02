@@ -89,15 +89,44 @@ Always inspect what failed to match:
 ``` r
 
 check_country_match(my_data$nation)
-#> # A tibble: 6 × 4
-#>   input         iso3c matched suggestion
-#>   <chr>         <chr> <lgl>   <chr>     
-#> 1 U.S.          USA   TRUE    NA        
-#> 2 S. Korea      KOR   TRUE    NA        
-#> 3 Czechia       CZE   TRUE    NA        
-#> 4 Kosovo        XKX   TRUE    NA        
-#> 5 Cote d'Ivoire CIV   TRUE    NA        
-#> 6 UK            GBR   TRUE    NA
+#> # A tibble: 6 × 5
+#>   input         iso3c matched historical suggestion
+#>   <chr>         <chr> <lgl>   <lgl>      <chr>     
+#> 1 U.S.          USA   TRUE    FALSE      NA        
+#> 2 S. Korea      KOR   TRUE    FALSE      NA        
+#> 3 Czechia       CZE   TRUE    FALSE      NA        
+#> 4 Kosovo        XKX   TRUE    FALSE      NA        
+#> 5 Cote d'Ivoire CIV   TRUE    FALSE      NA        
+#> 6 UK            GBR   TRUE    FALSE      NA
+```
+
+## Historical data: dissolved countries
+
+Historical panels bring a nastier failure mode: dissolved entities. Most
+are silently unmatched — but some are silently *mis*matched. countrycode
+resolves `"USSR"` to Russia’s `RUS`, so Soviet-era totals quietly become
+Russian totals. The `historical` column in the report above flags both
+cases, and
+[`dissolve_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/dissolve_country.md)
+resolves them to successor states via the curated `historical_codes`
+crosswalk (one row per successor, dated):
+
+``` r
+
+check_country_match(c("USSR", "Yugoslavia", "West Germany"))
+#> # A tibble: 3 × 5
+#>   input        iso3c matched historical suggestion
+#>   <chr>        <chr> <lgl>   <lgl>      <chr>     
+#> 1 USSR         RUS   TRUE    TRUE       NA        
+#> 2 Yugoslavia   NA    FALSE   TRUE       Yugoslavia
+#> 3 West Germany DEU   TRUE    FALSE      NA
+dissolve_country(c("Czechoslovakia", "France"))
+#> # A tibble: 3 × 5
+#>   input          historical     dissolved iso3c country 
+#>   <chr>          <chr>              <int> <chr> <chr>   
+#> 1 Czechoslovakia Czechoslovakia      1993 CZE   Czechia 
+#> 2 Czechoslovakia Czechoslovakia      1993 SVK   Slovakia
+#> 3 France         NA                    NA FRA   France
 ```
 
 ## Repair what can be repaired

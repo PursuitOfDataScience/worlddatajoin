@@ -16,6 +16,19 @@ bubble_map(snap, population)
 
 ![](beyond-the-choropleth_files/figure-html/unnamed-chunk-2-1.png)
 
+## Spike maps
+
+The same “totals” job as bubbles, with a different overplotting
+trade-off: spikes only grow upward, so dense regions (Europe, the
+Caribbean) stay legible.
+
+``` r
+
+spike_map(snap, population)
+```
+
+![](beyond-the-choropleth_files/figure-html/unnamed-chunk-3-1.png)
+
 ## Equal-area tile grids
 
 Give every country the same visual weight so micro-states are visible.
@@ -25,7 +38,7 @@ Give every country the same visual weight so micro-states are visible.
 tile_map(snap, gdp_per_capita)
 ```
 
-![](beyond-the-choropleth_files/figure-html/unnamed-chunk-3-1.png)
+![](beyond-the-choropleth_files/figure-html/unnamed-chunk-4-1.png)
 
 ## Flow maps
 
@@ -42,7 +55,7 @@ od <- data.frame(
 flow_map(od, from, to, weight)
 ```
 
-![](beyond-the-choropleth_files/figure-html/unnamed-chunk-4-1.png)
+![](beyond-the-choropleth_files/figure-html/unnamed-chunk-5-1.png)
 
 ## Small multiples
 
@@ -58,7 +71,7 @@ world_poly <- attach_geometry(snap, geometry = "polygon") |>
 facet_map(world_poly, gdp_per_capita, continent, style = "quantile", ncol = 3)
 ```
 
-![](beyond-the-choropleth_files/figure-html/unnamed-chunk-5-1.png)
+![](beyond-the-choropleth_files/figure-html/unnamed-chunk-6-1.png)
 
 ## Labels
 
@@ -75,7 +88,7 @@ world_map(mapdf, gdp_per_capita) +
   ggplot2::coord_cartesian(xlim = c(-25, 45), ylim = c(34, 72))
 ```
 
-![](beyond-the-choropleth_files/figure-html/unnamed-chunk-6-1.png)
+![](beyond-the-choropleth_files/figure-html/unnamed-chunk-7-1.png)
 
 ## Maps that need optional packages
 

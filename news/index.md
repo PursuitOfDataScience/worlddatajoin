@@ -87,6 +87,68 @@ see different maps or values.
   itself gains `...` passthrough to the underlying
   `cartogram::cartogram_*()` call.
 
+### New: historical entities, inequality and spatial statistics
+
+- `historical_codes` — a curated, dated crosswalk of dissolved entities
+  (Soviet Union, Yugoslavia, Czechoslovakia, East Germany, Netherlands
+  Antilles, North/South Yemen, pre-2011 Sudan, United Arab Republic,
+  Tanganyika/Zanzibar, North/South Vietnam, Serbia and Montenegro) to
+  their successor states, with retired ISO codes where they existed.
+  Kosovo is included among the Yugoslav successors on a territory basis
+  (documented).
+- [`dissolve_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/dissolve_country.md)
+  — resolve a mixed vector of historical *and* modern names to successor
+  `iso3c` rows (one-to-many, dated); modern names pass through as single
+  rows, so a whole messy column pipes in unchanged.
+- [`check_country_match()`](https://pursuitofdatascience.github.io/countryatlas/reference/check_country_match.md)
+  gains a `historical` column. It flags dissolved entities **even when
+  countrycode “matches” them** — the headline case is `"USSR"`, which
+  countrycode silently resolves to Russia’s `RUS`, so Soviet-era data
+  becomes Russian data with no warning.
+- [`correlate_indicators()`](https://pursuitofdatascience.github.io/countryatlas/reference/correlate_indicators.md)
+  — pairwise indicator correlations on the spine (pearson/spearman,
+  pairwise-complete, per-pair `n`), tidy long output.
+- [`beta_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/beta_convergence.md)
+  /
+  [`sigma_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/sigma_convergence.md)
+  — the two standard convergence diagnostics: the
+  growth-on-initial-level regression (with implied convergence speed and
+  half-life) and per-year cross-country dispersion.
+- [`gini()`](https://pursuitofdatascience.github.io/countryatlas/reference/gini.md)
+  and
+  [`theil()`](https://pursuitofdatascience.github.io/countryatlas/reference/theil.md)
+  — inequality across countries, population-weightable;
+  [`theil()`](https://pursuitofdatascience.github.io/countryatlas/reference/theil.md)
+  decomposes exactly into between/within components when a grouping
+  (continent, income) is supplied.
+- [`lag_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md)
+  /
+  [`diff_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md)
+  — panel lag and difference grouped by `iso3c` and ordered by `year`,
+  completing the panel toolkit around
+  [`growth_rate()`](https://pursuitofdatascience.github.io/countryatlas/reference/growth_rate.md)
+  /
+  [`index_to()`](https://pursuitofdatascience.github.io/countryatlas/reference/index_to.md)
+  /
+  [`complete_years()`](https://pursuitofdatascience.github.io/countryatlas/reference/complete_years.md).
+- [`morans_i()`](https://pursuitofdatascience.github.io/countryatlas/reference/morans_i.md)
+  — global Moran’s I with a permutation pseudo-p-value, computed on the
+  row-standardised
+  [`country_borders()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_borders.md)
+  adjacency. No `spdep` dependency: the weights come from the package’s
+  own curated topology.
+- [`spike_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/spike_map.md)
+  — triangular spikes at country centroids (height ∝ value), the
+  overplotting-resistant cousin of
+  [`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md);
+  needs only `maps`.
+- [`convert_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/convert_country.md)
+  accepts `to = "name_<lang>"` (`"name_fr"`, `"name_es"`, `"name_zh"`,
+  …) for localized country names via countrycode’s CLDR tables.
+- `world_map(style = "binned")` legends now show SI-formatted breaks
+  (`4M`, not `4e+06`) when `scales` is installed; the continuous scale
+  uses the same formatter.
+
 ### Bug fixes
 
 - `world_map(style = "quantile"/"jenks")` computed breaks over polygon
@@ -146,6 +208,12 @@ see different maps or values.
   The override set now flows through to both the polygon and `sf`
   matchers, so a custom mapping actually changes which polygons a
   country claims.
+- [`repair_country_names()`](https://pursuitofdatascience.github.io/countryatlas/reference/repair_country_names.md)
+  no longer records a no-op “repair” when a dissolved entity’s own name
+  (e.g. “Yugoslavia”, which exists in the codelist but has no ISO code)
+  comes back as its closest suggestion;
+  [`dissolve_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/dissolve_country.md)
+  is the right tool there and is what the report now points to.
 
 ### Housekeeping
 

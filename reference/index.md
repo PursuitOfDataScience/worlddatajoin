@@ -34,6 +34,8 @@ The package’s mission, exposed for your own data.
   : Reconcile and join two messy country tables
 - [`country_join_all()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_join_all.md)
   : Join many messy country tables on the ISO spine
+- [`dissolve_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/dissolve_country.md)
+  : Resolve dissolved entities to their successor states
 
 ## Diagnostics & data quality
 
@@ -78,6 +80,21 @@ Never lose a country silently.
   : Rebase a series to an index (base year = 100)
 - [`share_of_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/share_of_world.md)
   : Each country's share of the world total
+- [`lag_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md)
+  [`diff_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md)
+  : Panel lag / difference by country
+- [`correlate_indicators()`](https://pursuitofdatascience.github.io/countryatlas/reference/correlate_indicators.md)
+  : Pairwise correlation of indicators on the spine
+- [`beta_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/beta_convergence.md)
+  : Beta convergence (growth regression)
+- [`sigma_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/sigma_convergence.md)
+  : Sigma convergence (dispersion over time)
+- [`gini()`](https://pursuitofdatascience.github.io/countryatlas/reference/gini.md)
+  : Gini coefficient (population-weightable)
+- [`theil()`](https://pursuitofdatascience.github.io/countryatlas/reference/theil.md)
+  : Theil index, with between/within decomposition
+- [`morans_i()`](https://pursuitofdatascience.github.io/countryatlas/reference/morans_i.md)
+  : Global Moran's I (spatial autocorrelation)
 
 ## Visualization
 
@@ -93,6 +110,8 @@ A full vocabulary of projected, area-honest maps.
   : Small-multiple choropleths
 - [`bubble_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bubble_map.md)
   : Proportional-symbol (bubble) map
+- [`spike_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/spike_map.md)
+  : Spike map (heights at country centroids)
 - [`bivariate_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bivariate_map.md)
   : Two-variable bivariate choropleth
 - [`cartogram_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/cartogram_map.md)
@@ -140,6 +159,8 @@ Hand curated tables to ggsql for database-side spatial rendering.
   : Country-group membership (point-in-time)
 - [`world_tiles`](https://pursuitofdatascience.github.io/countryatlas/reference/world_tiles.md)
   : Equal-area world tile-grid layout
+- [`historical_codes`](https://pursuitofdatascience.github.io/countryatlas/reference/historical_codes.md)
+  : Historical / dissolved entities and their successor states
 
 ## Package
 

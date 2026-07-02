@@ -28,8 +28,10 @@ convert_country(
 - to:
 
   Destination scheme. A shortcut (`"iso3c"`, `"flag"`, `"currency"`,
-  `"tld"`, `"continent"`, `"region"`, `"cown"`, ...) or any raw
-  countrycode destination.
+  `"tld"`, `"continent"`, `"region"`, `"cown"`, ...), a localized name
+  `"name_<lang>"` (`"name_fr"`, `"name_es"`, `"name_zh"`, ... – any
+  language in countrycode's CLDR tables), or any raw countrycode
+  destination.
 
 - from:
 
@@ -57,4 +59,6 @@ convert_country("Germany", to = "currency")
 #> [1] "EUR"
 convert_country(c("USA", "France"), to = "continent")
 #> [1] "Americas" "Europe"  
+convert_country(c("Germany", "United States"), to = "name_fr")
+#> [1] "Allemagne"  "États-Unis"
 ```

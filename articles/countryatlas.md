@@ -220,13 +220,13 @@ reports missingness before a half-empty map is published.
 ``` r
 
 check_country_match(c("USA", "Cote d'Ivoire", "Yugoslavia", "Wakanda"))
-#> # A tibble: 4 × 4
-#>   input         iso3c matched suggestion
-#>   <chr>         <chr> <lgl>   <chr>     
-#> 1 USA           USA   TRUE    NA        
-#> 2 Cote d'Ivoire CIV   TRUE    NA        
-#> 3 Yugoslavia    NA    FALSE   Yugoslavia
-#> 4 Wakanda       NA    FALSE   Canada
+#> # A tibble: 4 × 5
+#>   input         iso3c matched historical suggestion
+#>   <chr>         <chr> <lgl>   <lgl>      <chr>     
+#> 1 USA           USA   TRUE    FALSE      NA        
+#> 2 Cote d'Ivoire CIV   TRUE    FALSE      NA        
+#> 3 Yugoslavia    NA    FALSE   TRUE       Yugoslavia
+#> 4 Wakanda       NA    FALSE   FALSE      Canada
 ```
 
 [`repair_country_names()`](https://pursuitofdatascience.github.io/countryatlas/reference/repair_country_names.md)
@@ -273,6 +273,37 @@ standardize_country(data.frame(region = dropped), region, warn = FALSE)
 #> 3 VIR   VI    Americas  Latin America & Caribbean
 #> 4 ESP   ES    Europe    Europe & Central Asia    
 #> 5 MAF   MF    Americas  Latin America & Caribbean
+```
+
+Dissolved entities get first-class treatment too. The `historical`
+column of
+[`check_country_match()`](https://pursuitofdatascience.github.io/countryatlas/reference/check_country_match.md)
+flags them — including `"USSR"`, which countrycode silently resolves to
+Russia’s `RUS` (so Soviet-era data becomes Russian data without a
+warning) — and
+[`dissolve_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/dissolve_country.md)
+expands them to their successor states via the curated
+`historical_codes` crosswalk:
+
+``` r
+
+check_country_match(c("USSR", "Czechoslovakia"))
+#> # A tibble: 2 × 5
+#>   input          iso3c matched historical suggestion    
+#>   <chr>          <chr> <lgl>   <lgl>      <chr>         
+#> 1 USSR           RUS   TRUE    TRUE       NA            
+#> 2 Czechoslovakia NA    FALSE   TRUE       Czechoslovakia
+dissolve_country("Yugoslavia")
+#> # A tibble: 7 × 5
+#>   input      historical dissolved iso3c country             
+#>   <chr>      <chr>          <int> <chr> <chr>               
+#> 1 Yugoslavia Yugoslavia      1992 BIH   Bosnia & Herzegovina
+#> 2 Yugoslavia Yugoslavia      1992 HRV   Croatia             
+#> 3 Yugoslavia Yugoslavia      1992 MKD   North Macedonia     
+#> 4 Yugoslavia Yugoslavia      1992 MNE   Montenegro          
+#> 5 Yugoslavia Yugoslavia      1992 SRB   Serbia              
+#> 6 Yugoslavia Yugoslavia      1992 SVN   Slovenia            
+#> 7 Yugoslavia Yugoslavia      1992 XKX   Kosovo
 ```
 
 ## Reference data and code translation
@@ -411,7 +442,11 @@ And
 [`complete_years()`](https://pursuitofdatascience.github.io/countryatlas/reference/complete_years.md)
 fills the panel gaps that would otherwise make an animation flicker or a
 join silently drop years — by grid completion, carry-forward or linear
-interpolation:
+interpolation
+([`lag_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md)
+and
+[`diff_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md)
+round out the panel toolkit):
 
 ``` r
 
@@ -424,6 +459,64 @@ complete_years(patchy, 2019:2021, method = "linear")
 #> 2 USA    2020   105
 #> 3 USA    2021   110
 ```
+
+### Inequality, correlation and convergence
+
+Three questions this data is constantly asked: *how unequal is the
+world*, *what moves together*, and *are poor countries catching up?*
+[`gini()`](https://pursuitofdatascience.github.io/countryatlas/reference/gini.md)
+and
+[`theil()`](https://pursuitofdatascience.github.io/countryatlas/reference/theil.md)
+measure inequality across countries — weight by population and they
+describe inequality between people;
+[`theil()`](https://pursuitofdatascience.github.io/countryatlas/reference/theil.md)
+decomposes exactly into between/within components:
+
+``` r
+
+gini(snapshot$gdp_per_capita, weights = snapshot$population)
+#> [1] 0.6094909
+theil(snapshot$gdp_per_capita, weights = snapshot$population,
+      groups = snapshot$continent)
+#> # A tibble: 3 × 3
+#>   component value share
+#>   <chr>     <dbl> <dbl>
+#> 1 total     0.678 1    
+#> 2 between   0.310 0.458
+#> 3 within    0.368 0.542
+```
+
+[`correlate_indicators()`](https://pursuitofdatascience.github.io/countryatlas/reference/correlate_indicators.md)
+screens indicator pairs (pairwise-complete, with the per-pair `n`
+reported so a correlation computed on 12 countries cannot masquerade as
+a world fact):
+
+``` r
+
+correlate_indicators(snapshot)
+#> # A tibble: 6 × 4
+#>   var_x           var_y                  r     n
+#>   <chr>           <chr>              <dbl> <int>
+#> 1 gdp_per_capita  life_expectancy  0.607     191
+#> 2 gdp_per_capita  co2_per_capita   0.435     184
+#> 3 life_expectancy co2_per_capita   0.307     203
+#> 4 gdp_per_capita  population      -0.0579    191
+#> 5 population      life_expectancy -0.0188    215
+#> 6 population      co2_per_capita   0.00660   203
+```
+
+For panels,
+[`beta_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/beta_convergence.md)
+runs the classic growth-on-initial-level regression (returning the
+implied convergence speed and half-life) and
+[`sigma_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/sigma_convergence.md)
+tracks whether cross-country dispersion is actually narrowing. And on
+the spatial side,
+[`morans_i()`](https://pursuitofdatascience.github.io/countryatlas/reference/morans_i.md)
+measures whether neighbouring countries have similar values, using the
+package’s own
+[`country_borders()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_borders.md)
+adjacency — no `spdep` needed.
 
 ## Performance and offline use
 

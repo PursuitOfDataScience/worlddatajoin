@@ -146,15 +146,42 @@ honest table:</p>
 <p>Always inspect what failed to match:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_country_match.html">check_country_match</a></span><span class="op">(</span><span class="va">my_data</span><span class="op">$</span><span class="va">nation</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
-<span><span class="co">#&gt;   input         iso3c matched suggestion</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> U.S.          USA   TRUE    <span style="color: #BB0000;">NA</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> S. Korea      KOR   TRUE    <span style="color: #BB0000;">NA</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Czechia       CZE   TRUE    <span style="color: #BB0000;">NA</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Kosovo        XKX   TRUE    <span style="color: #BB0000;">NA</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Cote d'Ivoire CIV   TRUE    <span style="color: #BB0000;">NA</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> UK            GBR   TRUE    <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
+<span><span class="co">#&gt;   input         iso3c matched historical suggestion</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> U.S.          USA   TRUE    FALSE      <span style="color: #BB0000;">NA</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> S. Korea      KOR   TRUE    FALSE      <span style="color: #BB0000;">NA</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Czechia       CZE   TRUE    FALSE      <span style="color: #BB0000;">NA</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Kosovo        XKX   TRUE    FALSE      <span style="color: #BB0000;">NA</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Cote d'Ivoire CIV   TRUE    FALSE      <span style="color: #BB0000;">NA</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> UK            GBR   TRUE    FALSE      <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="historical-data-dissolved-countries">Historical data: dissolved countries<a class="anchor" aria-label="anchor" href="#historical-data-dissolved-countries"></a>
+</h2>
+<p>Historical panels bring a nastier failure mode: dissolved entities.
+Most are silently unmatched — but some are silently <em>mis</em>matched.
+countrycode resolves <code>"USSR"</code> to Russia’s <code>RUS</code>,
+so Soviet-era totals quietly become Russian totals. The
+<code>historical</code> column in the report above flags both cases, and
+<code><a href="../reference/dissolve_country.html">dissolve_country()</a></code> resolves them to successor states via
+the curated <code>historical_codes</code> crosswalk (one row per
+successor, dated):</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/check_country_match.html">check_country_match</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USSR"</span>, <span class="st">"Yugoslavia"</span>, <span class="st">"West Germany"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
+<span><span class="co">#&gt;   input        iso3c matched historical suggestion</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> USSR         RUS   TRUE    TRUE       <span style="color: #BB0000;">NA</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Yugoslavia   <span style="color: #BB0000;">NA</span>    FALSE   TRUE       Yugoslavia</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> West Germany DEU   TRUE    FALSE      <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="fu"><a href="../reference/dissolve_country.html">dissolve_country</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Czechoslovakia"</span>, <span class="st">"France"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
+<span><span class="co">#&gt;   input          historical     dissolved iso3c country </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Czechoslovakia Czechoslovakia      <span style="text-decoration: underline;">1</span>993 CZE   Czechia </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Czechoslovakia Czechoslovakia      <span style="text-decoration: underline;">1</span>993 SVK   Slovakia</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> France         <span style="color: #BB0000;">NA</span>                    <span style="color: #BB0000;">NA</span> FRA   France</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="repair-what-can-be-repaired">Repair what can be repaired<a class="anchor" aria-label="anchor" href="#repair-what-can-be-repaired"></a>
@@ -163,7 +190,7 @@ honest table:</p>
 that report: it substitutes the closest known country name, but only
 when the match is confident, and attaches a record of what it
 changed:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/repair_country_names.html">repair_country_names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Brzil"</span>, <span class="st">"Nehterlands"</span>, <span class="st">"United States"</span><span class="op">)</span>,</span>
 <span>                              verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">fixed</span></span>
@@ -176,7 +203,7 @@ changed:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Nehterlands Netherlands</span></span></code></pre></div>
 <p>If something legitimately cannot be matched (an entity the backends
 simply do not know), extend the override table:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wdj_overrides.html">country_overrides</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Somaliland <span class="op">=</span> <span class="st">"SOM"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Kosovo"</span>, <span class="st">"Somaliland"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;     Kosovo Somaliland </span></span>
 <span><span class="co">#&gt;      "XKX"      "SOM"</span></span></code></pre></div>
@@ -186,7 +213,7 @@ simply do not know), extend the override table:</p>
 </h2>
 <p>If your key is already an ISO-2 or World Bank code, tell
 <code><a href="../reference/standardize_country.html">standardize_country()</a></code> via <code>origin</code>:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"US"</span>, <span class="st">"KR"</span>, <span class="st">"BR"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/standardize_country.html">standardize_country</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">code</span>, origin <span class="op">=</span> <span class="st">"iso2c"</span>, warn <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
@@ -205,7 +232,7 @@ coordinates (events, weather stations, survey sites).
 each point with the country that contains it, so point data joins the
 ISO spine like everything else. It needs the optional <code>sf</code> +
 <code>rnaturalearth</code> packages:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/locate_country.html">locate_country</a></span><span class="op">(</span>lon <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2.35</span>, <span class="op">-</span><span class="fl">74.0</span>, <span class="fl">139.7</span><span class="op">)</span>, lat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">48.85</span>, <span class="fl">40.7</span>, <span class="fl">35.7</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 2</span></span></span>
 <span><span class="co">#&gt;   iso3c country      </span></span>

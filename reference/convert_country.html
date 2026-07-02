@@ -76,7 +76,9 @@ emoji, currency, top-level domain, continent/region and research codes
 
 <dt id="arg-to">to<a class="anchor" aria-label="anchor" href="#arg-to"></a></dt>
 <dd><p>Destination scheme. A shortcut (<code>"iso3c"</code>, <code>"flag"</code>, <code>"currency"</code>,
-<code>"tld"</code>, <code>"continent"</code>, <code>"region"</code>, <code>"cown"</code>, ...) or any raw countrycode
+<code>"tld"</code>, <code>"continent"</code>, <code>"region"</code>, <code>"cown"</code>, ...), a localized name
+<code>"name_&lt;lang&gt;"</code> (<code>"name_fr"</code>, <code>"name_es"</code>, <code>"name_zh"</code>, ... – any
+language in countrycode's CLDR tables), or any raw countrycode
 destination.</p></dd>
 
 
@@ -105,6 +107,8 @@ destination.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EUR"</span>
 <span class="r-in"><span><span class="fu">convert_country</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA"</span>, <span class="st">"France"</span><span class="op">)</span>, to <span class="op">=</span> <span class="st">"continent"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Americas" "Europe"  </span>
+<span class="r-in"><span><span class="fu">convert_country</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Germany"</span>, <span class="st">"United States"</span><span class="op">)</span>, to <span class="op">=</span> <span class="st">"name_fr"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Allemagne"  "États-Unis"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

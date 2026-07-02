@@ -47,11 +47,34 @@ opt-in.
   [`country_borders()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_borders.md)
   /
   [`neighbors()`](https://pursuitofdatascience.github.io/countryatlas/reference/neighbors.md)
-  (who borders whom) and
+  (who borders whom),
   [`distance_between()`](https://pursuitofdatascience.github.io/countryatlas/reference/distance_between.md)
-  (great-circle distance, no `sf` needed).
-- **[`dorling_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/dorling_map.md)**:
-  the Dorling cartogram as a first-class verb.
+  (great-circle distance, no `sf` needed) and
+  [`morans_i()`](https://pursuitofdatascience.github.io/countryatlas/reference/morans_i.md)
+  (spatial autocorrelation on the package’s own adjacency — no `spdep`).
+- **Historical entities**:
+  [`dissolve_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/dissolve_country.md) +
+  the `historical_codes` crosswalk resolve the USSR / Yugoslavia /
+  Czechoslovakia to successor states;
+  [`check_country_match()`](https://pursuitofdatascience.github.io/countryatlas/reference/check_country_match.md)
+  now flags them (countrycode silently maps `"USSR"` to Russia —
+  caught).
+- **Inequality & convergence**:
+  [`gini()`](https://pursuitofdatascience.github.io/countryatlas/reference/gini.md),
+  [`theil()`](https://pursuitofdatascience.github.io/countryatlas/reference/theil.md)
+  (population-weighted, between/within decomposition),
+  [`beta_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/beta_convergence.md),
+  [`sigma_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/sigma_convergence.md),
+  [`correlate_indicators()`](https://pursuitofdatascience.github.io/countryatlas/reference/correlate_indicators.md),
+  [`lag_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md)
+  /
+  [`diff_by_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/lag_by_country.md).
+- **[`dorling_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/dorling_map.md)**
+  and
+  **[`spike_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/spike_map.md)**:
+  two more honest displays for totals.
+- **Localized names**:
+  `convert_country(to = "name_fr" / "name_es" / …)`.
 - **Correctness fixes** that change map output (quantile binning,
   centroids, label placement, projections, override-only lookups) — full
   [changelog](https://pursuitofdatascience.github.io/countryatlas/NEWS.md).
@@ -77,7 +100,8 @@ The base install is light. Heavy spatial extras (`sf`, `rnaturalearth`,
 | `globe_map(backend = "polygon")`, [`spin_globe()`](https://pursuitofdatascience.github.io/countryatlas/reference/spin_globe.md) | `maps`, `mapproj` |
 | [`bivariate_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/bivariate_map.md) | `biscale`, `sf` |
 | [`cartogram_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/cartogram_map.md), [`dorling_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/dorling_map.md) | `cartogram`, `sf` |
-| [`country_borders()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_borders.md), [`neighbors()`](https://pursuitofdatascience.github.io/countryatlas/reference/neighbors.md) | `sf` |
+| [`spike_map()`](https://pursuitofdatascience.github.io/countryatlas/reference/spike_map.md) | `maps` |
+| [`country_borders()`](https://pursuitofdatascience.github.io/countryatlas/reference/country_borders.md), [`neighbors()`](https://pursuitofdatascience.github.io/countryatlas/reference/neighbors.md), [`morans_i()`](https://pursuitofdatascience.github.io/countryatlas/reference/morans_i.md) | `sf` |
 | [`animate_world()`](https://pursuitofdatascience.github.io/countryatlas/reference/animate_world.md) (animated GIF) | `gganimate` (+ `gifski` or `magick`) |
 | `interactive_map(engine = "plotly")` | `plotly` |
 | `interactive_map(engine = "ggiraph")` | `ggiraph` |
@@ -227,13 +251,13 @@ country_join(a, b, country, nation)
 ``` r
 
 check_country_match(c("USA", "Cote d'Ivoire", "Yugoslavia", "Wakanda"))
-#> # A tibble: 4 × 4
-#>   input         iso3c matched suggestion
-#>   <chr>         <chr> <lgl>   <chr>     
-#> 1 USA           USA   TRUE    <NA>      
-#> 2 Cote d'Ivoire CIV   TRUE    <NA>      
-#> 3 Yugoslavia    <NA>  FALSE   Yugoslavia
-#> 4 Wakanda       <NA>  FALSE   Canada
+#> # A tibble: 4 × 5
+#>   input         iso3c matched historical suggestion
+#>   <chr>         <chr> <lgl>   <lgl>      <chr>     
+#> 1 USA           USA   TRUE    FALSE      <NA>      
+#> 2 Cote d'Ivoire CIV   TRUE    FALSE      <NA>      
+#> 3 Yugoslavia    <NA>  FALSE   TRUE       Yugoslavia
+#> 4 Wakanda       <NA>  FALSE   FALSE      Canada
 ```
 
 ## Reference data at your fingertips
@@ -356,6 +380,64 @@ country_join_all(list(t1, t2, t3), by = "country")
 distance_between("France", "Germany")
 #> [1] 802.3524
 ```
+
+## Historical data, honest joins
+
+Dissolved entities poison country joins twice over: most are silently
+dropped, and some are silently *mis*matched — countrycode resolves
+`"USSR"` to Russia alone, so Soviet-era totals quietly become Russian
+totals.
+[`check_country_match()`](https://pursuitofdatascience.github.io/countryatlas/reference/check_country_match.md)
+flags both cases, and
+[`dissolve_country()`](https://pursuitofdatascience.github.io/countryatlas/reference/dissolve_country.md)
+resolves them to successor states (one-to-many, dated) via the curated
+`historical_codes` crosswalk:
+
+``` r
+
+check_country_match(c("USSR", "Yugoslavia", "France"))
+#> # A tibble: 3 × 5
+#>   input      iso3c matched historical suggestion
+#>   <chr>      <chr> <lgl>   <lgl>      <chr>     
+#> 1 USSR       RUS   TRUE    TRUE       <NA>      
+#> 2 Yugoslavia <NA>  FALSE   TRUE       Yugoslavia
+#> 3 France     FRA   TRUE    FALSE      <NA>
+dissolve_country("Czechoslovakia")
+#> # A tibble: 2 × 5
+#>   input          historical     dissolved iso3c country 
+#>   <chr>          <chr>              <int> <chr> <chr>   
+#> 1 Czechoslovakia Czechoslovakia      1993 CZE   Czechia 
+#> 2 Czechoslovakia Czechoslovakia      1993 SVK   Slovakia
+```
+
+## Inequality, convergence and spatial statistics
+
+World inequality between *people*, not country units — and how much of
+it sits between continents vs within them:
+
+``` r
+
+snap <- world_snapshot$countries
+gini(snap$gdp_per_capita, weights = snap$population)
+#> [1] 0.6094909
+theil(snap$gdp_per_capita, weights = snap$population, groups = snap$continent)
+#> # A tibble: 3 × 3
+#>   component value share
+#>   <chr>     <dbl> <dbl>
+#> 1 total     0.678 1    
+#> 2 between   0.310 0.458
+#> 3 within    0.368 0.542
+```
+
+[`beta_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/beta_convergence.md)
+/
+[`sigma_convergence()`](https://pursuitofdatascience.github.io/countryatlas/reference/sigma_convergence.md)
+test whether poor countries are catching up;
+[`correlate_indicators()`](https://pursuitofdatascience.github.io/countryatlas/reference/correlate_indicators.md)
+screens indicator pairs (pairwise-complete, with `n` reported); and
+[`morans_i()`](https://pursuitofdatascience.github.io/countryatlas/reference/morans_i.md)
+measures spatial autocorrelation on the package’s own border adjacency —
+no `spdep` required.
 
 [`repair_country_names()`](https://pursuitofdatascience.github.io/countryatlas/reference/repair_country_names.md)
 auto-fixes typos to the closest known country,

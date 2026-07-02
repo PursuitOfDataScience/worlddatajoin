@@ -68,14 +68,14 @@ geometry (<code><a href="https://ggplot2.tidyverse.org/reference/map_data.html" 
 
 
 <p><code><a href="world_data.html">world_data()</a></code>, <code><a href="country_data.html">country_data()</a></code>, <code><a href="world_geometry.html">world_geometry()</a></code>, <code><a href="locate_country.html">locate_country()</a></code>,
-<code><a href="country_borders.html">country_borders()</a></code>, <code><a href="neighbors.html">neighbors()</a></code>, <code><a href="distance_between.html">distance_between()</a></code>.</p>
+<code><a href="country_borders.html">country_borders()</a></code>, <code><a href="neighbors.html">neighbors()</a></code>, <code><a href="distance_between.html">distance_between()</a></code>, <code><a href="morans_i.html">morans_i()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="the-join-engine">The join engine<a class="anchor" aria-label="anchor" href="#the-join-engine"></a></h2>
 
 
 <p><code><a href="standardize_country.html">standardize_country()</a></code>, <code><a href="join_world.html">join_world()</a></code>, <code><a href="attach_geometry.html">attach_geometry()</a></code>, <code><a href="country_join.html">country_join()</a></code>,
-<code><a href="country_join_all.html">country_join_all()</a></code>.</p>
+<code><a href="country_join_all.html">country_join_all()</a></code>, <code><a href="dissolve_country.html">dissolve_country()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="diagnostics">Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics"></a></h2>
@@ -90,23 +90,25 @@ geometry (<code><a href="https://ggplot2.tidyverse.org/reference/map_data.html" 
 
 <p><code><a href="convert_country.html">convert_country()</a></code>, <code><a href="country_codes.html">country_codes()</a></code>, <code><a href="country_groups.html">country_groups()</a></code>, <code><a href="in_group.html">in_group()</a></code>,
 <code><a href="wdi_search.html">wdi_search()</a></code>, and the datasets <a href="country_meta.html">country_meta</a>, <a href="common_indicators.html">common_indicators</a>,
-<a href="country_groups_tbl.html">country_groups_tbl</a>, <a href="world_snapshot.html">world_snapshot</a>, <a href="world_tiles.html">world_tiles</a>.</p>
+<a href="country_groups_tbl.html">country_groups_tbl</a>, <a href="world_snapshot.html">world_snapshot</a>, <a href="world_tiles.html">world_tiles</a>, <a href="historical_codes.html">historical_codes</a>.</p>
     </div>
     <div class="section level2">
     <h2 id="analysis-helpers">Analysis helpers<a class="anchor" aria-label="anchor" href="#analysis-helpers"></a></h2>
 
 
 <p><code><a href="per_capita.html">per_capita()</a></code>, <code><a href="aggregate_regions.html">aggregate_regions()</a></code>, <code><a href="rank_countries.html">rank_countries()</a></code>, <code><a href="complete_years.html">complete_years()</a></code>,
-<code><a href="growth_rate.html">growth_rate()</a></code>, <code><a href="index_to.html">index_to()</a></code>, <code><a href="share_of_world.html">share_of_world()</a></code>.</p>
+<code><a href="growth_rate.html">growth_rate()</a></code>, <code><a href="index_to.html">index_to()</a></code>, <code><a href="share_of_world.html">share_of_world()</a></code>, <code><a href="lag_by_country.html">lag_by_country()</a></code>,
+<code><a href="lag_by_country.html">diff_by_country()</a></code>, <code><a href="correlate_indicators.html">correlate_indicators()</a></code>, <code><a href="beta_convergence.html">beta_convergence()</a></code>,
+<code><a href="sigma_convergence.html">sigma_convergence()</a></code>, <code><a href="gini.html">gini()</a></code>, <code><a href="theil.html">theil()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="visualization">Visualization<a class="anchor" aria-label="anchor" href="#visualization"></a></h2>
 
 
 <p><code><a href="world_map.html">world_map()</a></code>, <code><a href="globe_map.html">globe_map()</a></code>, <code><a href="spin_globe.html">spin_globe()</a></code>, <code><a href="facet_map.html">facet_map()</a></code>, <code><a href="bubble_map.html">bubble_map()</a></code>,
-<code><a href="bivariate_map.html">bivariate_map()</a></code>, <code><a href="cartogram_map.html">cartogram_map()</a></code>, <code><a href="dorling_map.html">dorling_map()</a></code>, <code><a href="tile_map.html">tile_map()</a></code>,
-<code><a href="flow_map.html">flow_map()</a></code>, <code><a href="animate_world.html">animate_world()</a></code>, <code><a href="interactive_map.html">interactive_map()</a></code>, <code><a href="geom_country_labels.html">geom_country_labels()</a></code>,
-<code><a href="theme_world_map.html">theme_world_map()</a></code>.</p>
+<code><a href="spike_map.html">spike_map()</a></code>, <code><a href="bivariate_map.html">bivariate_map()</a></code>, <code><a href="cartogram_map.html">cartogram_map()</a></code>, <code><a href="dorling_map.html">dorling_map()</a></code>,
+<code><a href="tile_map.html">tile_map()</a></code>, <code><a href="flow_map.html">flow_map()</a></code>, <code><a href="animate_world.html">animate_world()</a></code>, <code><a href="interactive_map.html">interactive_map()</a></code>,
+<code><a href="geom_country_labels.html">geom_country_labels()</a></code>, <code><a href="theme_world_map.html">theme_world_map()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="database-rendering-ggsql-">Database rendering (ggsql)<a class="anchor" aria-label="anchor" href="#database-rendering-ggsql-"></a></h2>
